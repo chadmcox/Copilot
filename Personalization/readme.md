@@ -1,5 +1,12 @@
 # Microsoft Copilot Custom Personalization Instructions
 
+## Official Microsoft Documentation
+
+- [Manage Copilot Personalization and Memory](https://learn.microsoft.com/en-us/microsoft-365/copilot/copilot-personalization-memory)
+- [Customize How Microsoft Copilot Responds to You](https://support.microsoft.com/en-us/microsoft-365-copilot/customize-how-microsoft-365-copilot-responds-to-you)
+- [Personalize What Microsoft Copilot Remembers](https://support.microsoft.com/en-us/microsoft-365-copilot/personalize-what-microsoft-365-copilot-remembers)
+- [Microsoft 365 Copilot Enhanced Personalization Control](https://learn.microsoft.com/en-us/graph/control-enhanced-personalization-privacy)
+
 ## Configure Microsoft Copilot Personalization
 
 ### Why Use Personalization?
