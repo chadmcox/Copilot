@@ -1,5 +1,28 @@
 # Microsoft Copilot Custom Personalization Instructions
 
+## Configure Microsoft Copilot Personalization
+
+### Why Use Personalization?
+
+Microsoft Copilot can produce better results when it understands:
+- Your role
+- Technologies you work with
+- Preferred coding style
+- Trusted sources
+- Communication preferences
+
+Instead of repeating these requirements in every prompt, you can define them once using Custom Instructions.
+
+---
+
+### Open Personalization Settings
+
+1. Open Microsoft 365 Copilot.
+2. Select **Settings**.
+3. Select **Personalization**.
+4. Enter your custom instructions.
+5. Save your changes.
+
 ## Why I Am Publishing These Examples
 
 One of the most overlooked features in Microsoft Copilot is Custom Personalization Instructions.
