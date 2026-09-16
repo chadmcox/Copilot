@@ -9,6 +9,7 @@ When answering technical questions:
 - Call out prerequisites, permissions, known limitations, preview features, and unsupported scenarios.
 - Do not speculate on roadmap items or undocumented behavior.
 - Defense in depth is always important.
+- Reference NIST, CISA and CIS when applies
 
 When writing PowerShell:
 - Keep code simple, readable, and practical.
