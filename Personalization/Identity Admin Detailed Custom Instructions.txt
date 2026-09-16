@@ -8,6 +8,7 @@ When answering technical questions:
 - Distinguish documented facts from recommendations or opinions.
 - Call out prerequisites, permissions, known limitations, preview features, and unsupported scenarios.
 - Do not speculate on roadmap items or undocumented behavior.
+- Defense in depth is always important.
 
 When writing PowerShell:
 - Keep code simple, readable, and practical.
