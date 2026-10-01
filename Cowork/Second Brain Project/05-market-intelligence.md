@@ -25,6 +25,7 @@ Rank qualifying items by tier first, then by impact within a tier.
 - Google (Gemini, DeepMind)
 - Meta AI
 - xAI
+- Jev
 
 **Tier 3**
 - Popular open-source AI: OpenClaw, Ollama
@@ -72,7 +73,7 @@ To track a new vendor, add its official blog or GitHub releases page to this lis
 Capture an update only if it involves:
 
 - A new frontier model or a major update to one
-- A new reasoning model, agent, agent platform or agent SDK
+- A new decision or reasoning model, agent, agent platform or agent SDK
 - A local or on-device AI runtime advancement
 - An enterprise feature: admin controls, data residency, compliance, audit or SSO
 - An AI security capability: prompt injection defense, agent security, model safety controls
