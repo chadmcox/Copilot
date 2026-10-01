@@ -19,7 +19,6 @@ Don't summarize whole articles, repeat marketing copy, analyze trends or write k
 - Microsoft 365 Roadmap
 - Microsoft Security Blog
 - Microsoft Tech Community: Copilot, Entra and Security blogs
-- GitHub releases: Model Context Protocol (`modelcontextprotocol`)
 
 Don't search the open web or any other sites.
 
@@ -29,14 +28,14 @@ Don't search the open web or any other sites.
 
 Include an update only if it's about one of these. Edit the list to match your work.
 
-- Microsoft 365 Copilot or Copilot Studio
+- Cowork, Autopilot, Microsoft 365 Copilot or Copilot Studio
 - Agent 365
 - Microsoft Entra ID
 - Microsoft Entra Agent ID
 - Microsoft Defender or Security Copilot
 - Microsoft Purview (AI and data security only)
-- Model Context Protocol (MCP)
-- {{TOPICS}}
+- Project Perception
+- Microsoft redteam agent
 
 ---
 
