@@ -1,4 +1,4 @@
-# Second Brain Prompts
+# Second Brain Prompts for M365 Cowork
 
 Prompts for scheduled AI agents that build a personal work "second brain" from Microsoft 365 data and public sources. Each prompt runs as a daily scheduled task and writes Markdown files to OneDrive.
 
