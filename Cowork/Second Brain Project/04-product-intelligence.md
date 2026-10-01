@@ -58,6 +58,7 @@ This job covers the **Microsoft** products in these tiers. Non-Microsoft vendors
 - Microsoft Security Blog
 - Microsoft Tech Community: Microsoft Entra blog
 - Microsoft Tech Community: Microsoft Security blog
+- Microsoft Tech Community Copilot blog
 
 **Not yet tested (run by hand first)**
 - GitHub Changelog (GitHub Copilot entries only)
@@ -68,7 +69,6 @@ This job covers the **Microsoft** products in these tiers. Non-Microsoft vendors
 
 **Excluded (don't use)**
 - Microsoft 365 Roadmap
-- Microsoft Tech Community Copilot blog
 - Non-Microsoft MCP feeds
 
 Products in the tiers that don't have their own source are reported only when one of these sources covers them.
