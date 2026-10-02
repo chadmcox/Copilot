@@ -97,6 +97,17 @@ These prompts are deliberately narrow. An earlier version that tried to summariz
 4. Run each job by hand once before scheduling it. Remove any source the agent can't open or that doesn't show publication dates. Don't let it search for a replacement.
 5. Schedule the jobs in the order above.
 
+##Because everything is being written into your Second Brain folders, you can reference the repository by name:
+
+Examples
+
+- "Summarize my latest Product Intelligence report."
+- "What were the top findings in Threat Intelligence this week?"
+- "What open actions exist in my Action Tracker?"
+- "Show me everything from Enablement Intelligence related to Agent 365."
+- "What did the Daily Briefing say about OpenAI this week?"
+- "What Microsoft 365 Copilot updates have been captured this month?"
+
 ## Known Source Limitations
 
 From testing, these sources were removed because publication dates or articles couldn't be read reliably:
