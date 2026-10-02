@@ -18,6 +18,7 @@ Jobs 7-9 are reserved so new collection jobs can be added without renumbering.
 | 3:30 AM | [6. Threat Briefing](06-threat-briefing.md) | AI lab safety reports and threat intelligence | Daily report |
 | 4:00-7:30 AM | Jobs 7-9 (reserved) | | |
 | 8:00 AM | [10. Action Consolidation and Daily Briefing](10-daily-briefing.md) | Outputs of Jobs 1-6 | `Action Tracker.md`, Daily Briefing, Teams chat |
+| Sunday 10:00 AM | [11. Weekly Knowledge Base](11-weekly-knowledge-base.md) | Past 7 days of Jobs 4-7 | Topic files, Frontier vs Microsoft, Weekly Summary |
 
 Jobs 1-3 review the previous business day and name files by that date. Jobs 4-6 review the rolling 24 hours before they run and name files by the run date.
 
@@ -43,6 +44,7 @@ If a collection job takes longer than 30 minutes, space them one hour apart (1:0
 ├── Email Digest/
 ├── Product Intelligence/
 ├── Market Intelligence/
+├── Knowledge Base/
 └── Threat Intelligence/
 ```
 
