@@ -96,8 +96,9 @@ These prompts are deliberately narrow. An earlier version that tried to summariz
 3. Add the URLs you've verified to the source lists in Jobs 4-6.
 4. Run each job by hand once before scheduling it. Remove any source the agent can't open or that doesn't show publication dates. Don't let it search for a replacement.
 5. Schedule the jobs in the order above.
+6. Run it the first time to make sure to confirm always uploading the file it creates
 
-##Because everything is being written into your Second Brain folders, you can reference the repository by name:
+## Because everything is being written into your Second Brain folders in OneDrive, you can reference the repository by name in copilot chat:
 
 Examples
 
