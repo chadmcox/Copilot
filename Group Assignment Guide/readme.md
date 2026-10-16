@@ -4,6 +4,9 @@ Oct 16, 2026 · @Chad Cox
 
 This guide shows where to use each Copilot group. The groups come from New-CopilotGroups.ps1. You add each group to its admin center setting one time. After that, you add or remove people with the access packages from New-CopilotAccessPackages.ps1, not in the admin centers. *Unconfirmed* means Microsoft hasn't fully documented that path yet, so check it in your tenant.
 
+> **Next step: the Agent Delegation Guide.**
+> After you set up these groups, follow the [Copilot Agent Delegation Guide](../Agents/readme.md). It shows who can build, share, publish and receive agents, and how to limit each agent to the right group.
+
 ## Scripts in this folder
 
 All four scripts use only Microsoft Graph (the Microsoft.Graph.Authentication module). Run each one with `-WhatIf` first to see what it will do.
@@ -209,6 +212,8 @@ New models, like GPT-6.1 Sol and Claude Sonnet 5.5, follow the OpenAI and Anthro
 | Copilot App Builder Access | Power Platform command line (pac) | Run `pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledGroupsManagedAppsMcsPreview --setting-value '<group object ID>'`. This limits who can build apps in Copilot Studio. App building in Cowork uses Copilot Frontier Access instead |
 
 The Copilot Code exemption group waits with the other Code groups.
+
+For agent settings (who can build, share, publish and receive agents), see the [Copilot Agent Delegation Guide](../Agents/readme.md).
 
 ## Admin groups
 

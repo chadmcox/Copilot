@@ -2,7 +2,12 @@
 
 Oct 16, 2026 · @Chad Cox
 
-This guide explains who can **build** Copilot agents, who can **share and publish** them, and how to **give agents to people** in Microsoft 365. It uses the same groups as the [Copilot Group Assignment Guide](../Group%20Assignment%20Guide/readme.md). Create those groups first with `New-CopilotGroups.ps1`.
+> **Start here: do the Group Assignment Guide first.**
+> This guide is step 2. It uses groups and admin roles that the [Copilot Group Assignment Guide](../Group%20Assignment%20Guide/readme.md) sets up.
+> 1. Follow the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md). Run its scripts to create the Copilot groups, access packages and PIM admin groups.
+> 2. Then come back here to control who can build, share, publish and receive agents.
+
+This guide explains who can **build** Copilot agents, who can **share and publish** them, and how to **give agents to people** in Microsoft 365.
 
 Microsoft changes these settings often. Check each path in your own tenant before you rely on it.
 
@@ -93,7 +98,42 @@ Rules of thumb:
 
 **Plugins replace the Agents button.** From late October to late November 2026, users see a **Plugins** button instead of **Agents**, **Agents & Skills** or **Customize** (MC1484008). You still manage agents in the same admin pages.
 
-## 5. Keeping agents tidy
+## 5. Examples: setting up Microsoft's own agents
+
+**Not every agent should go to every user.** Before you assign an agent, ask four questions:
+
+1. **What data can it see?** People data, HR data and customer data need a smaller audience.
+2. **What can it do?** Agents that send email, change records or call other systems need a smaller audience.
+3. **Who actually needs it?** If only one team uses it, only that team gets it.
+4. **Does it cost extra?** Some agents use Copilot Credits or need another license.
+
+Here's how Microsoft's own agents should look in **Agents → All agents → [agent] → Users**:
+
+| Agent | Who should get it | Available to | Installed for | Pinned | Why |
+| --- | --- | --- | --- | --- | --- |
+| **Researcher** and **Analyst** | Everyone with a Copilot license | Can't be changed | Everyone (Microsoft installs them) | By Microsoft | You can't limit these to a group. Your only choice is to leave them on or block them for everyone |
+| **Workforce Insights** (Frontier) | Leaders, managers and their delegates | **Copilot Workforce Insights Agent Access** | Same group | Same group | It shows people data about a leader's organization. Microsoft says to pilot it with specific groups. Members also need Copilot Frontier Access |
+| **Sales** | Sellers who use Dynamics 365 Sales or Salesforce | **Copilot Sales Agent Access** | Same group | Optional | It only works for people connected to a CRM. Also add a Teams app setup policy for the same group |
+| **Employee Self-Service** (HR and IT) | Everyone, after a pilot | Pilot group first (about 5 to 10% of staff), then **Entire organization** | Same as Available to | Everyone, once it's live | Your team builds it from Microsoft's template in Copilot Studio, so it arrives as a publish request. Microsoft suggests a pilot of 5 to 10% |
+| **Legal** (Cowork for Legal plugin, Legal Skills in Word) | Your legal team | Can't be limited to a group today | Can't be limited to a group today | n/a | You can only turn these on or off for everyone. Turn them off if most people shouldn't use them (MC1509799) |
+
+### How to limit an agent to a group
+
+This example uses the Workforce Insights agent and a group called **Copilot Workforce Insights Agent Access**.
+
+1. **Create the group.** Name it `Copilot <Agent name> Agent Access`. Give it through an access package with manager approval, so it's reviewed.
+2. **Check the baseline.** Go to **Agents → Settings → User access**. Make sure the group's members can use agents at all, for example with **All users** or a group that includes them.
+3. **Open the agent.** Go to **Agents → All agents** and select the agent. Select the **Users** tab.
+4. **Set Available to.** Select **Specific users or groups can install**. Add the group. Don't pick **All users in the organization can install**.
+5. **Set Installed for.** Select **Specific users or groups**. Add the same group. Never pick **Entire organization** here: it installs the agent for everyone, whatever **Available to** says.
+6. Select **Update**.
+7. **Pin it (optional).** Go to **Agents → All agents → ... → Manage pinned agents → Pin agent**. Pick the agent, choose **Specific users or groups the agent is deployed to**, and add the group. Select **Save**. Pins can take up to 6 hours to appear.
+8. **Test it.** Sign in as someone who isn't in the group. They shouldn't be able to find or open the agent.
+9. **Review it.** Add the group to your quarterly access review.
+
+**For agents your own team builds** (Copilot Studio or Agents Toolkit), the maker picks an audience when they submit the agent. You set the final audience when you approve it under **Agents → All agents → Requests → Publish to store**. Use the same rules: start with a group, never the whole organization, until the pilot has worked.
+
+## 6. Keeping agents tidy
 
 Do these every month:
 
@@ -146,4 +186,10 @@ All of these groups use PIM, so people turn the role on only when they need it. 
 - [Restrict who can create applications and agents in Entra](https://learn.microsoft.com/entra/identity/role-based-access-control/delegate-app-roles#restrict-who-can-create-applications-and-agents)
 - [Best practices for Microsoft Entra Agent ID](https://learn.microsoft.com/entra/agent-id/best-practices-agent-id)
 - [Copilot Managed Runtime: scope app creation](https://learn.microsoft.com/microsoft-365/admin/manage/apps/)
-- Message Center: MC1472007 (advanced package uploads), MC1506733 (agent blueprints), MC1484008 (plugin registry), MC1511052 (SharePoint agents), MC1469329 (app building)
+- [Set availability of agents (Available to)](https://learn.microsoft.com/microsoft-365/copilot/agent-essentials/agent-lifecycle/agent-availability)
+- [Agent installation in Microsoft Copilot (Researcher and Analyst)](https://learn.microsoft.com/microsoft-365/copilot/copilot-agent-install)
+- [Workforce Insights agent: admin controls](https://learn.microsoft.com/microsoft-365/copilot/workforce-insights-agent)
+- [Install the Sales agent](https://learn.microsoft.com/microsoft-sales-copilot/install-sales-as-an-integrated-app)
+- [Publish the Employee Self-Service agent](https://learn.microsoft.com/microsoft-365/copilot/employee-self-service/declarative-agent-publish)
+- [Manage Copilot for legal](https://learn.microsoft.com/microsoft-365/admin/manage/manage-copilot-for-legal)
+- Message Center: MC1472007 (advanced package uploads), MC1506733 (agent blueprints), MC1484008 (plugin registry), MC1511052 (SharePoint agents), MC1469329 (app building), MC1509799 (legal plugins)
