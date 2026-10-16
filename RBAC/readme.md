@@ -1,4 +1,3 @@
-
 # Copilot Group Assignment Guide
 
 Oct 16, 2026 · @Chad Cox
@@ -17,18 +16,53 @@ Each group from New-CopilotGroups.ps1 is listed with the portal, path and settin
 | Copilot Studio Access | Entra admin center; Power Platform admin center | Groups → Licenses; PPAC → Environments → \[environment\] → Edit → Security group | Assign the Copilot Studio user license; set as the environment's security group for makers |
 | Copilot Pilot Ring | Several | Any group-scoped setting below | Add alongside the production group when piloting a new setting |
 
-## Spend groups
+## Spend groups and spending policies
 
-All four are set in **M365 admin center → Copilot → Cost Management → Configuration → + Add spending policy**, one policy per group. Being in scope of a policy that selects a service is what grants access to it.
+Every spending policy is created in **M365 admin center → Copilot → Cost Management → Configuration → + Add spending policy**. A policy is both a budget and an access grant: anyone in scope of a policy that checks a service can use it, however small the limit. Build one policy per audience, with its own group, and turn **Allow new Agents and services as they become available** off on every policy.
 
-| Group | Scope | Select agents and services | Per-user limit | Auto-apply new services |
+**Check the default policy first.** If the all-users default policy has every service checked and “Allow new” on, everyone can use Cowork and Code, and future credit-billed services join automatically. Uncheck the services there and turn the toggle off.
+
+### What each service in the policy wizard is
+
+| Service (checkbox) | Who consumes credits | Notes |
+| --- | --- | --- |
+| Microsoft Copilot (expandable) | Licensed Copilot users | Contains Cowork, Code, Advanced work in SharePoint, Advanced work in OneDrive. Expand it and check only the child each policy should grant |
+| Work IQ API for custom apps and agents | People using custom agents built in Copilot Studio, Foundry or third-party platforms grounded in M365 data; coding agents calling Work IQ directly | Not charged for Copilot Chat or Microsoft prebuilt agents; Work IQ used inside Cowork is billed to Cowork |
+| Copilot Managed Runtime | People running internal apps built in Cowork, Copilot Studio or the CLI | 0.1 credit per API call; no Copilot license needed; Power Apps Premium users don't consume credits up to their request limits. Building apps is billed through the creator's Cowork policy or PPAC |
+| Teams Phone Agent | Teams Phone Agent resource accounts, not people | Out of credits = falls back to a plain auto attendant. All accounts in one group share one policy |
+
+### Policy layout
+
+| Policy | Services checked | Scope group | Per-user limit | Owner |
 | --- | --- | --- | --- | --- |
-| Copilot + Cowork Spend Limit | Specific groups → this group | Cowork | On (at least 2,000 credits/user/month per Microsoft guidance) | Off |
-| Copilot + Cowork Spend Unlimited | Specific groups → this group | Cowork | Off | Off |
-| Copilot + Code Spend Limit | Specific groups → this group | Copilot Code *(label unconfirmed)* | On | Off |
-| Copilot + Code Spend Unlimited | Specific groups → this group | Copilot Code *(label unconfirmed)* | Off | Off |
+| Cowork – Limited | Cowork | Copilot + Cowork Spend Limit | On (≥ 2,000 credits/month per Microsoft guidance) | Copilot program owner |
+| Cowork – Unlimited | Cowork | Copilot + Cowork Spend Unlimited | Off | Copilot program owner |
+| Code – Limited | Code | Copilot + Code Spend Limit | On | Copilot program owner |
+| Code – Unlimited | Code | Copilot + Code Spend Unlimited | Off | Copilot program owner |
+| SharePoint & OneDrive advanced work | Advanced work in SharePoint, Advanced work in OneDrive | Copilot SharePoint OneDrive Advanced Access *(new group)* | On | Copilot program owner |
+| Work IQ API | Work IQ API for custom apps and agents | Copilot Work IQ API Access *(new group)* | On | App platform / Power Platform team |
+| Managed Runtime | Copilot Managed Runtime | Copilot Managed Runtime Access *(new group)* | On | App platform / Power Platform team |
+| Teams Phone Agent | Teams Phone Agent only | Copilot Teams Phone Agent Accounts *(new group, resource accounts only)* | Optional, per resource account | Teams voice admins |
 
-Don't select these services in the default all-users policy, or everyone gets access. Turning auto-apply off stops new Microsoft services from joining these policies without review.
+For different budgets per phone agent, create one group and policy per budget tier. Keep the number of owners on the Teams Phone Agent group small, per Microsoft's setup guide. Keep that group out of access packages, since its members are resource accounts.
+
+### Who can manage the policies
+
+| Action | Roles |
+| --- | --- |
+| Create a spending policy, set billing methods | Global Administrator, Billing Administrator |
+| Edit policies, limits and alerts | AI Administrator, License Administrator |
+| View consumption only | AI Reader, Global Reader, other supported reader roles |
+
+Microsoft's Teams Phone Agent guide says creating its policy needs AI Administrator, which conflicts with the general setup article; test with Billing Administrator first.
+
+### How overlapping policies behave
+
+- **Access:** if any policy a user is in checks a service, they get it. A stricter policy doesn't override a looser one.
+- **Limits:** when policies overlap, the highest per-user limit applies, then the largest policy limit, then the newest policy.
+- **Removing access:** take the user out of every policy that checks the service; lowering a limit doesn't remove access.
+
+Keep the Limited and Unlimited groups mutually exclusive per service; the incompatible-package setting in New-CopilotAccessPackages.ps1 enforces this for Cowork and Code.
 
 ## Model access groups
 
@@ -36,7 +70,7 @@ Don't select these services in the default all-users policy, or everyone gets ac
 | --- | --- | --- | --- |
 | Copilot Anthropic Models Access | M365 admin center | Copilot → Settings → View all → AI providers operating as Microsoft subprocessors → Anthropic | Choose who can access → Specific users and groups → this group. For Copilot Studio, also allow external LLMs in PPAC |
 | Copilot OpenAI Models Access | M365 admin center | Same page → OpenAI | Specific users and groups → this group |
-| Copilot Preview Models Access | M365 admin center | Copilot → Settings → View all → search “preview” *(label unconfirmed)*, add to the AI providers operating as independent processors models | Restrict preview / data-retention models to this group |
+| Copilot Preview Models Access | M365 admin center | Copilot → Settings → View all → search “preview” *(label unconfirmed)* | Restrict preview / data-retention models to this group |
 
 ## Capability and exception groups
 
@@ -96,3 +130,7 @@ These four groups have no Microsoft 365 setting that takes them as a scope, as f
 - [Agent settings in Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-settings)
 - [Manage Copilot in Teams meetings](https://learn.microsoft.com/microsoftteams/copilot-teams-transcription)
 - [Admin policies for Copilot Pages and Notebooks (Cloud Policy scoping)](https://learn.microsoft.com/microsoft-365/loop/cpcn-admin-configuration)
+- [Understand usage-based billing and cost management for Copilot Credits](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-overview-copilot-credits)
+- [Understand costs for Business Applications in Work IQ](https://learn.microsoft.com/power-platform/admin/business-applications-work-iq/understand-costs)
+- [Copilot Managed Runtime licensing FAQ](https://learn.microsoft.com/microsoft-365/admin/manage/apps/licensing-faq)
+- [Setup – Teams Phone Agent – Usage-based billing](https://learn.microsoft.com/microsoftteams/aa-cq-setup-teams-phone-agent-ubb)
