@@ -36,7 +36,7 @@ Don't select these services in the default all-users policy, or everyone gets ac
 | --- | --- | --- | --- |
 | Copilot Anthropic Models Access | M365 admin center | Copilot → Settings → View all → AI providers operating as Microsoft subprocessors → Anthropic | Choose who can access → Specific users and groups → this group. For Copilot Studio, also allow external LLMs in PPAC |
 | Copilot OpenAI Models Access | M365 admin center | Same page → OpenAI | Specific users and groups → this group |
-| Copilot Preview Models Access | M365 admin center | Copilot → Settings → View all → search “preview” *(label unconfirmed)* | Restrict preview / data-retention models to this group |
+| Copilot Preview Models Access | M365 admin center | Copilot → Settings → View all → search “preview” *(label unconfirmed)*, add to the AI providers operating as independent processors models | Restrict preview / data-retention models to this group |
 
 ## Capability and exception groups
 
