@@ -50,7 +50,7 @@ $groups = @(
     @{ Name = "Copilot + Opal Access";                      Desc = "Opal (Frontier). Target of Copilot > Settings > Opal (Frontier). Group owner must also be a member." }
     @{ Name = "Copilot + Autopilot Access";                 Desc = "Microsoft Autopilot (formerly Scout, Frontier). Pair with Copilot Frontier Access; scope of the Autopilot spending policy once Microsoft publishes it (MC1479277)." }
     @{ Name = "Copilot Studio Access";                      Desc = "Copilot Studio makers." }
-    @{ Name = "Copilot App Builder Access";                 Desc = "Who can build apps in Copilot Studio (Managed Runtime preview). Set via pac admin update-tenant-settings enabledGroupsManagedAppsMcsPreview." }
+    @{ Name = "Copilot App Builder Access";                 Desc = "Who can build apps in Copilot Studio (Managed Runtime preview). Set in M365 admin center > Apps > Overview > Set up app creation spaces (or pac enabledGroupsManagedAppsMcsPreview)." }
     @{ Name = "Copilot Frontier Access";                    Desc = "Target of Copilot > Settings > Copilot Frontier. Required for Opal, Code, SpaceXAI subprocessor models, Azure DevOps data. Keep flat (direct members)." }
     @{ Name = "Copilot Pilot Ring";                         Desc = "Early-validation users; scope of the New Services Pilot spending policy (auto-enrolls new credit-billed services)." }
 
