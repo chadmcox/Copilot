@@ -1,6 +1,6 @@
 # Copilot Group Assignment Guide
 
-Oct 16, 2026 · @Chad Cox
+Oct 19, 2026 · @Chad Cox
 
 This guide shows where to use each Copilot group. The groups come from New-CopilotGroups.ps1. You add each group to its admin center setting one time. After that, you add or remove people with the access packages from New-CopilotAccessPackages.ps1, not in the admin centers. *Unconfirmed* means Microsoft hasn't fully documented that path yet, so check it in your tenant.
 
@@ -34,11 +34,13 @@ Permissions: Group.ReadWrite.All for the groups; Privileged Role Administrator (
 
 | # | Where | What to do | By | Why |
 | --- | --- | --- | --- | --- |
-| 1 | M365 admin center → **Copilot → Settings → View all → Advanced package uploads** | Select **Specific users or groups**. Add **Copilot Advanced Package Upload Access**. Select **Save** | Oct 25, 2026 | If you do nothing, everyone can upload agents and plugins that run actions or MCP servers (MC1472007) |
-| 2 | Entra admin center → **Entra ID → Users → User settings** | Set **Users can create agent blueprints** to **No**. Select **Save**. Add the people who build agents to **Copilot Agent ID Developers** | Early Nov 2026 | If you do nothing, every user can create agent blueprints (MC1506733) |
-| 3 | M365 admin center → **Copilot → Cost Management → Configuration** | Open each spending policy. Turn off **Auto-apply new services**. Leave it on only for **Copilot New Services Pilot** | Now | It's on by default, so every new paid service gets added to every policy (MC1470425) |
-| 4 | M365 admin center → **Copilot → Settings → All settings → Access to usage-based billing experiences** | Select **Specific users and groups**. Add **Copilot Access**. Select **Save**. You need Global Administrator | October (November for deferred tenants) | This decides who can ask for Cowork, Code and Autopilot. It replaces the old discovery setting (MC1479277) |
-| 5 | SharePoint | If you used PowerShell to turn off Copilot in SharePoint, use the SharePoint & OneDrive spending policy and the site AI settings instead | Nov 1, 2026 | The PowerShell opt-out stops working (MC1479277) |
+| 1 | M365 admin center → **Copilot → Cost Management → Configuration** | Open each spending policy. Turn off **Auto-apply new services**. Leave it on only for **Copilot New Services Pilot** | Now | It's on by default, so every new paid service gets added to every policy (MC1470425) |
+| 2 | M365 admin center → **Copilot → Settings → All settings → Access to usage-based billing experiences** | Select **Specific users and groups**. Add **Copilot Access**. Select **Save**. You need Global Administrator | October (November for deferred tenants) | This decides who can ask for Cowork, Code and Autopilot. It replaces the old discovery setting (MC1479277) |
+| 3 | M365 admin center → **Copilot → Settings → All settings → Advanced package uploads** | Select **Specific users or groups**. Add **Copilot Advanced Package Upload Access**. Select **Save** | Oct 25, 2026 | If you do nothing, everyone can upload agents and plugins that run actions or MCP servers (MC1472007) |
+| 4 | SharePoint | If you used PowerShell to turn off Copilot in SharePoint, use the SharePoint & OneDrive spending policy and the site AI settings instead | Nov 1, 2026 | The PowerShell opt-out stops working (MC1479277) |
+| 5 | Entra admin center → **Entra ID → Audit logs** | Set Category to **ApplicationManagement** and Activity to **Add service principal**. Look for rows started by an **Application** that created an agent identity. For each of those agents, grant the Graph permission **AgentIdentity.CreateAsManager** (admin consent). Test it | Nov 4, 2026 | Entra stops giving agents this permission on its own. Agents that create their own identities without a user will fail with error 403 (MC1506728). No action if you have none |
+| 6 | Entra admin center → **Entra ID → Users → User settings** | Set **Users can create agent blueprints** to **No**. Select **Save**. Add the people who build agents to **Copilot Agent ID Developers** | Early Nov 2026 | If you do nothing, every user can create agent blueprints (MC1506733) |
+| 7 | Your makers | Tell people who built apps with the **App Builder agent** or **vibe.powerapps.com** to move them to Cowork or Copilot Studio. New apps there can't be made any more | Nov 30, 2026 | Both retire on Nov 30. Apps not moved by then can't be opened (MC1505609) |
 
 ## Feature access groups
 
@@ -52,7 +54,7 @@ Permissions: Group.ReadWrite.All for the groups; Privileged Role Administrator (
 
 **Groups we removed.** Update-CopilotGroupCleanup.ps1 deletes these:
 
-- **Copilot + Cowork Access.** Cowork access now comes only from the Cowork spend groups. To give people a Cowork plugin, go to **Agents → Tools → [plugin] → Installed for** and pick the Limited, Unlimited and Temp spend groups.
+- **Copilot + Cowork Access.** Cowork access now comes only from the Cowork spend groups. To give people a Cowork plugin, go to **Agents → Tools → Plugins → [plugin] → Users** and pick the Limited, Unlimited and Temp spend groups.
 - **Copilot + Code Access.** Code access will come from a Code spending policy, the same way as Cowork.
 - **Copilot Preview Models Access.** Use Copilot Independent Processor Models Access instead.
 
@@ -205,11 +207,11 @@ New models, like GPT-6.1 Sol and Claude Sonnet 5.5, follow the OpenAI and Anthro
 | --- | --- | --- |
 | Copilot + Cowork Browser Access | M365 admin center → **Copilot → Settings → View all → Cowork settings** (in your tenant: **Copilot → Cowork → Settings → Cowork**) | Turn on **Allow Cowork to use the Microsoft Edge browser**. Add this group. Select **Save** |
 | Copilot + Cowork Browser Access (devices) | Intune admin center → **Devices → Configuration → [Edge profile] → Assignments** | Set the Edge policy `CopilotCoworkToolActionsEnabled`. Assign the profile to this group. Needs Edge 152 or later |
-| Copilot Advanced Package Upload Access | M365 admin center → **Copilot → Settings → View all → Advanced package uploads** | Select **Specific users or groups**. Add this group. Select **Save**. Do this before Oct 25, 2026 |
+| Copilot Advanced Package Upload Access | M365 admin center → **Copilot → Settings → All settings → Advanced package uploads** | Select **Specific users or groups**. Add this group. Select **Save**. Do this before Oct 25, 2026 |
 | Copilot Agent Sharing Access | M365 admin center → **Agents → Settings → Sharing** | Select **Specific users**. Add this group. Select **Save** |
 | Copilot Teams Policy Exceptions | Teams admin center → **Meetings → Meeting policies** (and **Voice → Calling policies**) **→ Group policy assignment** | Assign the special Copilot policy to this group. Add people directly; groups inside this group are ignored |
 | Copilot Cloud Policy Exceptions | Microsoft 365 Apps admin center (config.office.com) → **Customization → Policy Management → [new policy] → Scope** | Scope the policy to this group. Give it a lower priority number than the all-users policy, so it wins |
-| Copilot App Builder Access | Power Platform command line (pac) | Run `pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledGroupsManagedAppsMcsPreview --setting-value '<group object ID>'`. This limits who can build apps in Copilot Studio. App building in Cowork uses Copilot Frontier Access instead |
+| Copilot App Builder Access | M365 admin center → **Apps → Overview → Set up app creation spaces** | Find **Copilot Studio** app creation. Limit it to this group. Select **Save**. You need Global Administrator or Power Platform Administrator. Open Copilot Studio tabs keep the old setting for up to 15 minutes. You can also use `pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledGroupsManagedAppsMcsPreview --setting-value '<group object ID>'`. App building in Cowork uses Copilot Frontier Access and the Cowork spending policy instead. Copilot Studio app building uses the environment's credits in the Power Platform admin center, not a spending policy |
 
 The Copilot Code exemption group waits with the other Code groups.
 
@@ -246,18 +248,25 @@ Microsoft doesn't have a setting for these groups yet.
 | Copilot Cost Reader | No role can view spending without also seeing other things | Give it AI Reader, or delete it and use Copilot AI Reader |
 | Copilot Plugin Approvers | Tenant admins approve plugin requests. The new plugin registry under **Agents → Tools** (MC1484008) has no approver setting | Use it as a mailing or ticket queue, or give it AI Administrator |
 
-## Other Message Center changes (checked Oct 16, 2026)
+## Other Message Center changes (checked Oct 19, 2026)
 
-I checked every Copilot post in Message Center from July 1 to Oct 16, 2026, plus the M365 roadmap and Learn. These changes are already worked into the sections above.
+I checked every Copilot post in Message Center from July 1 to Oct 19, 2026, plus the M365 roadmap and Learn. These changes are already worked into the sections above.
 
 | Change | Post | What it means for you |
 | --- | --- | --- |
+| Agents that create their own Entra agent identities need an admin grant from Nov 4 | MC1506728 | See Do these first, row 5 |
+| App Builder agent and vibe.powerapps.com retire on Nov 30. New apps there are already blocked | MC1505609 | Makers build apps in Cowork or Copilot Studio. Copilot App Builder Access still limits Copilot Studio |
+| Copilot Studio app building can be limited to groups in the M365 admin center | MC1469329 | Use **Apps → Overview → Set up app creation spaces** with Copilot App Builder Access. Copilot Studio app building is billed per environment, not by a spending policy |
+| The Copilot Studio app in Teams goes away: no editing from January 2027, removed in February 2027 | MC1511056 | Tell makers to use copilotstudio.microsoft.com. Nothing to change in your groups |
+| Researcher and Analyst are no longer pinned by default in the Copilot app | MC1479277 | If you want them pinned, pin them yourself. See the Agent Delegation Guide |
+| Usage numbers for Microsoft-built agents no longer need an Agent 365 license (late November) | MC1506727 | Copilot AI Reader members can see agent activity in **Agents → All agents** |
+| Sensitivity labels can be put on Entra security groups (mid-November) | MC1508238 | Don't label the Copilot groups yet. A label can't be changed or removed once it's on a security group |
+| Older GPT models in Copilot Studio move to GPT Chat Latest on Nov 12 | MC1506318 | Tell agent owners to test their agents. Your model groups don't change |
 | Spending policies can use a model profile (Cowork only) | MC1479276 | You can limit which models each Cowork policy uses. See Model profiles |
 | Credit requests can go to your own approval process | MC1470425 | Send Cowork requests to the Cowork (Limited) access package. See Credit requests |
 | Credits follow a person when they move between policies | MC1470425 | Test the 30-day temporary tier with one person first |
 | Code comes to Frontier tenants later in October | MC1479277 | Wait for Code to appear in the wizard. Deploy the unified Copilot app with the beta channel first |
 | Autopilot (formerly Scout) uses a spending policy; admin settings not out yet | MC1479277, MC1332811 | Keep the Autopilot group. Its package adds Frontier |
-| App building in Copilot Studio is on by default and can be limited to groups | MC1469329 | Use the new Copilot App Builder Access group |
 | Cowork browser use can be limited to groups | MC1474461 | Confirms the Cowork Browser Access row |
 | SpaceXAI setting: Frontier only, off by default, can be limited to groups | MC1474124 | Confirms the SpaceXAI row |
 | GPT-6.1 Sol and Claude Sonnet 5.5 follow the OpenAI and Anthropic settings | MC1483844 | Your model groups still decide who gets them |
@@ -307,3 +316,12 @@ I checked every Copilot post in Message Center from July 1 to Oct 16, 2026, plus
 - [Manage Copilot Code for your organization](https://learn.microsoft.com/copilot/code/code-admin)
 - [Copilot Managed Runtime: scope app creation](https://learn.microsoft.com/microsoft-365/admin/manage/apps/?view=o365-worldwide#enable-copilot-managed-runtime-for-your-tenant)
 - [Manage preview AI models](https://learn.microsoft.com/microsoft-365/copilot/manage-preview-ai-models)
+- [Copilot Managed Runtime: where the app creation settings live](https://learn.microsoft.com/microsoft-365/admin/manage/apps/?view=o365-worldwide#enable-copilot-managed-runtime-for-your-tenant)
+- [Environment routing for Copilot Managed Runtime (app creation spaces)](https://learn.microsoft.com/power-platform/admin/default-environment-routing-copilot-managed-runtime#frequently-asked-questions)
+- [Grant agents access to Microsoft 365 resources](https://learn.microsoft.com/entra/agent-id/grant-agent-access-microsoft-365)
+- [MC1506728 AgentIdentity.CreateAsManager changes](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1506728)
+- [MC1505609 App Builder agent and vibe.powerapps.com retirement](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1505609)
+- [MC1511056 Copilot Studio Teams app retirement](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1511056)
+- [MC1506727 Agent usage insights without an Agent 365 license](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1506727)
+- [MC1508238 Sensitivity labels for Entra security groups](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1508238)
+- [MC1506318 Copilot Studio model retirements](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1506318)
