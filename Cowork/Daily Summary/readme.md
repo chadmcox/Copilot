@@ -1,6 +1,6 @@
 # Daily Summary
 
-Three separate Cowork prompts, each scheduled to run **daily** and email the result to me. Run them a few minutes apart (e.g. 6:00, 6:05, 6:10 AM) so the emails arrive in a predictable order.
+Separate Cowork prompts, each scheduled to run **daily** and email the result to me. Run them a few minutes apart (e.g. 6:00, 6:05, 6:10 AM) so the emails arrive in a predictable order.
 
 ---
 
@@ -70,6 +70,7 @@ Find the top 10-15 most recent and important news items, feature releases, and a
 - Agent 365
 - Microsoft Defender XDR
 - Project Perception
+- Microsoft Finops / Token 
 
 Focus on updates from roughly the last 7 days, prioritizing the newest. Prefer official sources (Microsoft blogs, Tech Community, Microsoft Learn, the M365 roadmap, GitHub's blog, and official release notes) over third-party coverage. Only include genuine updates — new features, GA/preview releases, roadmap changes, pricing or licensing changes, or notable guidance — not opinion pieces or recycled summaries.
 
