@@ -82,3 +82,27 @@ Organize the items grouped by product, newest first within each group. If a prod
 
 Email this digest to me with the subject "Daily Product Update Digest – [today's date]".
 ```
+
+---
+
+## 5. Daily Certification Study Summary
+
+> To study for a different certification later, change only the exam code and name on the **CERTIFICATION** line below. Everything else stays the same.
+
+```text
+CERTIFICATION: AB-100 (Microsoft Agentic AI Architect)
+
+I am studying for the certification above over the next month. Each day, give me 5 topics to learn, drawn from the official skills-measured outline for this exam (look it up on Microsoft Learn to make sure the topics are current and accurate).
+
+Work through the exam's objective areas over the month so that, across daily sessions, I cover the whole outline rather than repeating the same topics. Each day, move on to the next topics in order; pick up where the outline left off the day before.
+
+For each of today's 5 topics, write a short, easy-to-digest lesson in plain, simple language:
+- Topic name – the concept or skill
+- In plain terms – 2-4 sentences explaining what it is and why it matters, with no jargon (or jargon explained simply)
+- Why it's on the exam – 1 sentence on how it fits the certification
+- Learn more – a link to the relevant Microsoft Learn page
+
+Keep the whole thing friendly and skimmable — something I can read in a few minutes with coffee. At the end, add one line: "Tomorrow: [the next few topics]" so I know what's coming.
+
+Email this to me with the subject "AB-100 Study – Day [running day number] – [today's date]".
+```
