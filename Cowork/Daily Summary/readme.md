@@ -54,3 +54,31 @@ Put a section at the top called "My Action Items" that lists every action item a
 
 Email this summary to me with the subject "Daily Meeting Summary – [yesterday's date]".
 ```
+
+---
+
+## 4. Daily Product Update Digest
+
+```text
+Find the top 10-15 most recent and important news items, feature releases, and announcements about the following Microsoft products and technologies:
+
+- Microsoft 365 Copilot
+- GitHub Copilot
+- Copilot Cowork
+- Copilot Studio
+- Azure AI Foundry
+- Agent 365
+- Microsoft Defender XDR
+- Project Perception
+
+Focus on updates from roughly the last 7 days, prioritizing the newest. Prefer official sources (Microsoft blogs, Tech Community, Microsoft Learn, the M365 roadmap, GitHub's blog, and official release notes) over third-party coverage. Only include genuine updates — new features, GA/preview releases, roadmap changes, pricing or licensing changes, or notable guidance — not opinion pieces or recycled summaries.
+
+For each item, provide:
+- Title – the product name followed by a short headline (e.g. "GitHub Copilot – Agent mode now GA")
+- Brief summary – 1-2 sentences on what changed and why it matters
+- Link – a direct URL to the source article
+
+Organize the items grouped by product, newest first within each group. If a product has no recent updates, note "No recent updates" for it. Do not repeat an item you have already reported in a previous day's digest if you can tell it's the same announcement.
+
+Email this digest to me with the subject "Daily Product Update Digest – [today's date]".
+```
