@@ -1,11 +1,23 @@
 # Copilot Group Assignment Guide
 
-Oct 16, 2026 · @Chad Cox
+Updated Oct 23, 2026 · @Chad Cox
 
-This guide shows where to use each Copilot group. The groups come from New-CopilotGroups.ps1. You add each group to its admin center setting one time. After that, you add or remove people with the access packages from New-CopilotAccessPackages.ps1, not in the admin centers. *Unconfirmed* means Microsoft hasn't fully documented that path yet, so check it in your tenant.
+This guide shows where to use each Copilot group. The scripts in this folder create the groups. You add each group to its admin center setting one time. After that, you add or remove people with access packages, not in the admin centers.
 
 > **Next step: the Agent Delegation Guide.**
-> After you set up these groups, follow the [Copilot Agent Delegation Guide](../Agents/readme.md). It shows who can build, share, publish and receive agents, and how to limit each agent to the right group.
+> After you set up these groups, follow the [Copilot Agent Delegation Guide](../Agents/readme.md). It covers who can build, share, publish and receive agents.
+
+## How to read the labels
+
+Every step has one of these labels:
+
+- **Checked in the admin center on Oct 23, 2026.** I opened the page and saw this menu path, setting name and options. I only looked. I didn't save anything.
+- **From Microsoft docs (link).** I couldn't see it in the admin center, but this Microsoft Learn page says it.
+- **Not checked.** I didn't check this in the admin center or re-read Microsoft docs for this version. Check it yourself before you rely on it.
+
+Admin centers change often, and some options only appear in some tenants. If your screen doesn't match, trust your screen.
+
+**About defaults.** An admin center shows your tenant's *current* value, not Microsoft's default. So this guide only lists a default when the page or Microsoft docs clearly says what it is.
 
 ## Scripts in this folder
 
@@ -13,11 +25,11 @@ All four scripts use only Microsoft Graph (the Microsoft.Graph.Authentication mo
 
 | Order | Script | What it does |
 | --- | --- | --- |
-| 1 | `New-CopilotGroups.ps1` | Creates every group in this guide. Idempotent: groups that already exist are skipped. Admin groups are created role-assignable. `-IncludeCodeGroups` adds the Copilot Code groups once Code appears in your spending policy wizard |
-| 2 | `Update-CopilotGroupCleanup.ps1` | One-off, only for tenants built from the first version of this design. Deletes Copilot + Cowork Access, Copilot + Code Access and Copilot Preview Models Access (exports members and owners to CSV first; skips groups that still have members unless `-DeleteEvenIfMembers`), and sets current descriptions |
-| 3 | `New-CopilotAdminPim.ps1` | Puts the admin groups under PIM for Groups and creates Copilot Platform Admin. Requires `-ApproverGroupName` |
-| 4 | `New-CopilotAccessPackages.ps1` | Creates the entitlement management catalog, access packages, approval policies and access reviews. `-IncludeAdminPackages` and `-IncludeCodePackages` are optional |
-| 5 | (manual) | Point each admin center setting at its group, using the tables below |
+| 1 | `New-CopilotGroups.ps1` | Creates every group in this guide. Skips groups that already exist. Creates admin groups as role-assignable. `-IncludeCodeGroups` adds the Copilot Code groups |
+| 2 | `Update-CopilotGroupCleanup.ps1` | Only for tenants built from the first version of this design. Deletes Copilot + Cowork Access, Copilot + Code Access and Copilot Preview Models Access. Exports members and owners to CSV first. Skips groups that still have members unless you add `-DeleteEvenIfMembers` |
+| 3 | `New-CopilotAdminPim.ps1` | Puts the admin groups under PIM for Groups. Needs `-ApproverGroupName` |
+| 4 | `New-CopilotAccessPackages.ps1` | Creates the catalog, access packages, approval policies and access reviews. `-IncludeAdminPackages` and `-IncludeCodePackages` are optional |
+| 5 | (by hand) | Point each admin center setting at its group, using the steps below |
 
 ```powershell
 .\New-CopilotGroups.ps1 -WhatIf
@@ -28,38 +40,158 @@ All four scripts use only Microsoft Graph (the Microsoft.Graph.Authentication mo
 .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -WhatIf
 ```
 
-Permissions: Group.ReadWrite.All for the groups; Privileged Role Administrator (or Global Administrator) to create role-assignable groups and configure PIM; Identity Governance Administrator for access packages.
+Permissions you need: Group.ReadWrite.All for the groups. Privileged Role Administrator (or Global Administrator) to create role-assignable groups and set up PIM. Identity Governance Administrator for access packages.
+
+**Before you run the cleanup script:** check that no admin center setting still points at a group it deletes. For example, an AI provider can still be assigned to Copilot Preview Models Access. Move the setting to the new group first.
 
 ## Do these first
 
-| # | Where | What to do | By | Why |
-| --- | --- | --- | --- | --- |
-| 1 | M365 admin center → **Copilot → Settings → View all → Advanced package uploads** | Select **Specific users or groups**. Add **Copilot Advanced Package Upload Access**. Select **Save** | Oct 25, 2026 | If you do nothing, everyone can upload agents and plugins that run actions or MCP servers (MC1472007) |
-| 2 | Entra admin center → **Entra ID → Users → User settings** | Set **Users can create agent blueprints** to **No**. Select **Save**. Add the people who build agents to **Copilot Agent ID Developers** | Early Nov 2026 | If you do nothing, every user can create agent blueprints (MC1506733) |
-| 3 | M365 admin center → **Copilot → Cost Management → Configuration** | Open each spending policy. Turn off **Auto-apply new services**. Leave it on only for **Copilot New Services Pilot** | Now | It's on by default, so every new paid service gets added to every policy (MC1470425) |
-| 4 | M365 admin center → **Copilot → Settings → All settings → Access to usage-based billing experiences** | Select **Specific users and groups**. Add **Copilot Access**. Select **Save**. You need Global Administrator | October (November for deferred tenants) | This decides who can ask for Cowork, Code and Autopilot. It replaces the old discovery setting (MC1479277) |
-| 5 | SharePoint | If you used PowerShell to turn off Copilot in SharePoint, use the SharePoint & OneDrive spending policy and the site AI settings instead | Nov 1, 2026 | The PowerShell opt-out stops working (MC1479277) |
+### 1. Limit who can upload advanced agent and plugin packages
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Go to M365 admin center → **Copilot** → **Settings** → **View all**.
+2. Select **Advanced package uploads**.
+3. Under **Select who can upload advanced packages**, select **Specific users or groups**. The other options are **All users** and **No users**.
+4. Add **Copilot Advanced Package Upload Access**. You can add up to 50 users or groups.
+5. Select **Save**.
+
+Why: if you do nothing, everyone can upload agents and plugins that run actions or MCP servers (MC1472007). *Not checked:* the Oct 25, 2026 date comes from the earlier version of this guide.
+
+### 2. Stop every user from creating agent blueprints in Entra
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Go to Entra admin center → **Entra ID** → **Users** → **User settings**.
+2. Under **Default user role permissions**, find **Users can register agent identity blueprints**. It's a **Yes** / **No** switch.
+3. Set it to **No**.
+4. Select **Save**.
+5. Add the people who build agents to **Copilot Agent ID Developers**.
+
+Note: the admin center calls it **Users can register agent identity blueprints**. Microsoft docs call it **Users can create agent blueprints**. It's the same switch.
+
+*From Microsoft docs ([Restrict who can create applications and agents](https://learn.microsoft.com/entra/identity/role-based-access-control/delegate-app-roles#restrict-who-can-create-applications-and-agents)):* by default, users can create agent identity blueprints. When it's set to **No**, only admins and people with the **Agent ID Developer** role can create them.
+
+### 3. Turn off automatic new services in your spending policies
+
+*Checked in the admin center on Oct 23, 2026.*
+
+The admin center calls this setting **Allow new Agents and services as they become available**. Microsoft docs call it **Auto-apply new services**. It's the first step of the spending policy wizard.
+
+- **In a new policy it's on by default.** When I opened **Add spending policy**, this switch was on, and every service was already checked. Turn it off and uncheck what the policy doesn't need.
+- **For an existing policy:** go to **Copilot** → **Cost management** → **Configuration**, and select the policy name. *Not checked:* the details panel I opened didn't show this setting, and I didn't open edit mode. Look for it when you edit the policy.
+
+Leave it on only in **Copilot New Services Pilot** (see below).
+
+*From Microsoft docs ([Set up usage-based billing](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-setup)):* the default spending policy also has this setting turned on by default.
+
+### 4. Choose who can ask for usage-based billing experiences
+
+This setting decides what people see when they try Cowork (or another paid service) without a spending policy.
+
+*From Microsoft docs ([Access requests to usage-based billing experiences](https://learn.microsoft.com/microsoft-365/copilot/request-access-usage-based-billing-experiences)):*
+
+1. Go to M365 admin center → **Copilot** → **Settings** → **All settings**.
+2. Select **Access to usage-based billing experiences**.
+3. Under **Choose who can request a spending policy**, select **Specific users and groups**. The default is **All users**. The other option is **No users**.
+4. Add **Copilot Access**.
+5. Select **Save**. You need Global Administrator. It can take up to 24 hours.
+
+**I couldn't confirm this in the admin center on Oct 23, 2026.** The closest setting I found was **Copilot** → **Settings** → **View all** → **AI experiences enabled by usage-based billing**. It only had one checkbox, **Allow users to discover and use AI experiences enabled by usage-based billing**, and no user or group picker. Microsoft may still be rolling this out. Check your own tenant.
+
+### 5. SharePoint
+
+*Not checked.* If you used PowerShell to turn off Copilot in SharePoint, use the SharePoint & OneDrive spending policy and the site AI settings instead. The earlier version of this guide says the PowerShell opt-out stops working on Nov 1, 2026 (MC1479277).
+
+### 6. Find agents that create their own Entra agent identities (by Nov 4, 2026)
+
+From Nov 4, 2026, Entra stops giving agents this permission on its own. Agents that create their own identities without a user will fail with error 403 (MC1506728). If you have none, there's nothing to do.
+
+*Checked in the admin center on Oct 23, 2026:* Entra admin center → **Audit logs** has **Category** and **Activity** filters.
+
+*Not checked* (from the earlier version of this guide):
+
+1. Go to Entra admin center → **Entra ID** → **Audit logs**.
+2. Set **Category** to **ApplicationManagement** and **Activity** to **Add service principal**.
+3. Look for rows started by an **Application** that created an agent identity.
+4. For each of those agents, grant the Graph permission **AgentIdentity.CreateAsManager** (admin consent). Test it.
+
+See [Grant agents access to Microsoft 365 resources](https://learn.microsoft.com/entra/agent-id/grant-agent-access-microsoft-365).
+
+### 7. Tell makers to move apps off App Builder (by Nov 30, 2026)
+
+*Not checked.* Tell people who built apps with the **App Builder agent** or **vibe.powerapps.com** to move them to Cowork or Copilot Studio. New apps there are already blocked. Both retire on Nov 30, 2026, and apps not moved by then can't be opened (MC1505609).
 
 ## Feature access groups
 
-| Group | Where | What to do | Notes |
-| --- | --- | --- | --- |
-| Copilot Access | Entra admin center → **Groups → Copilot Access → Licenses** | Assign the Microsoft Copilot license. Keep the **Microsoft Copilot with Graph-grounded chat** service plan turned on | **E7** includes Copilot: skip the license for E7 users but keep them in the group. **E5 doesn't include Copilot**. Groups inside this group don't get licenses |
-| Copilot Frontier Access | M365 admin center → **Copilot → Settings → View all → Copilot Frontier** | Select **Specific users and groups**. Add this group. Select **Save**. It can take up to 3 hours | Add people directly. Don't put other groups inside it |
-| Copilot + Opal Access | M365 admin center → **Copilot → Settings → Opal (Frontier)** | Add this group. Then finish setup in the Opal Admin Portal | The group owner must also be a member. Confirmed in your tenant |
-| Copilot Studio Access | Entra admin center → **Groups → Licenses**; Power Platform admin center → **Environments → [environment] → Edit → Security group** | Assign the Copilot Studio license. Set this group as the environment's security group | |
-| Copilot Pilot Ring | Any setting in this guide | Add it next to the main group when you test a new setting | It's also the only group in the New Services Pilot spending policy |
+### Copilot Access
 
-**Groups we removed.** Update-CopilotGroupCleanup.ps1 deletes these:
+*Not checked.*
 
-- **Copilot + Cowork Access.** Cowork access now comes only from the Cowork spend groups. To give people a Cowork plugin, go to **Agents → Tools → [plugin] → Installed for** and pick the Limited, Unlimited and Temp spend groups.
+1. Go to Entra admin center → **Groups** → **Copilot Access** → **Licenses**.
+2. Assign the Microsoft Copilot license.
+3. Keep the **Microsoft Copilot with Graph-grounded chat** service plan turned on (MC1405498).
+
+E7 includes Copilot, so E7 users can skip the license but should stay in the group. E5 doesn't include Copilot. Groups inside this group don't get licenses. See [License options for Microsoft Copilot](https://learn.microsoft.com/microsoft-365/copilot/microsoft-365-copilot-licensing).
+
+### Copilot Frontier Access
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Go to M365 admin center → **Copilot** → **Settings** → **View all**.
+2. Select **Copilot Frontier**. The panel title is **Turn on Frontier features**.
+3. Select **Specific users and groups**. The other options are **No access** and **All users**.
+4. Add **Copilot Frontier Access**.
+5. Select **Save**. The page says changes can take up to 3 hours.
+
+The page also says:
+
+- People need a Microsoft 365 Copilot license to get Frontier.
+- People in Microsoft's Technology Adoption Program (TAP) get Frontier early but don't show up here.
+- It shows an estimate of how many of 10,000 assignments you've used.
+
+*Not checked:* the earlier version of this guide said to add people directly and not put other groups inside this group.
+
+### Copilot + Opal Access
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Go to M365 admin center → **Copilot** → **Settings** → **View all**.
+2. Select **Opal (Frontier)**.
+3. Under **Choose who can access Opal**, select **Specific user groups**. The other option is **No users**.
+4. Add **Copilot + Opal Access**.
+5. Select **Save**.
+6. Finish setup in the Opal admin portal. The page says Opal needs this one-time setup, needs Global Administrator, and won't work until you do it.
+
+*Not checked:* the earlier version of this guide said the group owner must also be a member. See [Get started with Opal](https://learn.microsoft.com/microsoft-365/copilot/opal-settings-manage).
+
+### Copilot Studio Access
+
+*Not checked.*
+
+1. In Entra admin center, assign the Copilot Studio license to this group.
+2. In Power Platform admin center, go to **Environments** → [environment] → **Edit** → **Security group**. Set this group.
+
+### Copilot Pilot Ring
+
+Add it next to the main group when you test a new setting. It's also the only group in the **Copilot New Services Pilot** spending policy.
+
+### Groups we removed
+
+`Update-CopilotGroupCleanup.ps1` deletes these:
+
+- **Copilot + Cowork Access.** Cowork access now comes from the Cowork spend groups. To give people a Cowork plugin, see Cowork plugins below.
 - **Copilot + Code Access.** Code access will come from a Code spending policy, the same way as Cowork.
-- **Copilot Preview Models Access.** Use Copilot Independent Processor Models Access instead.
+- **Copilot Preview Models Access.** Use **Copilot Independent Processor Models Access** instead. Move any AI provider setting that still uses it before you delete it.
 
-**Copilot Code: wait for it.** Code reaches Frontier tenants later in October 2026 (MC1479277), but it isn't in your tenant yet. When Code shows up in the spending policy wizard:
+### Copilot Code: wait for it
+
+*Checked in the admin center on Oct 23, 2026:* **Code** wasn't in the spending policy wizard yet. Message Center listed "Copilot Code is rolling out in Frontier" on Oct 21, 2026. **Copilot Code** does appear under **Web search for Microsoft Copilot** in **Copilot** → **Settings** → **View all**.
+
+When Code shows up in the spending policy wizard:
 
 1. Deploy the unified Copilot app.
-2. Set the app's update channel (TargetChannel) to beta.
+2. Set the app's update channel (TargetChannel) to beta. *Not checked.*
 3. Run `New-CopilotGroups.ps1 -IncludeCodeGroups` and `New-CopilotAccessPackages.ps1 -IncludeCodePackages`.
 4. Create the Code spending policies in the policy table below.
 
@@ -67,48 +199,62 @@ Permissions: Group.ReadWrite.All for the groups; Privileged Role Administrator (
 
 A spending policy decides two things: who can use a paid Copilot service, such as Cowork, and how many credits they can spend. Anyone in a policy can use its services, even if the limit is tiny. To keep someone out of a service, take them out of every policy that includes it.
 
-Create policies in M365 admin center → **Copilot → Cost Management → Configuration → + Add spending policy**.
+### Create a spending policy
 
-- Make one policy for each group in the policy table below.
-- Turn off **Auto-apply new services** on every policy except Copilot New Services Pilot. Older Microsoft pages call this setting **Allow new Agents and services as they become available**.
-- **Check the default policy first.** If it covers all users and has services checked, everyone can use those services. Uncheck the services and turn off Auto-apply.
+*Checked in the admin center on Oct 23, 2026* (I opened the wizard and selected **Cancel**).
 
-### What each service is
+1. Go to M365 admin center → **Copilot** → **Cost management** → **Configuration**.
+2. Select **Add spending policy**.
+3. The wizard has five steps: **Agents and services** → **Access scope** → **Limits and alerts** → **Billing method** → **Review and add policy**.
+4. On **Agents and services**:
+   - Turn off **Allow new Agents and services as they become available** (unless this is the pilot policy).
+   - Uncheck every service the policy doesn't need. In a new policy, all of them start checked.
+5. Pick the group on **Access scope**, set limits on **Limits and alerts**, and finish the wizard.
 
-| Service in the wizard | Who uses the credits | Notes |
+The **Cost management** page has three tabs: **Overview**, **Configuration** and **Consumption**.
+
+**Check the default policy first.** If it covers all users and has services checked, everyone can use those services. Uncheck the services and turn off the new-services setting. *Not checked.*
+
+### Services in the wizard
+
+*Checked in the admin center on Oct 23, 2026.*
+
+| Service in the wizard | What's inside | Who uses the credits |
 | --- | --- | --- |
-| Microsoft Copilot (expand it) | Licensed Copilot users | Holds Cowork, Code, Advanced work in SharePoint and Advanced work in OneDrive. Expand it and check only what each policy needs |
-| Work IQ API for custom apps and agents | People using custom agents or apps that read Microsoft 365 data through Work IQ | Copilot Chat and Microsoft's own agents don't use these credits. Work IQ used inside Cowork is billed to Cowork |
-| Copilot Managed Runtime | People running apps built in Cowork, Copilot Studio or the command line | 0.1 credit per call. No Copilot license needed. Power Apps Premium users don't use credits until they pass their request limits |
-| Teams Phone Agent | Teams Phone Agent resource accounts, not people | When credits run out, it acts like a plain auto attendant. All accounts in one group share one policy |
+| **Microsoft Copilot** (select the arrow to expand it) | **Cowork**, **Advanced work in OneDrive**, **Advanced work in SharePoint**. Each says "Copilot license required" | Licensed Copilot users |
+| **Work IQ API for custom apps and agents** | | *Not checked:* people using custom agents or apps that read Microsoft 365 data through Work IQ |
+| **Copilot Managed Runtime** | | *Not checked:* people running apps built in Cowork, Copilot Studio or the command line |
+| **Teams Phone Agent** | | *Not checked:* Teams Phone Agent resource accounts, not people |
+
+*Not checked:* the credit details from the earlier version of this guide (0.1 credit per Managed Runtime call; Work IQ used inside Cowork is billed to Cowork; Teams Phone Agent acts like a plain auto attendant when credits run out).
 
 ### Policy layout
 
 | Policy name | Check these services | Group | Per-user limit | Owner |
 | --- | --- | --- | --- | --- |
-| Cowork – Limited | Cowork | Copilot + Cowork Spend Limit | On (at least 2,000 credits a month, per Microsoft) | Copilot program owner |
+| Cowork – Limited | Cowork | Copilot + Cowork Spend Limit | On | Copilot program owner |
 | Cowork – Unlimited | Cowork | Copilot + Cowork Spend Unlimited | Off | Copilot program owner |
 | Cowork – Temporary Unlimited | Cowork | Copilot + Cowork Spend Unlimited Temp | Off. Set a policy limit and an alert | Copilot program owner |
 | SharePoint & OneDrive advanced work | Advanced work in SharePoint, Advanced work in OneDrive | Copilot SharePoint OneDrive Advanced Access | On | Copilot program owner |
 | Work IQ API | Work IQ API for custom apps and agents | Copilot Work IQ API Access | On | App platform / Power Platform team |
 | Managed Runtime | Copilot Managed Runtime | Copilot Managed Runtime Access | On | App platform / Power Platform team |
 | Teams Phone Agent | Teams Phone Agent | Copilot Teams Phone Agent Accounts (resource accounts only) | Optional | Teams voice admins |
-| Copilot New Services Pilot | None. Auto-apply new services **on** | Copilot Pilot Ring | On | Copilot program owner |
+| Copilot New Services Pilot | None. New-services setting **on** | Copilot Pilot Ring | On | Copilot program owner |
 | Code – Limited / Unlimited | *Wait for Code* | Copilot + Code Spend Limit / Unlimited | On / Off | Copilot program owner |
 
 Need different budgets for different phone agents? Make one group and one policy per budget. Keep the Teams Phone Agent group's owners to a few people, and don't put it in an access package, because its members are resource accounts.
 
 ### New services pilot (Copilot Pilot Ring)
 
-**Auto-apply new services** adds each new paid service Microsoft releases to that policy. Use it in one small policy only, so a few testers see new services first.
+The new-services setting adds each new paid service Microsoft releases to that policy. Use it in one small policy only, so a few testers see new services first.
 
 1. Create a policy named **Copilot New Services Pilot**.
 2. Scope it to **Copilot Pilot Ring** (a few IT and power users).
-3. Check no services. If the wizard needs one, pick a low-risk service the testers already have.
-4. Turn **Auto-apply new services** on.
+3. Check as few services as the wizard allows.
+4. Leave **Allow new Agents and services as they become available** on.
 5. Turn the per-user limit on. Set a small monthly policy limit and an alert to the Copilot program owner.
 
-When Message Center announces a new paid service, test it with the pilot ring. If it works for you, add it to the main policies yourself.
+When Message Center announces a new paid service, test it with the pilot ring. If it works, add it to the main policies yourself.
 
 - **The pilot ring gets new services before anyone reviews them.** Keep the group small and review it every quarter.
 - **Some new services are for resource accounts, not people,** like Teams Phone Agent. Check what was added after each release.
@@ -117,99 +263,201 @@ If you don't want anything added automatically, skip this policy.
 
 ### Temporary unlimited Cowork (30 days)
 
-People in the Limited group can ask for unlimited Cowork for 30 days. Entra removes it on day 30. Only Limited group members can see the request.
+People in the Limited group can ask for unlimited Cowork for 30 days. Entra removes it on day 30. Only Limited group members can see the request. This is set up by `New-CopilotAccessPackages.ps1`.
 
 | Piece | Setting |
 | --- | --- |
 | Group | Copilot + Cowork Spend Unlimited Temp |
-| Spending policy | **Cowork – Temporary Unlimited**: Cowork only; this group; per-user limit **off**; a monthly policy limit and an alert to the Copilot program owner; Auto-apply new services **off** |
+| Spending policy | **Cowork – Temporary Unlimited**: Cowork only; this group; per-user limit **off**; a monthly policy limit and an alert to the Copilot program owner; new-services setting **off** |
 | Access package | Copilot + Cowork Access (Temporary Unlimited, 30 days). It adds people to the Temp group only |
-| Who can ask | Members of **Copilot + Cowork Spend Limit** only. Nobody else sees it in My Access |
+| Who can ask | Members of **Copilot + Cowork Spend Limit** only |
 | Approval | Manager, then the approver group |
-| How long | 30 days. People can't extend it or pick dates. Access ends on its own |
+| How long | 30 days. People can't extend it or pick dates |
 | Can't be combined with | Copilot + Cowork Access (Unlimited) |
 
 - **They stay in Limited.** While someone is in both policies, the higher limit wins. After 30 days they're back on their Limited limit.
-- **Only the Temp group is removed** at the end. Their other groups don't change.
+- **Only the Temp group is removed** at the end.
 - **They can ask again.** If someone asks often, move them to Unlimited.
 - **There's no per-user limit for 30 days.** The policy limit and alert are your safety net.
-- **Test this with one person first.** Credits now follow a person between policies (MC1470425). What they spend while unlimited might count against their Limited limit afterward and block them until next month.
+- **Test this with one person first.** *Not checked:* the earlier version of this guide says credits follow a person between policies (MC1470425), so unlimited spending might count against their Limited limit afterward.
 
 ### Model profiles (Cowork)
 
-A model profile is a list of models. Attach one to a Cowork spending policy to control which models those users can pick and which models Auto can use.
+A model profile is a list of models. Attach one to a Cowork spending policy to control which models those users can pick.
 
-1. Go to **Copilot → Cost Management → Configuration → Model profiles**.
-2. Select **Add model profile**.
-3. Pick at least two models. Select **Save**.
-4. Open each Cowork policy and select the profile.
+*From Microsoft docs ([Configure model profiles](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-setup#configure-model-profiles)):*
 
-A profile can't turn on a provider that's turned off in the AI provider settings below.
+1. Go to **Copilot** → **Cost management** → **Configuration**.
+2. Select **Model profiles**.
+3. Select **Add model profile**. Enter a name.
+4. Pick at least two models.
+5. Optional: select **Microsoft can select the most comparable model to maintain availability**.
+6. Save the profile. Then pick it in each Cowork policy. The model profile step only appears when the policy includes Cowork.
+
+A profile can't use a provider that's turned off in **AI providers operating as independent processors**.
+
+**I couldn't confirm this in the admin center on Oct 23, 2026.** The **Configuration** tab only showed **Spending policies**. I didn't see **Model profiles**.
 
 | Policy | Profile to use |
 | --- | --- |
-| Cowork – Limited | Lower-cost models, and allow Microsoft to swap in a similar model |
+| Cowork – Limited | Lower-cost models, and allow Microsoft to pick a comparable model |
 | Cowork – Unlimited | Default models |
 | Cowork – Temporary Unlimited | Same as Limited, unless the person asked for a specific model |
 
 ### Credit requests
 
-People without a spending policy see a **Request access** button on Cowork, Code and Autopilot. Set up two things:
+People without a spending policy see a request option on Cowork and other paid services.
 
-1. **Choose who can ask.** Go to **Copilot → Settings → All settings → Access to usage-based billing experiences**. Select **Specific users and groups**, add **Copilot Access**, and select **Save**. You need Global Administrator. It can take up to 24 hours.
-2. **Send requests to your access package.** Go to **Copilot → Cost Management → Credit requests → Request policies → Add request policy**. Pick **Cowork**. For the redirect URL, paste the My Access link for **Copilot + Cowork Access (Limited)**. Select **Save**.
+**1. Choose who can ask.** See Do these first, step 4.
 
-Requests then go through the access package approval. The admin center marks them **Handled externally**.
+**2. Send requests to your access package.**
+
+*Checked in the admin center on Oct 23, 2026* (up to the **Add request policy** button):
+
+1. Go to **Copilot** → **Cost management** → **Overview**.
+2. Under **Users requesting credit increases**, select **View requests**. This opens **Credit requests**.
+3. Select the **Request policies** tab.
+4. Select **Add request policy**.
+
+*Not checked:* the rest, from the earlier version of this guide. Pick **Cowork**. For the redirect URL, paste the My Access link for **Copilot + Cowork Access (Limited)**. Select **Save**. Requests then go through the access package approval. See [Custom request policies](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-monitor-spending#configure-custom-request-policies).
 
 ### Who can manage the policies
 
+*From Microsoft docs ([Set up usage-based billing](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-setup)):*
+
 | Task | Roles |
 | --- | --- |
-| Create a spending policy or set a billing method | Global Administrator, Billing Administrator |
-| Change policies, limits and alerts | AI Administrator, License Administrator |
+| Create a spending policy, add or change a billing method | Global Administrator, Billing Administrator |
+| Edit policies, limits, alerts and billing methods (can't create policies) | AI Administrator, License Administrator |
 | View spending only | AI Reader, Global Reader, other reader roles |
-
-For the Teams Phone Agent policy, try Billing Administrator first. If that fails, use AI Administrator; Microsoft's guides disagree on this one.
 
 ### When a person is in more than one policy
 
-- **Access:** they get every service from every policy they're in.
-- **Limits:** the highest per-user limit wins. If that's a tie, the biggest policy limit wins, then the newest policy.
-- **Removing access:** take them out of every policy with that service. Lowering their limit doesn't remove access.
+- **Limits:** *Checked in the admin center on Oct 23, 2026:* the **Spending policies** page says the policy with the highest spending limit applies.
+- **Access:** they get every service from every policy they're in. *Not checked.*
+- **Removing access:** take them out of every policy with that service. Lowering their limit doesn't remove access. *Not checked.*
 
 Keep each person in only Limited or Unlimited for a service. The access packages enforce this.
 
 ## Model access groups
 
-The M365 admin center has two pages for AI providers:
+*Checked in the admin center on Oct 23, 2026.* There are three pages under **Copilot** → **Settings** → **View all**:
 
-- **AI providers operating as Microsoft subprocessors:** Microsoft's terms and data protection apply. AI Administrator can change it.
-- **AI providers for other large language models:** the provider's own terms apply, not Microsoft's. You need Global Administrator and a legal sign-off.
+- **AI providers operating as Microsoft subprocessors.** Lists **Anthropic** and **OpenAI**.
+- **AI providers operating as independent processors.** Lists **SpaceXAI**, **Mistral AI** and **Anthropic Models with Data Retention**. These run under the provider's own terms.
+- **Experimental and preview AI models.** This list was empty when I checked.
 
-Both pages accept groups inside groups, up to 999 per provider.
+The provider lists can differ by tenant and region.
 
-| Group | Where | What to do |
-| --- | --- | --- |
-| Copilot Anthropic Models Access | **Copilot → Settings → View all → AI providers operating as Microsoft subprocessors → Anthropic** | Select **Specific users and groups**. Add this group. Select **Save**. For Copilot Studio, also allow external models in the Power Platform admin center |
-| Copilot OpenAI Models Access | Same page → **OpenAI** | Select **Specific users and groups**. Add this group. Select **Save** |
-| Copilot SpaceXAI Models Access | Same page → **SpaceXAI** | Select **Specific users and groups**. Add this group. Select **Save**. It's off by default and Frontier only. It adds Grok to Word, Excel and PowerPoint. Not available in the EU, EFTA, UK or government clouds |
-| Copilot Independent Processor Models Access | **Copilot → Settings → View all → AI providers for other large language models → [provider]** | Get legal and privacy sign-off. Accept the provider's terms. Add this group. Select **Save** |
+### Copilot Anthropic Models Access and Copilot OpenAI Models Access
 
-**Models that keep your data.** Some models, like Claude Fable 5, keep your data at the provider. Use the Independent Processor group for them. They're off by default. Claude Fable 5.1 without data retention uses the normal Anthropic setting. *Unconfirmed:* Microsoft doesn't name the page for other preview models yet. Don't use the Pilot Ring for these models, because sending data outside Microsoft's terms is a legal decision.
+*Checked in the admin center on Oct 23, 2026.*
 
-New models, like GPT-6.1 Sol and Claude Sonnet 5.5, follow the OpenAI and Anthropic settings above.
+1. Go to **Copilot** → **Settings** → **View all** → **AI providers operating as Microsoft subprocessors**.
+2. Select the arrow next to **Anthropic** to expand it.
+3. Under **Choose which users can access Anthropic models**, select **Specific users and groups**. The other options are **All users** and **No users**.
+4. Add **Copilot Anthropic Models Access**. Select **Save**.
+5. Do the same for **OpenAI** with **Copilot OpenAI Models Access**.
+
+*Not checked:* for Copilot Studio, also allow external models in the Power Platform admin center.
+
+### Copilot Independent Processor Models Access
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Get legal and privacy sign-off first. These providers use their own terms, not Microsoft's.
+2. Go to **Copilot** → **Settings** → **View all** → **AI providers operating as independent processors**.
+3. Select the arrow next to the provider (for example **SpaceXAI** or **Anthropic Models with Data Retention**).
+4. Under **Choose which users can access ...**, select **Specific users and groups**. The other options are **All users** and **No users**.
+5. Add **Copilot Independent Processor Models Access**. Select **Save**.
+
+Changes from the earlier version of this guide:
+
+- **SpaceXAI is on the independent processors page**, not the subprocessors page. Use Copilot Independent Processor Models Access for it.
+- **Models that keep your data** appear as **Anthropic Models with Data Retention** on the independent processors page.
+- *Not checked:* accepting the provider's terms. The providers I saw were already allowed, so I didn't see a terms step.
+- *Not checked:* the earlier version of this guide said SpaceXAI is Frontier only, off by default, and not available in the EU, EFTA, UK or government clouds (MC1474124).
+
+Don't use the Pilot Ring for these providers. Sending data outside Microsoft's terms is a legal decision.
 
 ## Capability and exception groups
 
-| Group | Where | What to do |
-| --- | --- | --- |
-| Copilot + Cowork Browser Access | M365 admin center → **Copilot → Settings → View all → Cowork settings** (in your tenant: **Copilot → Cowork → Settings → Cowork**) | Turn on **Allow Cowork to use the Microsoft Edge browser**. Add this group. Select **Save** |
-| Copilot + Cowork Browser Access (devices) | Intune admin center → **Devices → Configuration → [Edge profile] → Assignments** | Set the Edge policy `CopilotCoworkToolActionsEnabled`. Assign the profile to this group. Needs Edge 152 or later |
-| Copilot Advanced Package Upload Access | M365 admin center → **Copilot → Settings → View all → Advanced package uploads** | Select **Specific users or groups**. Add this group. Select **Save**. Do this before Oct 25, 2026 |
-| Copilot Agent Sharing Access | M365 admin center → **Agents → Settings → Sharing** | Select **Specific users**. Add this group. Select **Save** |
-| Copilot Teams Policy Exceptions | Teams admin center → **Meetings → Meeting policies** (and **Voice → Calling policies**) **→ Group policy assignment** | Assign the special Copilot policy to this group. Add people directly; groups inside this group are ignored |
-| Copilot Cloud Policy Exceptions | Microsoft 365 Apps admin center (config.office.com) → **Customization → Policy Management → [new policy] → Scope** | Scope the policy to this group. Give it a lower priority number than the all-users policy, so it wins |
-| Copilot App Builder Access | Power Platform command line (pac) | Run `pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledGroupsManagedAppsMcsPreview --setting-value '<group object ID>'`. This limits who can build apps in Copilot Studio. App building in Cowork uses Copilot Frontier Access instead |
+### Copilot + Cowork Browser Access
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Go to **Copilot** → **Settings** → **View all** → **Browser use in Microsoft Copilot**. (It's also under **Copilot** → **Cowork** → **Settings**.)
+2. Turn on **Allow local browser use**. The page says this lets Copilot experiences such as Cowork and Chat use the local Microsoft Edge browser for people.
+3. Under **Choose who can use browser access**, select **Specific users and groups**. The other option is **All users**.
+4. Add **Copilot + Cowork Browser Access**. Select **Save**.
+
+*Not checked:* the device side. In Intune admin center → **Devices** → **Configuration** → [Edge profile] → **Assignments**, set the Edge policy `CopilotCoworkToolActionsEnabled` and assign the profile to this group. Needs Edge 152 or later.
+
+### Copilot Advanced Package Upload Access
+
+See Do these first, step 1.
+
+### Copilot Agent Sharing Access
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Go to M365 admin center → **Agents** → **Settings** → **Sharing**.
+2. Under **Choose who can share agents with anyone in the organization**, select **Specific users**. The other options are **All users** and **No users**.
+3. Add **Copilot Agent Sharing Access**. Select **Save**.
+
+The page says this affects agents built with Agent Builder, and people who can't share with everyone can still share with named people and security groups. The same choice also appears in **Copilot** → **Settings** → **View all** → **Agents**.
+
+### Cowork plugins
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Go to **Agents** → **Tools**. The **Registry** tab lists **Plugins**, **Skills**, **MCP servers** and **Connectors**.
+2. Select the plugin. It has an **Overview** tab and a **Users** tab, plus **Install** and **Block** buttons.
+3. To limit who can find it: on **Users**, under **Available to**, select **Specific users and groups** (other options: **All users**, **No users**). Add the Cowork spend groups (Limited, Unlimited and Temp). Select **Save**.
+
+*From Microsoft docs ([Manage plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-manage-plugins)):* to install it for people automatically, select the plugin, then **Installed for** → **Specific users/groups**, then **Next** and install. I didn't open **Install** in the admin center.
+
+### Copilot Teams Policy Exceptions
+
+*Checked in the admin center on Oct 23, 2026.*
+
+1. Go to Teams admin center → **Meetings** → **Meeting policies**.
+2. Create or open the special Copilot policy on the **Manage policies** tab. The setting is in the **Copilot and other AI** section, named **Copilot**. Its options are **On**, **On with saved transcript required**, **On with transcript saved by default** and **Off**.
+3. On the **Group policy assignment** tab, assign that policy to this group.
+
+*Not checked:* **Voice** → **Calling policies**, and whether groups inside this group are ignored. Add people directly to be safe.
+
+### Copilot Cloud Policy Exceptions
+
+*Not checked.* Microsoft 365 Apps admin center (config.office.com) → **Customization** → **Policy Management** → [new policy] → **Scope**. Scope the policy to this group. Give it a lower priority number than the all-users policy, so it wins.
+
+Related: *Checked in the admin center on Oct 23, 2026:* **Web search for Microsoft Copilot** in **Copilot** → **Settings** → **View all** says to manage it in the Microsoft 365 Apps admin center.
+
+### Copilot App Builder Access
+
+This limits who can build apps in Copilot Studio.
+
+*Checked in the admin center on Oct 23, 2026* (up to the **Set up** button):
+
+1. Go to M365 admin center → **Apps** → **Overview**. The page is marked **Preview**.
+2. Find the **App creation paths** card and select **Set up**.
+
+*Not checked* (I didn't open **Set up**; from the earlier version of this guide):
+
+3. Find **Copilot Studio** app creation. Limit it to **Copilot App Builder Access**.
+4. Select **Save**. You need Global Administrator or Power Platform Administrator. Open Copilot Studio tabs can keep the old setting for up to 15 minutes.
+
+You can also use the Power Platform command line (pac). *Not checked:*
+
+```powershell
+pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledGroupsManagedAppsMcsPreview --setting-value '<group object ID>'
+```
+
+- App building in Cowork uses Copilot Frontier Access and the Cowork spending policy instead.
+- *Not checked:* Copilot Studio app building uses the environment's credits in the Power Platform admin center, not a spending policy.
+- *Checked in the admin center on Oct 23, 2026:* **Apps** → **Settings** only had **Environment groups**.
+
+See [Environment routing for Copilot Managed Runtime](https://learn.microsoft.com/power-platform/admin/default-environment-routing-copilot-managed-runtime#frequently-asked-questions).
 
 The Copilot Code exemption group waits with the other Code groups.
 
@@ -217,7 +465,7 @@ For agent settings (who can build, share, publish and receive agents), see the [
 
 ## Admin groups
 
-Admin groups use **PIM for Groups** (New-CopilotAdminPim.ps1). The group always holds the role. People are *eligible* members: they turn the role on when they need it, for a few hours, with MFA and a reason. To give roles without PIM, run New-CopilotGroups.ps1 with `-AssignRoles`.
+*Not checked.* Admin groups use **PIM for Groups** (`New-CopilotAdminPim.ps1`). The group always holds the role. People are *eligible* members: they turn the role on when they need it, for a few hours, with MFA and a reason. To give roles without PIM, run `New-CopilotGroups.ps1` with `-AssignRoles`.
 
 | Group | Entra role(s) | How long it stays on | What it's for |
 | --- | --- | --- | --- |
@@ -225,10 +473,10 @@ Admin groups use **PIM for Groups** (New-CopilotAdminPim.ps1). The group always 
 | Copilot Delegated Admin | AI Administrator | 8 hours, needs approval | M365 admin center → Copilot settings |
 | Copilot Agent Management Admin | AI Administrator | 8 hours, needs approval | M365 admin center → Agents |
 | Copilot AI Reader | AI Reader | 8 hours | Read-only view of agents, Copilot settings and spending |
-| Copilot Billing Admin | Billing Administrator | 4 hours, needs approval | Creating spending policies in Copilot → Cost Management |
+| Copilot Billing Admin | Billing Administrator | 4 hours, needs approval | Creating spending policies in Copilot → Cost management |
 | Copilot Cost Reader | None | 8 hours | See the next section |
 | Copilot Agent ID Admin | Agent ID Administrator | 4 hours, needs approval | Entra → Agent ID |
-| Copilot Agent ID Developers | Agent ID Developer | 8 hours | Creating agent blueprints after **Users can create agent blueprints** is set to **No** |
+| Copilot Agent ID Developers | Agent ID Developer | 8 hours | Creating agent blueprints after **Users can register agent identity blueprints** is **No** |
 | Copilot Office Apps Admin | Office Apps Administrator | 8 hours | Cloud Policy in config.office.com |
 | Copilot Compliance Admin | Compliance Administrator | 4 hours, needs approval | Purview DLP, audit, eDiscovery, DSPM for AI |
 | Copilot Teams Admin | Teams Administrator | 8 hours, needs approval | Teams admin center |
@@ -238,48 +486,88 @@ Admin groups use **PIM for Groups** (New-CopilotAdminPim.ps1). The group always 
 
 ## Groups with no setting yet
 
-Microsoft doesn't have a setting for these groups yet.
-
 | Group | Why | What to do for now |
 | --- | --- | --- |
-| Copilot + Autopilot Access | Autopilot is the new name for Microsoft Scout (MC1479277). It's Frontier only and uses a spending policy, but Microsoft hasn't released its admin settings yet. The Scout preview needed Intune policies and an admin sign-off (MC1332811) | Keep the group. Its access package also adds Copilot Access and Copilot Frontier Access. When Autopilot appears in the spending policy wizard, create a policy for this group |
+| Copilot + Autopilot Access | *Not checked:* Autopilot is the new name for Microsoft Scout (MC1479277). It uses a spending policy, but its admin settings aren't out yet. *Checked Oct 23, 2026:* Autopilot wasn't in the spending policy wizard | Keep the group. Its access package also adds Copilot Access and Copilot Frontier Access. When Autopilot appears in the wizard, create a policy for this group |
 | Copilot Cost Reader | No role can view spending without also seeing other things | Give it AI Reader, or delete it and use Copilot AI Reader |
-| Copilot Plugin Approvers | Tenant admins approve plugin requests. The new plugin registry under **Agents → Tools** (MC1484008) has no approver setting | Use it as a mailing or ticket queue, or give it AI Administrator |
+| Copilot Plugin Approvers | Plugin requests are under **Agents** → **Tools** → **Requests (preview)** (checked Oct 23, 2026). I didn't see an approver setting | Use it as a mailing or ticket queue, or give it AI Administrator |
 
-## Other Message Center changes (checked Oct 16, 2026)
+## Audit logs
 
-I checked every Copilot post in Message Center from July 1 to Oct 16, 2026, plus the M365 roadmap and Learn. These changes are already worked into the sections above.
+*Checked in the admin center on Oct 23, 2026:* Entra admin center → **Audit logs** lets you filter by **Date range**, **Service**, **Category** and **Activity**. Use it to see who changed **User settings**, such as the agent blueprint switch.
+
+*From Microsoft docs ([Manage plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-manage-plugins)):* Copilot and Cowork plugin activity is in Microsoft Purview audit, under **Copilot activities**, not in Entra audit logs.
+
+## Message Center changes
+
+*Not checked for this version.* The earlier version of this guide checked every Copilot post in Message Center from July 1 to Oct 19, 2026, plus the M365 roadmap and Learn. These changes are worked into the sections above.
 
 | Change | Post | What it means for you |
 | --- | --- | --- |
-| Spending policies can use a model profile (Cowork only) | MC1479276 | You can limit which models each Cowork policy uses. See Model profiles |
-| Credit requests can go to your own approval process | MC1470425 | Send Cowork requests to the Cowork (Limited) access package. See Credit requests |
+| Agents that create their own Entra agent identities need an admin grant from Nov 4 | MC1506728 | See Do these first, step 6 |
+| App Builder agent and vibe.powerapps.com retire on Nov 30. New apps there are already blocked | MC1505609 | Makers build apps in Cowork or Copilot Studio. Copilot App Builder Access still limits Copilot Studio |
+| Copilot Studio app building can be limited to groups in the M365 admin center | MC1469329 | See Copilot App Builder Access |
+| The Copilot Studio app in Teams goes away: no editing from January 2027, removed in February 2027 | MC1511056 | Tell makers to use copilotstudio.microsoft.com. Nothing to change in your groups |
+| Researcher and Analyst are no longer pinned by default in the Copilot app | MC1479277 | If you want them pinned, pin them yourself. See the Agent Delegation Guide |
+| Usage numbers for Microsoft-built agents no longer need an Agent 365 license (late November) | MC1506727 | Copilot AI Reader members can see agent activity in **Agents** → **All agents** |
+| Sensitivity labels can be put on Entra security groups (mid-November) | MC1508238 | Don't label the Copilot groups yet. A label can't be changed or removed once it's on a security group |
+| Older GPT models in Copilot Studio move to GPT Chat Latest on Nov 12 | MC1506318 | Tell agent owners to test their agents. Your model groups don't change |
+| Spending policies can use a model profile (Cowork only) | MC1479276 | See Model profiles |
+| Credit requests can go to your own approval process | MC1470425 | See Credit requests |
 | Credits follow a person when they move between policies | MC1470425 | Test the 30-day temporary tier with one person first |
-| Code comes to Frontier tenants later in October | MC1479277 | Wait for Code to appear in the wizard. Deploy the unified Copilot app with the beta channel first |
-| Autopilot (formerly Scout) uses a spending policy; admin settings not out yet | MC1479277, MC1332811 | Keep the Autopilot group. Its package adds Frontier |
-| App building in Copilot Studio is on by default and can be limited to groups | MC1469329 | Use the new Copilot App Builder Access group |
-| Cowork browser use can be limited to groups | MC1474461 | Confirms the Cowork Browser Access row |
-| SpaceXAI setting: Frontier only, off by default, can be limited to groups | MC1474124 | Confirms the SpaceXAI row |
+| Code comes to Frontier tenants later in October | MC1479277 | Wait for Code to appear in the wizard |
+| Autopilot (formerly Scout) uses a spending policy; admin settings not out yet | MC1479277, MC1332811 | Keep the Autopilot group |
+| Cowork browser use can be limited to groups | MC1474461 | See Copilot + Cowork Browser Access |
+| SpaceXAI setting can be limited to groups | MC1474124 | See Copilot Independent Processor Models Access |
 | GPT-6.1 Sol and Claude Sonnet 5.5 follow the OpenAI and Anthropic settings | MC1483844 | Your model groups still decide who gets them |
-| A **Plugins** button replaces the Agents, Agents & Skills and Customize buttons | MC1484008 | Admins still deploy plugins from Agents → Tools. Update user training |
+| A **Plugins** button replaces the Agents, Agents & Skills and Customize buttons | MC1484008 | Admins still deploy plugins from **Agents** → **Tools**. Update user training |
 | The **Microsoft Copilot with Graph-grounded chat** service plan now controls full vs basic Copilot | MC1405498 | Don't turn that plan off in the Copilot Access license |
-| Copilot connectors follow **Allowed agent types**; the old setFederatedConnectors switch is gone | MC1454973 | Check **Agents → Settings → Allowed agent types** |
-| Legal plugins in Word and Cowork; the Legal Agent is retiring | MC1509799 | You can only turn these on or off for everyone: the Cowork for Legal plugin in the M365 admin center, and Legal Skills in the Apps admin center |
+| Copilot connectors follow **Allowed agent types**; the old setFederatedConnectors switch is gone | MC1454973 | *Checked Oct 23, 2026:* I didn't see a setting named **Allowed agent types**. The closest is **Agents** → **Settings** → **Agent and plugin access** |
+| Legal plugins in Word and Cowork; the Legal Agent is retiring | MC1509799 | You can only turn these on or off for everyone |
+
+## What changed on Oct 23, 2026
+
+I checked each step against the admin centers. These are the differences from the earlier version:
+
+| Old guide said | What the admin center shows |
+| --- | --- |
+| **Users can create agent blueprints** | **Users can register agent identity blueprints** |
+| **Auto-apply new services** | **Allow new Agents and services as they become available**. On by default in a new policy, with every service checked |
+| SpaceXAI is on the subprocessors page | SpaceXAI is on **AI providers operating as independent processors** |
+| **AI providers for other large language models** | **AI providers operating as independent processors** |
+| **Copilot → Settings → View all → Cowork settings** → **Allow Cowork to use the Microsoft Edge browser** | **Browser use in Microsoft Copilot** → **Allow local browser use** |
+| **Access to usage-based billing experiences** with a group picker | Couldn't find it. The closest is **AI experiences enabled by usage-based billing**, with one checkbox and no group picker |
+| **Copilot → Cost Management → Configuration → Model profiles** | Not shown on the **Configuration** tab |
+| **Copilot → Cost Management → Credit requests** | **Copilot → Cost management → Overview → View requests** |
+| **Agents → Tools → [plugin] → Installed for** | Plugin has **Users** (**Available to**) and an **Install** button |
+| Frontier: no user count | Panel shows an estimate of how many of 10,000 assignments you've used |
 
 ## Sources
+
+Microsoft docs I read for this version:
+
+- [Set up usage-based billing for Copilot Credits](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-setup)
+- [Access requests to usage-based billing experiences](https://learn.microsoft.com/microsoft-365/copilot/request-access-usage-based-billing-experiences)
+- [Manage plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-manage-plugins)
+- [Restrict who can create applications and agents in Entra](https://learn.microsoft.com/entra/identity/role-based-access-control/delegate-app-roles#restrict-who-can-create-applications-and-agents)
+- [Create an agent identity blueprint](https://learn.microsoft.com/entra/agent-id/create-blueprint)
+
+Other sources from the earlier version (not re-read for this version):
 
 - [Get started with the Microsoft Frontier Program](https://learn.microsoft.com/microsoft-365/admin/manage/get-started-frontier)
 - [Get started with Opal in Microsoft Copilot](https://learn.microsoft.com/microsoft-365/copilot/opal-settings-manage)
 - [Manage Copilot Cowork for your organization](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-admin-governance)
-- [Manage plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-manage-plugins)
 - [Use the local browser with Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-local-browser)
 - [Managing AI experiences enabled by usage-based billing](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-manage-copilot-credits)
-- [Set up usage-based billing for Copilot Credits](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-setup)
+- [Custom request policies](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-monitor-spending#configure-custom-request-policies)
 - [Manage Copilot Code for your organization](https://learn.microsoft.com/copilot/code/code-admin)
 - [Secure local execution in Copilot Code](https://learn.microsoft.com/copilot/code/code-secure-local-execution)
 - [Anthropic models in Microsoft Online Services](https://learn.microsoft.com/microsoft-365/copilot/connect-to-ai-subprocessor)
 - [OpenAI as a subprocessor](https://learn.microsoft.com/microsoft-365/copilot/openai-subprocessor)
 - [Manage preview AI models](https://learn.microsoft.com/microsoft-365/copilot/manage-preview-ai-models)
+- [Connect to SpaceXAI models (as an independent processor)](https://learn.microsoft.com/microsoft-365/copilot/connect-to-ai-models)
+- [SpaceXAI as a subprocessor in Microsoft Online Services](https://learn.microsoft.com/microsoft-365/copilot/spacexai-subprocessor)
+- [Assign AI provider access to users and groups](https://learn.microsoft.com/microsoft-365/copilot/copilot-ai-provider-user-sec-group-access)
 - [Manage Microsoft Copilot settings in the M365 admin center](https://learn.microsoft.com/microsoft-365/copilot/microsoft-365-copilot-page)
 - [Agent settings in Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-settings)
 - [Manage Copilot in Teams meetings](https://learn.microsoft.com/microsoftteams/copilot-teams-transcription)
@@ -287,23 +575,10 @@ I checked every Copilot post in Message Center from July 1 to Oct 16, 2026, plus
 - [Understand usage-based billing and cost management for Copilot Credits](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-overview-copilot-credits)
 - [Understand costs for Business Applications in Work IQ](https://learn.microsoft.com/power-platform/admin/business-applications-work-iq/understand-costs)
 - [Copilot Managed Runtime licensing FAQ](https://learn.microsoft.com/microsoft-365/admin/manage/apps/licensing-faq)
-- [Setup – Teams Phone Agent – Usage-based billing](https://learn.microsoft.com/microsoftteams/aa-cq-setup-teams-phone-agent-ubb)
-- [Connect to SpaceXAI models (as an independent processor)](https://learn.microsoft.com/microsoft-365/copilot/connect-to-ai-models)
-- [SpaceXAI as a subprocessor in Microsoft Online Services](https://learn.microsoft.com/microsoft-365/copilot/spacexai-subprocessor)
-- [Assign AI provider access to users and groups](https://learn.microsoft.com/microsoft-365/copilot/copilot-ai-provider-user-sec-group-access)
-- [License options for Microsoft Copilot (E7 includes Copilot)](https://learn.microsoft.com/microsoft-365/copilot/microsoft-365-copilot-licensing)
-- [Create assignmentPolicies (specificAllowedTargets)](https://learn.microsoft.com/graph/api/entitlementmanagement-post-assignmentpolicies)
-- [MC1470425 Cost Management September updates](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1470425)
-- [MC1479276 Copilot pricing model and FinOps](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1479276)
-- [MC1479277 Home, Code, Autopilot, request access](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1479277)
-- [MC1472007 Advanced package uploads](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1472007)
-- [MC1506733 Who can create agents in Entra](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1506733)
-- [MC1474461 Cowork browser use admin control](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1474461)
-- [MC1474124 SpaceXAI subprocessor setting](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1474124)
-- [MC1469329 Build apps in Copilot Studio and Cowork](https://admin.microsoft.com/?ref=MessageCenter/:/messages/MC1469329)
-- [Access requests to usage-based billing experiences](https://learn.microsoft.com/microsoft-365/copilot/request-access-usage-based-billing-experiences)
-- [Configure model profiles](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-setup#configure-model-profiles)
-- [Custom request policies](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-monitor-spending#configure-custom-request-policies)
-- [Manage Copilot Code for your organization](https://learn.microsoft.com/copilot/code/code-admin)
 - [Copilot Managed Runtime: scope app creation](https://learn.microsoft.com/microsoft-365/admin/manage/apps/?view=o365-worldwide#enable-copilot-managed-runtime-for-your-tenant)
-- [Manage preview AI models](https://learn.microsoft.com/microsoft-365/copilot/manage-preview-ai-models)
+- [Setup – Teams Phone Agent – Usage-based billing](https://learn.microsoft.com/microsoftteams/aa-cq-setup-teams-phone-agent-ubb)
+- [License options for Microsoft Copilot](https://learn.microsoft.com/microsoft-365/copilot/microsoft-365-copilot-licensing)
+- [Create assignmentPolicies (specificAllowedTargets)](https://learn.microsoft.com/graph/api/entitlementmanagement-post-assignmentpolicies)
+- [Environment routing for Copilot Managed Runtime (app creation spaces)](https://learn.microsoft.com/power-platform/admin/default-environment-routing-copilot-managed-runtime#frequently-asked-questions)
+- [Grant agents access to Microsoft 365 resources](https://learn.microsoft.com/entra/agent-id/grant-agent-access-microsoft-365)
+- Message Center: MC1470425, MC1479276, MC1479277, MC1472007, MC1506733, MC1506728, MC1505609, MC1511056, MC1506727, MC1508238, MC1506318, MC1474461, MC1474124, MC1469329, MC1483844, MC1405498, MC1484008, MC1454973, MC1509799, MC1332811
