@@ -25,9 +25,9 @@ All four scripts use only Microsoft Graph (the Microsoft.Graph.Authentication mo
 
 | Order | Script | What it does |
 | --- | --- | --- |
-| 1 | `New-CopilotGroups.ps1` | Creates every group in this guide. Skips groups that already exist. Creates admin groups as role-assignable. `-IncludeCodeGroups` adds the Copilot Code groups |
+| 1 | `New-CopilotGroups.ps1` | Creates every group in the table below except Copilot Platform Admin. Skips groups that already exist. Creates admin groups as role-assignable. `-IncludeCodeGroups` adds the three Copilot Code groups |
 | 2 | `Update-CopilotGroupCleanup.ps1` | Only for tenants built from the first version of this design. Deletes Copilot + Cowork Access, Copilot + Code Access and Copilot Preview Models Access. Exports members and owners to CSV first. Skips groups that still have members unless you add `-DeleteEvenIfMembers` |
-| 3 | `New-CopilotAdminPim.ps1` | Puts the admin groups under PIM for Groups. Needs `-ApproverGroupName` |
+| 3 | `New-CopilotAdminPim.ps1` | Creates Copilot Platform Admin and puts every admin group under PIM for Groups. Needs `-ApproverGroupName` |
 | 4 | `New-CopilotAccessPackages.ps1` | Creates the catalog, access packages, approval policies and access reviews. `-IncludeAdminPackages` and `-IncludeCodePackages` are optional |
 | 5 | (by hand) | Point each admin center setting at its group, using the steps below |
 
@@ -43,6 +43,82 @@ All four scripts use only Microsoft Graph (the Microsoft.Graph.Authentication mo
 Permissions you need: Group.ReadWrite.All for the groups. Privileged Role Administrator (or Global Administrator) to create role-assignable groups and set up PIM. Identity Governance Administrator for access packages.
 
 **Before you run the cleanup script:** check that no admin center setting still points at a group it deletes. For example, an AI provider can still be assigned to Copilot Preview Models Access. Move the setting to the new group first.
+
+## Every group the scripts create
+
+This is the full list from `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1`, in the same order. Each row says where you assign the group and which access package from `New-CopilotAccessPackages.ps1` adds people to it.
+
+You set each admin center setting once. After that, people join through the access package, not the admin center.
+
+### Access package tiers
+
+The access package script puts every package in a catalog named **Copilot Access Catalog** and gives each package one of these tiers. The approver group is whatever you pass as `-ApproverGroupName` (default: **Copilot Delegated Admin**). Admin packages use `-AdminApproverGroupName`.
+
+| Tier | Approval | Access ends after | Access review |
+| --- | --- | --- | --- |
+| Standard | Manager | 365 days | Every 6 months |
+| Elevated | Manager, then the approver group | 180 days | Every 3 months |
+| Admin | Manager, then the admin approver group | 90 days | Every 3 months |
+| Temporary | Manager, then the approver group | 30 days, can't be extended | None. Removed at the end |
+
+### Feature access
+
+| Group | Where you assign it | Access package (tier) · also adds |
+| --- | --- | --- |
+| Copilot Access | Entra → **Groups** → this group → **Licenses** (Copilot license) | Copilot Access (Standard) |
+| Copilot + Opal Access | Copilot → Settings → **Opal (Frontier)** | Copilot + Opal Access (Elevated) · Copilot Access, Copilot Frontier Access |
+| Copilot + Autopilot Access | Nothing yet. Autopilot spending policy when it appears | Copilot + Autopilot Access (Elevated) · Copilot Access, Copilot Frontier Access |
+| Copilot Studio Access | Entra licenses (Copilot Studio) and the Power Platform environment security group | Copilot Studio Access (Standard) |
+| Copilot App Builder Access | Apps → Overview → **App creation paths**, or the pac command | Copilot App Builder Access (Elevated) · Copilot Studio Access |
+| Copilot Frontier Access | Copilot → Settings → **Copilot Frontier** | Copilot Frontier Access (Elevated) · Copilot Access |
+| Copilot Pilot Ring | Copilot New Services Pilot spending policy | Copilot Pilot Ring (Elevated) |
+
+### Spend groups (spending policies)
+
+| Group | Where you assign it | Access package (tier) · also adds |
+| --- | --- | --- |
+| Copilot + Cowork Spend Limit | Cowork – Limited spending policy | Copilot + Cowork Access (Limited) (Standard) · Copilot Access. Can't be held with Unlimited |
+| Copilot + Cowork Spend Unlimited | Cowork – Unlimited spending policy | Copilot + Cowork Access (Unlimited) (Elevated) · Copilot Access |
+| Copilot + Cowork Spend Unlimited Temp | Cowork – Temporary Unlimited spending policy | Copilot + Cowork Access (Temporary Unlimited, 30 days) (Temporary). Only Spend Limit members can ask |
+| Copilot SharePoint OneDrive Advanced Access | SharePoint & OneDrive advanced work spending policy | Copilot SharePoint OneDrive Advanced Access (Standard) · Copilot Access |
+| Copilot Work IQ API Access | Work IQ API spending policy | Copilot Work IQ API Access (Elevated) |
+| Copilot Managed Runtime Access | Managed Runtime spending policy | Copilot Managed Runtime Access (Standard). No Copilot license needed, so it doesn't add Copilot Access |
+| Copilot Teams Phone Agent Accounts | Teams Phone Agent spending policy | None. Members are resource accounts, not people |
+
+### Copilot Code (only with `-IncludeCodeGroups`)
+
+| Group | Where you assign it | Access package (tier) · also adds |
+| --- | --- | --- |
+| Copilot + Code Spend Limit | Code – Limited spending policy, once Code is in the wizard | Copilot + Code Access (Limited) (Elevated) · Copilot Access, Copilot Frontier Access. Can't be held with Unlimited |
+| Copilot + Code Spend Unlimited | Code – Unlimited spending policy, once Code is in the wizard | Copilot + Code Access (Unlimited) (Elevated) · Copilot Access, Copilot Frontier Access |
+| Copilot + Code Secure Execution Exemption | Copilot Code exemption setting, once Microsoft shows it | Copilot + Code Secure Execution Exemption (Admin) |
+
+### Models
+
+| Group | Where you assign it | Access package (tier) · also adds |
+| --- | --- | --- |
+| Copilot Anthropic Models Access | AI providers operating as Microsoft subprocessors → **Anthropic** | Copilot Anthropic Models Access (Standard) |
+| Copilot OpenAI Models Access | AI providers operating as Microsoft subprocessors → **OpenAI** | Copilot OpenAI Models Access (Standard) |
+| Copilot SpaceXAI Models Access | The **SpaceXAI** row. See the note under Copilot SpaceXAI Models Access | Copilot SpaceXAI Models Access (Elevated) · Copilot Access, Copilot Frontier Access |
+| Copilot Independent Processor Models Access | AI providers operating as independent processors → every other provider (for example **Mistral AI**, **Anthropic Models with Data Retention**) | Copilot Independent Processor Models Access (Admin) |
+
+### Capability and exceptions
+
+| Group | Where you assign it | Access package (tier) |
+| --- | --- | --- |
+| Copilot + Cowork Browser Access | Copilot → Settings → **Browser use in Microsoft Copilot**, and the Intune Edge profile | Copilot + Cowork Browser Access (Elevated) |
+| Copilot Advanced Package Upload Access | Copilot → Settings → **Advanced package uploads** | Copilot Advanced Package Upload Access (Elevated) |
+| Copilot Agent Sharing Access | Agents → Settings → **Sharing** | Copilot Agent Sharing Access (Standard) |
+| Copilot Teams Policy Exceptions | Teams → Meeting policies → **Group policy assignment** | Copilot Teams Policy Exceptions (Elevated) |
+| Copilot Cloud Policy Exceptions | config.office.com → the exception policy's **Scope** | Copilot Cloud Policy Exceptions (Elevated) |
+
+### Admin groups (role-assignable, under PIM)
+
+These get roles through PIM, not through an admin center setting. The roles and activation times are in the Admin groups section below. Access packages for them are only made with `-IncludeAdminPackages` (Admin tier).
+
+Copilot Platform Admin, Copilot Delegated Admin, Copilot Agent Management Admin, Copilot AI Reader, Copilot Billing Admin, Copilot Cost Reader, Copilot Agent ID Admin, Copilot Agent ID Developers, Copilot Office Apps Admin, Copilot Compliance Admin, Copilot Teams Admin, Copilot SharePoint Admin, Copilot Studio Environment Admin, Copilot Plugin Approvers.
+
+Copilot Platform Admin is made by `New-CopilotAdminPim.ps1` and has no access package.
 
 ## Do these first
 
@@ -192,8 +268,9 @@ When Code shows up in the spending policy wizard:
 
 1. Deploy the unified Copilot app.
 2. Set the app's update channel (TargetChannel) to beta. *Not checked.*
-3. Run `New-CopilotGroups.ps1 -IncludeCodeGroups` and `New-CopilotAccessPackages.ps1 -IncludeCodePackages`.
+3. Run `New-CopilotGroups.ps1 -IncludeCodeGroups` and `New-CopilotAccessPackages.ps1 -IncludeCodePackages`. This creates **Copilot + Code Spend Limit**, **Copilot + Code Spend Unlimited** and **Copilot + Code Secure Execution Exemption**, and their packages.
 4. Create the Code spending policies in the policy table below.
+5. When Microsoft shows the Code exemption setting, assign **Copilot + Code Secure Execution Exemption** to it. Keep the group small. *Not checked:* see [Secure local execution in Copilot Code](https://learn.microsoft.com/copilot/code/code-secure-local-execution).
 
 ## Spend groups and spending policies
 
@@ -361,22 +438,35 @@ The provider lists can differ by tenant and region.
 
 *Not checked:* for Copilot Studio, also allow external models in the Power Platform admin center.
 
+### Copilot SpaceXAI Models Access
+
+The scripts make a separate group for SpaceXAI. Its access package also adds Copilot Access and Copilot Frontier Access, because SpaceXAI is Frontier only.
+
+*Checked in the admin center on Oct 23, 2026:*
+
+1. Go to **Copilot** → **Settings** → **View all** → **AI providers operating as independent processors**.
+2. Select the arrow next to **SpaceXAI**.
+3. Under **Choose which users can access SpaceXAI models**, select **Specific users and groups**. The other options are **All users** and **No users**.
+4. Add **Copilot SpaceXAI Models Access**. Select **Save**.
+
+**Where SpaceXAI shows up can differ.** The script descriptions put SpaceXAI on the **subprocessors** page. On Oct 23, 2026, it showed on the **independent processors** page instead, where the provider's own terms apply. Microsoft has a doc for each: [SpaceXAI as a subprocessor](https://learn.microsoft.com/microsoft-365/copilot/spacexai-subprocessor) and [Connect to SpaceXAI models (as an independent processor)](https://learn.microsoft.com/microsoft-365/copilot/connect-to-ai-models). *Not checked:* which one applies to your tenant. Use the page where SpaceXAI appears. If it's on the independent processors page, get legal and privacy sign-off first, as for the group below.
+
+*Not checked:* the earlier version of this guide said SpaceXAI is Frontier only, off by default, and not available in the EU, EFTA, UK or government clouds (MC1474124).
+
 ### Copilot Independent Processor Models Access
+
+Use this group for every independent-processor provider except SpaceXAI. Its access package is Admin tier, because data leaves Microsoft's terms.
 
 *Checked in the admin center on Oct 23, 2026.*
 
 1. Get legal and privacy sign-off first. These providers use their own terms, not Microsoft's.
 2. Go to **Copilot** → **Settings** → **View all** → **AI providers operating as independent processors**.
-3. Select the arrow next to the provider (for example **SpaceXAI** or **Anthropic Models with Data Retention**).
+3. Select the arrow next to the provider (for example **Mistral AI** or **Anthropic Models with Data Retention**).
 4. Under **Choose which users can access ...**, select **Specific users and groups**. The other options are **All users** and **No users**.
 5. Add **Copilot Independent Processor Models Access**. Select **Save**.
 
-Changes from the earlier version of this guide:
-
-- **SpaceXAI is on the independent processors page**, not the subprocessors page. Use Copilot Independent Processor Models Access for it.
-- **Models that keep your data** appear as **Anthropic Models with Data Retention** on the independent processors page.
+- **Models that keep your data** appear as **Anthropic Models with Data Retention** on this page. Use this group for them.
 - *Not checked:* accepting the provider's terms. The providers I saw were already allowed, so I didn't see a terms step.
-- *Not checked:* the earlier version of this guide said SpaceXAI is Frontier only, off by default, and not available in the EU, EFTA, UK or government clouds (MC1474124).
 
 Don't use the Pilot Ring for these providers. Sending data outside Microsoft's terms is a legal decision.
 
@@ -459,7 +549,7 @@ pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledG
 
 See [Environment routing for Copilot Managed Runtime](https://learn.microsoft.com/power-platform/admin/default-environment-routing-copilot-managed-runtime#frequently-asked-questions).
 
-The Copilot Code exemption group waits with the other Code groups.
+**Copilot + Code Secure Execution Exemption** waits with the other Code groups. See Copilot Code: wait for it.
 
 For agent settings (who can build, share, publish and receive agents), see the [Copilot Agent Delegation Guide](../Agents/readme.md).
 
@@ -518,7 +608,7 @@ For agent settings (who can build, share, publish and receive agents), see the [
 | Code comes to Frontier tenants later in October | MC1479277 | Wait for Code to appear in the wizard |
 | Autopilot (formerly Scout) uses a spending policy; admin settings not out yet | MC1479277, MC1332811 | Keep the Autopilot group |
 | Cowork browser use can be limited to groups | MC1474461 | See Copilot + Cowork Browser Access |
-| SpaceXAI setting can be limited to groups | MC1474124 | See Copilot Independent Processor Models Access |
+| SpaceXAI setting can be limited to groups | MC1474124 | See Copilot SpaceXAI Models Access |
 | GPT-6.1 Sol and Claude Sonnet 5.5 follow the OpenAI and Anthropic settings | MC1483844 | Your model groups still decide who gets them |
 | A **Plugins** button replaces the Agents, Agents & Skills and Customize buttons | MC1484008 | Admins still deploy plugins from **Agents** → **Tools**. Update user training |
 | The **Microsoft Copilot with Graph-grounded chat** service plan now controls full vs basic Copilot | MC1405498 | Don't turn that plan off in the Copilot Access license |
@@ -533,7 +623,7 @@ I checked each step against the admin centers. These are the differences from th
 | --- | --- |
 | **Users can create agent blueprints** | **Users can register agent identity blueprints** |
 | **Auto-apply new services** | **Allow new Agents and services as they become available**. On by default in a new policy, with every service checked |
-| SpaceXAI is on the subprocessors page | SpaceXAI is on **AI providers operating as independent processors** |
+| SpaceXAI is on the subprocessors page | SpaceXAI is on **AI providers operating as independent processors**. Still use Copilot SpaceXAI Models Access for it |
 | **AI providers for other large language models** | **AI providers operating as independent processors** |
 | **Copilot → Settings → View all → Cowork settings** → **Allow Cowork to use the Microsoft Edge browser** | **Browser use in Microsoft Copilot** → **Allow local browser use** |
 | **Access to usage-based billing experiences** with a group picker | Couldn't find it. The closest is **AI experiences enabled by usage-based billing**, with one checkbox and no group picker |
