@@ -13,8 +13,8 @@
          The 30-day Temporary Unlimited Cowork package is visible and requestable only by
          members of Copilot + Cowork Spend Limit.
       4. Incompatible-package links so a user can't hold both Limited and Unlimited spend tiers.
-      5. Optional (-IncludeCodePackages): Copilot Code packages, on hold until Code is
-         selectable in the spending policy wizard.
+      5. Optional (-IncludeCodePackages): Copilot Code packages. Code is rolling out to
+         Frontier tenants (MC1519871); check Code is in your spending policy wizard first.
       6. Optional (-IncludeAdminPackages): packages for the role-assignable admin groups
          (not needed if you use New-CopilotAdminPim.ps1 for admin access).
       7. Optional (-CreateAdminGroupReviews): standalone recurring access reviews on the admin
@@ -99,7 +99,7 @@ $packages = @(
     @{ Name = "Copilot Work IQ API Access";          Tier = "Elevated"; Groups = @("Copilot Work IQ API Access") }
     # Managed Runtime users don't need a Copilot license, so Copilot Access isn't bundled.
     @{ Name = "Copilot Managed Runtime Access";      Tier = "Standard"; Groups = @("Copilot Managed Runtime Access") }
-    # Copilot Code (on hold until Code is selectable in your spending policy wizard; rolling out to Frontier Oct 2026): -IncludeCodePackages
+    # Copilot Code (rolling out to Frontier from late Oct 2026, MC1519871): -IncludeCodePackages
     @{ Name = "Copilot + Code Access (Limited)";     Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Code Spend Limit");     Incompatible = "Copilot + Code Access (Unlimited)"; Code = $true }
     @{ Name = "Copilot + Code Access (Unlimited)";   Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Code Spend Unlimited"); Code = $true }
     @{ Name = "Copilot + Code Secure Execution Exemption"; Tier = "Admin"; Groups = @("Copilot + Code Secure Execution Exemption"); Code = $true }
@@ -123,7 +123,7 @@ $packages = @(
 )
 
 $adminGroups = @(
-    "Copilot Delegated Admin", "Copilot Agent Management Admin", "Copilot AI Reader",
+    "Copilot Delegated Admin", "Copilot Agent Management Admin", "Copilot Agent Registry Admin", "Copilot AI Reader",
     "Copilot Billing Admin", "Copilot Cost Reader", "Copilot Agent ID Admin", "Copilot Agent ID Developers",
     "Copilot Office Apps Admin", "Copilot Compliance Admin", "Copilot Teams Admin",
     "Copilot SharePoint Admin", "Copilot Studio Environment Admin", "Copilot Plugin Approvers"
