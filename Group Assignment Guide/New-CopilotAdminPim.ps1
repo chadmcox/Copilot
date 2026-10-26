@@ -73,12 +73,14 @@ $adminGroups = @(
        Desc = "All-up Copilot administration (JIT via PIM). Activation grants every role below."
        Roles = @(
            "AI Administrator", "Billing Administrator", "Agent ID Administrator",
+           "Agent Registry Administrator",
            "Office Apps Administrator", "Compliance Administrator", "Teams Administrator",
            "SharePoint Administrator", "Power Platform Administrator",
            "Message Center Reader", "Service Support Administrator"
        ) }
     @{ Name = "Copilot Delegated Admin";          Hours = 8; Approval = $true;  Roles = @("AI Administrator") }
     @{ Name = "Copilot Agent Management Admin";   Hours = 8; Approval = $true;  Roles = @("AI Administrator") }
+    @{ Name = "Copilot Agent Registry Admin";     Hours = 8; Approval = $true;  Roles = @("Agent Registry Administrator") }
     @{ Name = "Copilot AI Reader";                Hours = 8; Approval = $false; Roles = @("AI Reader") }
     @{ Name = "Copilot Billing Admin";            Hours = 4; Approval = $true;  Roles = @("Billing Administrator") }
     @{ Name = "Copilot Cost Reader";              Hours = 8; Approval = $false; Roles = @() }

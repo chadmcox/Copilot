@@ -1,6 +1,6 @@
 # Copilot Agent Delegation Guide
 
-Oct 16, 2026 · @Chad Cox
+Updated Oct 26, 2026 · @Chad Cox
 
 > **Start here: do the Group Assignment Guide first.**
 > This guide is step 2. It uses groups and admin roles that the [Copilot Group Assignment Guide](../Group%20Assignment%20Guide/readme.md) sets up.
@@ -26,11 +26,14 @@ Lock down steps 2 to 4, and a badly built agent stays with the one person who bu
 
 | # | Where | What to do | By | Why |
 | --- | --- | --- | --- | --- |
-| 1 | M365 admin center → **Copilot → Settings → View all → Advanced package uploads** | Select **Specific users or groups**. Add **Copilot Advanced Package Upload Access**. Select **Save** | Oct 25, 2026 | If you do nothing, everyone can upload agents and plugins that run actions or MCP servers (MC1472007) |
-| 2 | Entra admin center → **Entra ID → Users → User settings** | Set **Users can create agent blueprints** to **No**. Select **Save**. Put agent developers in **Copilot Agent ID Developers** | Early Nov 2026 | If you do nothing, every user can create agent identities in Entra (MC1506733) |
-| 3 | M365 admin center → **Agents → Settings → Sharing** | Select **Specific users**. Add **Copilot Agent Sharing Access**. Select **Save** | Now | Stops everyone from sharing Agent Builder agents with the whole organization |
-| 4 | M365 admin center → **Agents → Settings → Agent and plugin access** | Leave **Built by Microsoft** and **Built by your organization** on. Turn off **Built by external publishers** until you've reviewed them | Now | Outside agents process your data under their own terms |
-| 5 | SharePoint | Tell site owners that new SharePoint agents use Agent Builder from mid-November, and that `.agent` files stop working in April 2027 | Mid-Nov 2026 | See [SharePoint agents are changing](#sharepoint-agents-are-changing) (MC1511052) |
+| 1 | M365 admin center → **Agents → Settings → Agent and plugin access** | Leave **Built by Microsoft** and **Built by your organization** on. Turn off **Built by external publishers** until you've reviewed them. Select **Save** | **Oct 30, 2026** | From Oct 30 the Copilot Connectors page follows this setting, and the old `setFederatedConnectors` command is gone. Microsoft docs also call this page **Allowed agent types** (MC1454973, updated Oct 23, 2026) |
+| 2 | M365 admin center → **Copilot → Settings → View all → Advanced package uploads** | Select **Specific users or groups**. Add **Copilot Advanced Package Upload Access**. Select **Save** | **Date passed (Oct 25, 2026). Do it now** | If you do nothing, everyone can upload agents and plugins that run actions or MCP servers (MC1472007) |
+| 3 | Entra admin center → **Entra ID → Users → User settings** | Set **Users can register agent identity blueprints** to **No**. Select **Save**. Put agent developers in **Copilot Agent ID Developers** | **Nov 4, 2026** | If you do nothing, every user can create agent identities in Entra (MC1506733). From Nov 4, agents that make their own identities need an admin grant (MC1506728) |
+| 4 | M365 admin center → **Agents → Settings → Sharing** | Select **Specific users**. Add **Copilot Agent Sharing Access**. Select **Save** | Now | Stops everyone from sharing Agent Builder agents with the whole organization |
+| 5 | M365 admin center → **Agents → Settings → Agent feedback sharing** | Decide: **No agents** (the default), **All agents**, or **Selected agents**. Select **Save** | Now | New setting. It decides whether agent owners see the ratings and comments users leave (MC1520901) |
+| 6 | SharePoint | Tell site owners that new SharePoint agents use Agent Builder from mid-November, and that `.agent` files stop working in April 2027 | Mid-Nov 2026 | See [SharePoint agents are changing](#sharepoint-agents-are-changing) (MC1511052) |
+
+The admin center calls the blueprint switch **Users can register agent identity blueprints**. Microsoft docs call it **Users can create agent blueprints**. It's the same switch.
 
 ## 1. Who can build agents
 
@@ -40,9 +43,10 @@ Lock down steps 2 to 4, and a badly built agent stays with the one person who bu
 | **Copilot Studio** | Everyone with a Copilot license, a Copilot Studio license or a trial | 1. Assign the Copilot Studio user license to a group. 2. In the Power Platform admin center, go to **Manage → Tenant settings → Copilot Studio authors** and add the group. 3. Turn off self-service trials. 4. Limit each environment to a security group. 5. Use data policies to block channels and connectors | Copilot Studio Access |
 | **Apps in Copilot Studio and Cowork** | On by default in Copilot Studio. Cowork app building needs Frontier | Copilot Studio: run `pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledGroupsManagedAppsMcsPreview --setting-value '<group object ID>'`. Cowork: Frontier access | Copilot App Builder Access; Copilot Frontier Access |
 | **SharePoint agents** | Anyone who can edit a site and has a Copilot license | Turn off agents on sensitive sites with **Restricted content discovery**. Turn off the **Microsoft Copilot for SharePoint** service plan for people who shouldn't use them | None (site-level setting) |
-| **Agents with actions or MCP servers** (uploaded packages) | Everyone, from Oct 25, 2026, unless you limit it | **Copilot → Settings → Advanced package uploads** | Copilot Advanced Package Upload Access |
+| **Agents with actions or MCP servers** (uploaded packages) | Everyone, unless you limit it. The Oct 25, 2026 date has passed | **Copilot → Settings → Advanced package uploads** | Copilot Advanced Package Upload Access |
 | **Teams custom apps** (sideloading) | Depends on your Teams app setup policy | Teams admin center → **Teams apps → Setup policies → Upload custom apps**. Turn it on only in a policy for developers | Your developer group |
-| **Entra agent identities** (blueprints) | Every user, from early Nov 2026 | Set **Users can create agent blueprints** to **No**. Give the **Agent ID Developer** role to people who need it | Copilot Agent ID Developers |
+| **Teams apps and agents** (who gets them) | Depends on your Teams app settings | Teams admin center → **Teams apps → Manage apps → Manage access**. From mid-October to mid-November 2026 this is one guided flow: who can use the app, who gets it installed, the permissions, and allow or block (MC1515931). Nothing changes until you select **Apply** | Your audience group |
+| **Entra agent identities** (blueprints) | Every user, unless you change it | Set **Users can register agent identity blueprints** to **No**. Give the **Agent ID Developer** role to people who need it | Copilot Agent ID Developers |
 | **MCP servers and tools** | Developers register them, then an admin approves | M365 admin center → **Agents → Tools → Requests**. Needs AI Administrator | Copilot Agent Management Admin |
 
 **Copilot Studio can't be turned off.** Microsoft says to use data policies so nobody can chat with agents you haven't approved. Even with **Copilot Studio authors** set, people with a Copilot license can still open Copilot Studio.
@@ -140,6 +144,16 @@ Do these every month:
 1. **Find agents with no owner.** Go to **Agents → All agents** and filter on **Missing an owner**. Add a rule under **Agents → Settings → Agent management rules** to:
    - give Agent Builder agents to the old owner's manager
    - block ownerless agents nobody uses
+
+   Rules can now do these jobs in bulk:
+
+   | Rule action | What it does |
+   | --- | --- |
+   | Install Microsoft agents | Installs Microsoft's own agents for everyone, in one action |
+   | Reassign ownerless agents to manager | Gives Agent Builder agents to the manager of the person who left |
+   | Block ownerless agents without usage | Blocks ownerless agents nobody uses |
+   | Apply a template | Puts a set of security policies on agents you already published. One-time action, not a schedule |
+   | Reject agent publish requests older than N days | Clears out old requests |
 2. **Block risky agents.** Open the agent and select **Block**. This removes it from everyone who installed it. Blocking a SharePoint or Foundry agent only removes it from Copilot Chat.
 3. **Review who can share and publish.** Include the Copilot Agent Sharing Access, Copilot Advanced Package Upload Access and Copilot Agent ID Developers groups in your access reviews.
 4. **Check the logs.** Copilot Studio and agent admin actions are logged in Microsoft Purview audit.
@@ -156,6 +170,20 @@ From mid-November 2026, **Create an agent** in SharePoint and OneDrive opens Age
    - **A chat agent used across Microsoft 365:** select **Upgrade to M365 Agent** in the SharePoint builder.
 3. Upgraded agents must be added to Teams chats and channels again.
 
+## What's on the Agent settings page now
+
+*From Microsoft docs ([Agent settings in the Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/admin/manage/agent-settings)).* Go to M365 admin center → **Agents** → **Settings**.
+
+| Setting | What it does | This guide |
+| --- | --- | --- |
+| **Agent management rules** | Bulk actions on agents | See Keeping agents tidy |
+| **Agent and plugin access** | Which kinds of agents and plugins people can install: Microsoft, your organization, external publishers. Also called **Allowed agent types** | Do these first, step 1 |
+| **Security templates** (policy templates) | A set of security policies you put on new agents | Use one, then apply it to old agents with a rule |
+| **Sharing** | Who can share Agent Builder agents with the whole organization | Do these first, step 4 |
+| **User access** | Which users or groups can use agents and plugins at all | Set this before you limit one agent to a group |
+| **Agent feedback sharing** | Whether agent owners see user ratings and comments. Default **No agents** | Do these first, step 5 (MC1520901) |
+| **Tags** | Labels for finding and sorting agents. Up to 50. Deleting a tag removes it from every agent | Tag agents by owner team and by data they read |
+
 ## Admin roles for agents
 
 | Task | Role | Group |
@@ -163,6 +191,7 @@ From mid-November 2026, **Create an agent** in SharePoint and OneDrive opens Age
 | Approve, publish, deploy, pin, block and set agent settings | AI Administrator | Copilot Agent Management Admin |
 | View agents and settings only | AI Reader | Copilot AI Reader |
 | Manage Entra agent identities and blueprints | Agent ID Administrator | Copilot Agent ID Admin |
+| Manage the Entra Agent Registry: agent metadata, collections and who can see which agents | Agent Registry Administrator | Copilot Agent Registry Admin (new) |
 | Create agent blueprints | Agent ID Developer | Copilot Agent ID Developers |
 | Copilot Studio environments, data policies, **Copilot Studio authors** | Power Platform Administrator | Copilot Studio Environment Admin |
 | Teams app setup and permission policies | Teams Administrator | Copilot Teams Admin |
@@ -192,4 +221,8 @@ All of these groups use PIM, so people turn the role on only when they need it. 
 - [Install the Sales agent](https://learn.microsoft.com/microsoft-sales-copilot/install-sales-as-an-integrated-app)
 - [Publish the Employee Self-Service agent](https://learn.microsoft.com/microsoft-365/copilot/employee-self-service/declarative-agent-publish)
 - [Manage Copilot for legal](https://learn.microsoft.com/microsoft-365/admin/manage/manage-copilot-for-legal)
-- Message Center: MC1472007 (advanced package uploads), MC1506733 (agent blueprints), MC1484008 (plugin registry), MC1511052 (SharePoint agents), MC1469329 (app building), MC1509799 (legal plugins)
+- [Agent management roles and permissions](https://learn.microsoft.com/microsoft-365/admin/manage/agent-roles-perms)
+- [Microsoft Entra built-in roles (Agent Registry Administrator)](https://learn.microsoft.com/entra/identity/role-based-access-control/permissions-reference)
+- [Agent Registry convergence with Microsoft Agent 365](https://learn.microsoft.com/entra/agent-id/agent-registry-convergence)
+- Message Center: MC1472007 (advanced package uploads), MC1506733 (agent blueprints), MC1506728 (agents that make their own identities, Nov 4), MC1484008 (plugin registry), MC1511052 (SharePoint agents), MC1469329 (app building), MC1509799 (legal plugins)
+- Message Center, new this week: MC1454973 (Agent and plugin access decides connector access from Oct 30), MC1520901 (Agent feedback sharing), MC1515931 (Teams app enablement flow), MC1518233 (Copilot Studio support for Copilot Chat agents), MC1518036 (admin controls for Business Applications in Work IQ, preview by Nov 17)

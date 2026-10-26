@@ -19,8 +19,9 @@
     in the admin centers (Copilot Frontier, Opal, AI providers, Cost Management spending
     policies, Cowork browser access, etc.).
 
-    Copilot Code groups are skipped unless -IncludeCodeGroups is used, because Code isn't
-    yet selectable in the spending policy wizard and its exemption setting isn't exposed.
+    Copilot Code groups are skipped unless -IncludeCodeGroups is used. Code began rolling out
+    to Frontier tenants in late October 2026 (MC1519871) and is now a usage-based service, so
+    use -IncludeCodeGroups once Code appears in your spending policy wizard.
 
 .EXAMPLE
     .\New-CopilotGroups.ps1 -WhatIf
@@ -64,19 +65,19 @@ $groups = @(
     @{ Name = "Copilot Managed Runtime Access";             Desc = "Spending policy selecting Copilot Managed Runtime (running internal apps; no Copilot license required)." }
     @{ Name = "Copilot Teams Phone Agent Accounts";         Desc = "Teams Phone Agent RESOURCE ACCOUNTS only (no people). Scope of the Teams Phone Agent spending policy. Owned by Teams voice admins." }
 
-    # ---------- Copilot Code (on hold until Code appears in your spending policy wizard; rolling out to Frontier Oct 2026) ----------
-    @{ Name = "Copilot + Code Spend Limit";                 Desc = "Spending policy selecting Copilot Code with a per-user limit. Mutually exclusive with Unlimited."; Code = $true }
-    @{ Name = "Copilot + Code Spend Unlimited";             Desc = "Spending policy selecting Copilot Code with no per-user limit. Mutually exclusive with Limit.";   Code = $true }
-    @{ Name = "Copilot + Code Secure Execution Exemption";  Desc = "Copilot Code policy exemption group - runs local projects outside the protected environment. Keep small."; Code = $true }
+    # ---------- Copilot Code (rolling out to Frontier from late Oct 2026, MC1519871; use -IncludeCodeGroups) ----------
+    @{ Name = "Copilot + Code Spend Limit";                 Desc = "Scope of the Code Limited spending policy. Per-user limit on (minimum 2,000 credits/month). Mutually exclusive with Unlimited."; Code = $true }
+    @{ Name = "Copilot + Code Spend Unlimited";             Desc = "Scope of the Code Unlimited spending policy. No per-user limit. Mutually exclusive with Limit.";   Code = $true }
+    @{ Name = "Copilot + Code Secure Execution Exemption";  Desc = "Policy exemption group for Copilot Code secure local execution - runs local projects outside the protected environment. Keep small."; Code = $true }
 
     # ---------- Models ----------
     @{ Name = "Copilot Anthropic Models Access";            Desc = "AI providers operating as Microsoft subprocessors > Anthropic. Required for Word/Excel/PowerPoint Agents." }
     @{ Name = "Copilot OpenAI Models Access";               Desc = "AI providers operating as Microsoft subprocessors > OpenAI (if restricting)." }
-    @{ Name = "Copilot SpaceXAI Models Access";             Desc = "AI providers operating as Microsoft subprocessors > SpaceXAI (Frontier only; Grok in Word/Excel/PowerPoint)." }
-    @{ Name = "Copilot Independent Processor Models Access"; Desc = "AI providers for other large language models (independent processors, e.g. SpaceXAI for Cowork/Copilot Studio). Data leaves Microsoft terms - legal approval required. Global Admin configures." }
+    @{ Name = "Copilot SpaceXAI Models Access";             Desc = "SpaceXAI models (Frontier only). On Oct 23, 2026 SpaceXAI appeared under AI providers operating as independent processors, not subprocessors - use the page where you see it." }
+    @{ Name = "Copilot Independent Processor Models Access"; Desc = "AI providers operating as independent processors, every provider except SpaceXAI (e.g. Mistral AI, Anthropic Models with Data Retention). Data leaves Microsoft terms - legal approval required. Global Admin configures." }
 
     # ---------- Capability scoping ----------
-    @{ Name = "Copilot + Cowork Browser Access";            Desc = "Copilot > Cowork > Settings > Cowork > Allow browser access (off by default)." }
+    @{ Name = "Copilot + Cowork Browser Access";            Desc = "Copilot > Settings > Browser use in Microsoft Copilot > Allow local browser use (renamed from Cowork settings, MC1515930). Also the Intune Edge policy CopilotCoworkToolActionsEnabled (Edge 152+)." }
     @{ Name = "Copilot Advanced Package Upload Access";     Desc = "Who can upload agent/plugin packages with actions or MCP servers." }
     @{ Name = "Copilot Agent Sharing Access";               Desc = "Who can share Agent Builder agents org-wide." }
     @{ Name = "Copilot Teams Policy Exceptions";            Desc = "Users assigned a non-default Teams meeting/calling Copilot policy." }
@@ -85,11 +86,12 @@ $groups = @(
     # ---------- Delegated administration (role-assignable) ----------
     @{ Name = "Copilot Delegated Admin";                    Desc = "Copilot settings administration.";                  RoleAssignable = $true; Role = "AI Administrator" }
     @{ Name = "Copilot Agent Management Admin";             Desc = "Agents node / Agent 365 administration.";             RoleAssignable = $true; Role = "AI Administrator" }
+    @{ Name = "Copilot Agent Registry Admin";               Desc = "Entra Agent Registry: agent metadata, collections and agent visibility.";   RoleAssignable = $true; Role = "Agent Registry Administrator" }
     @{ Name = "Copilot AI Reader";                          Desc = "Read-only Copilot settings and agent inventory.";     RoleAssignable = $true; Role = "AI Reader" }
     @{ Name = "Copilot Billing Admin";                      Desc = "Copilot > Cost Management spending policies.";        RoleAssignable = $true; Role = "Billing Administrator" }
     @{ Name = "Copilot Cost Reader";                        Desc = "Read-only consumption reporting. Assign a supported reader role manually."; RoleAssignable = $true; Role = $null }
     @{ Name = "Copilot Agent ID Admin";                     Desc = "Entra Agent ID identities and blueprints.";           RoleAssignable = $true; Role = "Agent ID Administrator" }
-    @{ Name = "Copilot Agent ID Developers";                Desc = "Can create agent blueprints after 'Users can create agent blueprints' is set to No (MC1506733).";  RoleAssignable = $true; Role = "Agent ID Developer" }
+    @{ Name = "Copilot Agent ID Developers";                Desc = "Can create agent blueprints after 'Users can register agent identity blueprints' is set to No (MC1506733).";  RoleAssignable = $true; Role = "Agent ID Developer" }
     @{ Name = "Copilot Office Apps Admin";                  Desc = "Cloud Policy (config.office.com) Copilot settings.";  RoleAssignable = $true; Role = "Office Apps Administrator" }
     @{ Name = "Copilot Compliance Admin";                   Desc = "Purview DLP, audit, eDiscovery, DSPM for AI.";        RoleAssignable = $true; Role = "Compliance Administrator" }
     @{ Name = "Copilot Teams Admin";                        Desc = "Teams meeting/calling Copilot policies.";             RoleAssignable = $true; Role = "Teams Administrator" }
