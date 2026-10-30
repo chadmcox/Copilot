@@ -10,7 +10,8 @@
     in the Microsoft 365 admin center (Copilot > Cost management > Configuration).
 
     For each policy in the table below the script:
-      1. Skips it if a policy with that name already exists (match on displayName).
+      1. Skips it if a policy with that name already exists (match on displayName). With
+         -UpdateExisting it instead brings that policy in line: limits, services and group.
       2. Creates it as a selectedGroupsSpendingPolicy with its period limit, per-user limit
          and services. A new policy is created DISABLED.
       3. Links its Entra group, which is what lets the service enable the policy.
@@ -51,18 +52,30 @@
     One or more user principal names to email when a policy reaches its threshold. Required if
     you use -AlertThresholdPercent.
 
+.PARAMETER UpdateExisting
+    For policies that already exist: set the period and per-user limits to the values the
+    script would create, turn on any missing service, and link the group if it's missing.
+    It never turns a service off or removes a group; it only reports extras.
+
+.PARAMETER TempPeriodLimit
+    Monthly cap for the Cowork Temporary Unlimited policy. Its users have no per-user cap, so
+    this is the safety net. Defaults to -PeriodLimit.
+
 .EXAMPLE
     .\New-CopilotSpendingPolicies.ps1 -ShowServiceIds
     .\New-CopilotSpendingPolicies.ps1 -WhatIf
+    .\New-CopilotSpendingPolicies.ps1 -UpdateExisting -TempPeriodLimit 20000 -WhatIf
     .\New-CopilotSpendingPolicies.ps1 -IncludeCodePolicies -AlertThresholdPercent 80 -AlertRecipientUpn "<copilot program owner UPN>"
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [switch]$ShowServiceIds,
     [switch]$IncludeCodePolicies,
+    [switch]$UpdateExisting,
     [hashtable]$ServiceIdMap = @{},
     [int]$PerUserLimit    = 2000,
     [int]$PeriodLimit     = 100000,
+    [int]$TempPeriodLimit = 0,
     [int]$AlertThresholdPercent = 0,
     [string[]]$AlertRecipientUpn = @(),
     [ValidateSet("notSpecified", "prepaidCredits", "payAsYouGo", "prepaidCredits,payAsYouGo")]
@@ -106,7 +119,7 @@ $documentedIds = @("cowork", "workIQ")
 $policies = @(
     @{ Name = "Cowork Limited";                   Group = "Copilot + Cowork Spend Limit";                Services = @($svc.Cowork); PerUser = "limited" }
     @{ Name = "Cowork Unlimited";                 Group = "Copilot + Cowork Spend Unlimited";            Services = @($svc.Cowork); PerUser = "unlimited" }
-    @{ Name = "Cowork Temporary Unlimited";       Group = "Copilot + Cowork Spend Unlimited Temp";       Services = @($svc.Cowork); PerUser = "unlimited" }
+    @{ Name = "Cowork Temporary Unlimited";       Group = "Copilot + Cowork Spend Unlimited Temp";       Services = @($svc.Cowork); PerUser = "unlimited"; Period = $TempPeriodLimit }
     @{ Name = "SharePoint OneDrive Advanced Work"; Group = "Copilot SharePoint OneDrive Advanced Access"; Services = @($svc.SharePointAdvanced, $svc.OneDriveAdvanced); PerUser = "limited" }
     @{ Name = "Work IQ API";                      Group = "Copilot Work IQ API Access";                  Services = @($svc.WorkIqApi); PerUser = "limited" }
     @{ Name = "Managed Runtime";                  Group = "Copilot Managed Runtime Access";              Services = @($svc.ManagedRuntime); PerUser = "limited" }
@@ -188,6 +201,62 @@ function Test-PolicyName([string]$Name) {
     return $null
 }
 
+function Test-SameQuantity($a, $b) {
+    $ta = "$($a.'@odata.type')".TrimStart('#'); $tb = "$($b.'@odata.type')".TrimStart('#')
+    if ($ta -ne $tb) { return $false }
+    if ($ta -like "*unlimited*") { return $true }
+    [double]$a.value -eq [double]$b.value
+}
+
+# -UpdateExisting: bring an existing policy in line with the table. Only adds; never removes.
+function Sync-Policy([string]$Id, $Want, [string]$GroupId, [hashtable]$Desired) {
+    $notes  = @()
+    $policy = Invoke-Graph GET "$cm/spendingPolicies/$Id" $null $null
+
+    $patch = @{}
+    if (-not (Test-SameQuantity $policy.periodLimit  $Desired.periodLimit))  { $patch.periodLimit  = $Desired.periodLimit }
+    if (-not (Test-SameQuantity $policy.perUserLimit $Desired.perUserLimit)) { $patch.perUserLimit = $Desired.perUserLimit }
+    if ($script:BillingSet) {
+        if ($policy.billingMethods -ne $Desired.billingMethods) { $patch.billingMethods = $Desired.billingMethods }
+    }
+    if ($patch.Count -gt 0 -and $PSCmdlet.ShouldProcess($Want.Name, "PATCH limits ($($patch.Keys -join ', '))")) {
+        Invoke-Graph PATCH "$cm/spendingPolicies/$Id" $patch @{ "If-Match" = (Get-PolicyEtag $Id) } | Out-Null
+        $notes += "updated $($patch.Keys -join ', ')"
+    }
+
+    $current = Get-AllPages "$cm/spendingPolicies/$Id/serviceSettings"
+    foreach ($sid in $Want.Services) {
+        $row = $current | Where-Object { $_.serviceId -ceq $sid } | Select-Object -First 1
+        if (-not $row) {
+            if ($PSCmdlet.ShouldProcess($Want.Name, "Add service $sid")) {
+                Invoke-Graph POST "$cm/spendingPolicies/$Id/serviceSettings" @{ serviceId = $sid; state = "enabled" } @{ "If-Match" = (Get-PolicyEtag $Id) } | Out-Null
+                $notes += "added $sid"
+            }
+        }
+        elseif ($row.state -ne "enabled") {
+            if ($PSCmdlet.ShouldProcess($Want.Name, "Enable service $sid")) {
+                Invoke-Graph PATCH "$cm/spendingPolicies/$Id/serviceSettings/$sid" @{ state = "enabled" } @{ "If-Match" = (Get-PolicyEtag $Id) } | Out-Null
+                $notes += "enabled $sid"
+            }
+        }
+    }
+    $extra = $current | Where-Object { $_.state -eq "enabled" -and $_.serviceId -cnotin $Want.Services } | ForEach-Object serviceId
+    if ($extra) { $notes += "EXTRA services on (left alone): $($extra -join ', ')" }
+
+    $groups = Get-AllPages "$cm/spendingPolicies/$Id/microsoft.graph.selectedGroupsSpendingPolicy/assignedGroups"
+    if ($GroupId -notin $groups.id) {
+        if ($PSCmdlet.ShouldProcess($Want.Name, "Link group $($Want.Group)")) {
+            Invoke-Graph POST "$cm/spendingPolicies/$Id/microsoft.graph.selectedGroupsSpendingPolicy/assignedGroups/`$ref" `
+                @{ "@odata.id" = "$beta/groups/$GroupId" } @{ "If-Match" = (Get-PolicyEtag $Id) } | Out-Null
+            $notes += "linked $($Want.Group)"
+        }
+    }
+    $others = @($groups | Where-Object { $_.id -ne $GroupId })
+    if ($others) { $notes += "EXTRA groups (left alone): $(($others | ForEach-Object displayName) -join ', ')" }
+
+    if (-not $notes) { "already matches" } else { $notes -join "; " }
+}
+
 # ---------------------------------------------------------------------------
 # -ShowServiceIds: read the service IDs off the policies already in the tenant
 # ---------------------------------------------------------------------------
@@ -222,6 +291,7 @@ if ($unknown) {
 # ---------------------------------------------------------------------------
 # Create the policies
 # ---------------------------------------------------------------------------
+$script:BillingSet = $PSBoundParameters.ContainsKey("BillingMethods")
 $existingPolicies = Get-AllPages "$cm/spendingPolicies?`$select=id,displayName,status"
 $results = @()
 
@@ -232,9 +302,26 @@ foreach ($p in $policies) {
         continue
     }
 
+    $period = if ($p.Period) { $p.Period } else { $PeriodLimit }
+    $desired = @{
+        periodLimit    = (New-Quantity "limited" $period)
+        perUserLimit   = (New-Quantity $p.PerUser $PerUserLimit)
+        billingMethods = $BillingMethods
+    }
+
     $already = $existingPolicies | Where-Object { $_.displayName -eq $p.Name } | Select-Object -First 1
     if ($already) {
-        $results += [pscustomobject]@{ Policy = $p.Name; Status = "Exists"; Detail = "status $($already.status); id $($already.id)" }
+        if (-not $UpdateExisting) {
+            $results += [pscustomobject]@{ Policy = $p.Name; Status = "Exists"; Detail = "status $($already.status); id $($already.id). Use -UpdateExisting to sync it" }
+            continue
+        }
+        try {
+            $note = Sync-Policy $already.id $p (Get-GroupId $p.Group) $desired
+            $results += [pscustomobject]@{ Policy = $p.Name; Status = "Checked"; Detail = "status $($already.status); $note" }
+        }
+        catch {
+            $results += [pscustomobject]@{ Policy = $p.Name; Status = "Failed"; Detail = "update: $($_.Exception.Message)" }
+        }
         continue
     }
 
@@ -248,9 +335,9 @@ foreach ($p in $policies) {
     $body = @{
         "@odata.type"   = "#microsoft.graph.selectedGroupsSpendingPolicy"
         displayName     = $p.Name
-        periodLimit     = (New-Quantity "limited" $PeriodLimit)
-        perUserLimit    = (New-Quantity $p.PerUser $PerUserLimit)
-        billingMethods  = $BillingMethods
+        periodLimit     = $desired.periodLimit
+        perUserLimit    = $desired.perUserLimit
+        billingMethods  = $desired.billingMethods
         serviceSettings = @($p.Services | ForEach-Object { @{ serviceId = $_; state = "enabled" } })
     }
 

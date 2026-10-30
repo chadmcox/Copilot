@@ -20,7 +20,7 @@ Admin centers change often, and some options only appear in some tenants. If you
 
 ## Scripts in this folder
 
-All six scripts use only Microsoft Graph (the Microsoft.Graph.Authentication module). Run each one with `-WhatIf` first to see what it will do.
+All the scripts use only Microsoft Graph (the Microsoft.Graph.Authentication module). Run each one that makes changes with `-WhatIf` first to see what it will do. `Get-CopilotSpendingReport.ps1` only reads.
 
 | Order | Script | What it does |
 | --- | --- | --- |
@@ -29,8 +29,9 @@ All six scripts use only Microsoft Graph (the Microsoft.Graph.Authentication mod
 | 3 | `Update-CopilotGroups-20261026.ps1` | Brings the descriptions of groups already in your tenant up to this version. Renames nothing by default. Run it after the cleanup script |
 | 4 | `New-CopilotAdminPim.ps1` | Creates Copilot Platform Admin and puts every admin group under PIM for Groups. Needs `-ApproverGroupName` |
 | 5 | `New-CopilotAccessPackages.ps1` | Creates the catalog, access packages, approval policies and access reviews. `-IncludeAdminPackages` and `-IncludeCodePackages` are optional |
-| 6 | `New-CopilotSpendingPolicies.ps1` | **New, preview.** Creates the spending policies with the new Graph cost management API (beta). Needs `-Confirm:$false` or your approval for each policy |
-| 7 | (by hand) | Point each admin center setting at its group, using the steps below |
+| 6 | `New-CopilotSpendingPolicies.ps1` | **Preview.** Creates the spending policies with the new Graph cost management API (beta). Add `-UpdateExisting` to fix policies that already exist: it sets their limits, turns on missing services and links missing groups. It never turns anything off |
+| 7 | `Get-CopilotSpendingReport.ps1` | **Preview, read-only.** Shows the credit balance and every spending policy with its groups, services, limits and alerts, and flags problems. Add `-UserPrincipalName` to see which policy covers a person and how much they have left |
+| 8 | (by hand) | Point each admin center setting at its group, using the steps below |
 
 ```powershell
 .\New-CopilotGroups.ps1 -WhatIf
@@ -42,6 +43,8 @@ All six scripts use only Microsoft Graph (the Microsoft.Graph.Authentication mod
 .\New-CopilotAdminPim.ps1 -ApproverGroupName "<approver group>" -WhatIf
 .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -WhatIf
 .\New-CopilotSpendingPolicies.ps1 -WhatIf
+.\New-CopilotSpendingPolicies.ps1 -UpdateExisting -WhatIf
+.\Get-CopilotSpendingReport.ps1
 ```
 
 Permissions you need: Group.ReadWrite.All for the groups. Privileged Role Administrator (or Global Administrator) to create role-assignable groups and set up PIM. Identity Governance Administrator for access packages.
@@ -428,7 +431,7 @@ People in the Limited group can ask for unlimited Cowork for 30 days. Entra remo
 - **Credits they already spent still count.** Moving between groups or policies does not reset a person's spending for the month (MC1470425). Someone who spends a lot during the 30 days may hit their Limited limit as soon as the Temp access ends.
 - **They can ask again.** If someone asks often, move them to Unlimited.
 - **The policy limit and the alert are your safety net,** because there is no per-user limit for those 30 days.
-- **Test this with one person first.**
+- **Test this with one person first.** Run `Get-CopilotSpendingReport.ps1 -UserPrincipalName <person>` before, during and after their 30 days. It shows which policy covers them for Cowork, how much they've used this month and how much is left.
 
 ### Model profiles (Cowork)
 
@@ -508,6 +511,10 @@ What you can do with them: read the tenant credit balance, create, change and de
 What you still do by hand: the **Allow new Agents and services as they become available** switch is not in the API. Model profiles are not in the API either.
 
 `New-CopilotSpendingPolicies.ps1` in this folder uses these APIs to create the policies in the table above. Run it with `-WhatIf` first.
+
+- **Already made your policies in the admin center?** Run `New-CopilotSpendingPolicies.ps1 -UpdateExisting -WhatIf`. It matches policies by name. Then it sets their limits, turns on missing services and links the right group. It only adds: extra services or groups are listed, not removed.
+- **Cowork Temporary Unlimited has no per-user limit,** so give it a smaller monthly limit with `-TempPeriodLimit`.
+- **Check the result** with `Get-CopilotSpendingReport.ps1`. It flags policies that aren't on, have no group, cover all users, have no alert, or aren't in this guide.
 
 Things to know before you run it:
 
