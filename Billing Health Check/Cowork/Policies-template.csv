@@ -1,0 +1,4 @@
+Policy,Status,Scope,Groups,GroupIds,Services,PerUserLimit,MonthlyLimit,Billing,AlertOn,AlertRecipients
+Cowork Limited,enabled,Groups,Copilot + Cowork Spend Limit,,cowork,2000,100000,prepaid,True,
+Cowork Unlimited,enabled,Groups,Copilot + Cowork Spend Unlimited,,cowork,Unlimited,200000,prepaid,True,
+Cowork Temporary Unlimited,enabled,Groups,Copilot + Cowork Spend Unlimited Temp,,cowork,Unlimited,50000,prepaid,True,

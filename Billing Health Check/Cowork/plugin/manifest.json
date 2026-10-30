@@ -1,0 +1,44 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.29",
+  "version": "1.0.3",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "developer": {
+    "name": "Copilot Billing Health Check",
+    "websiteUrl": "https://github.com/chadmcox/Copilot/tree/main/Billing%20Health%20Check",
+    "privacyUrl": "https://github.com/chadmcox/Copilot/blob/main/Billing%20Health%20Check/Cowork/readme.md#privacy",
+    "termsOfUseUrl": "https://github.com/chadmcox/Copilot/blob/main/Billing%20Health%20Check/Cowork/readme.md#terms"
+  },
+  "name": {
+    "short": "Copilot Billing Health",
+    "full": "Copilot Billing Health Check for Copilot Cowork"
+  },
+  "description": {
+    "short": "Read-only check of Copilot spending policies, groups and members",
+    "full": "Checks Microsoft 365 Copilot spending policies, the groups they use and the people in those groups, then explains how to fix each problem. Reads groups, members, licenses and sign-ins through the Microsoft MCP Server for Enterprise. Read-only."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#2B579A",
+  "agentSkills": [
+    { "folder": "./skills/copilot-billing-health" }
+  ],
+  "agentConnectors": [
+    {
+      "id": "enterprise-mcp",
+      "displayName": "Microsoft MCP Server for Enterprise",
+      "description": "Read-only Microsoft Graph calls for Microsoft Entra users, groups, licenses, sign-ins and access reviews, as the signed-in admin.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "https://mcp.svc.cloud.microsoft/enterprise",
+          "authorization": {
+            "type": "OAuthPluginVault",
+            "referenceId": "REPLACE-WITH-OAUTH-CLIENT-REGISTRATION-ID"
+          }
+        }
+      }
+    }
+  ]
+}
