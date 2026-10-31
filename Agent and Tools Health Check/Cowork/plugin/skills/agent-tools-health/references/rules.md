@@ -77,6 +77,13 @@ Microsoft Defender's `AgentsInfo` inventory covers Copilot Studio, Foundry, thir
 | Not in the registry, and `Availability` is all users | High | Inventory | Limit it to a group, then register it |
 | Not in the registry, and `OwnerCount` is 0 | Medium | Ownership | Find who built it and make them the owner, or remove it |
 | Cloud agent with no `EntraAgentId` | Medium | Identity | Recreate or register it with an Agent ID so it gets a sponsor, Conditional Access and lifecycle controls |
+| An `McpServerUrls` entry starts with `http://` (no TLS) | High | Tools | Use HTTPS only, or remove the server |
+| An `McpServerUrls` host isn't Microsoft-run (not under microsoft.com, cloud.microsoft, office.com, sharepoint.com, azure.com, azure-api.net, windows.net, dynamics.com, powerplatform.com, azurewebsites.net) | Low | Tools | Check it's on your approved tools list (Agents > Tools), and who runs it |
+| **No Packages.csv** (no Agent 365 catalog): Defender's agents become the agent list. Cloud agent `Availability` is all users | High | Access | Make it available to specific groups |
+| No Packages.csv: `OwnerCount` is 0 | Medium | Ownership | Find who built it and make them the owner, or remove it |
+| No Packages.csv: unclear `AgentName` | Medium | Naming | Rename it so people can tell what it does and who owns it |
+
+`LastActivity`, `Invocations30d` and `ToolCalls30d` come from Agent 365 activity in Defender (`CloudAppEvents`, last 30 days). When an agent in Packages.csv matches a Defender agent with a `LastActivity` within the stale period, it counts as used: don't report "Not used". A Defender agent without activity isn't proof it's unused, because only agents that send Agent 365 observability data appear there.
 | Local agent (Platform `LocalAgents`), one finding per agent name with the device count | Low | Inventory | Check it's an approved tool; govern it with Defender for Endpoint and Intune |
 
 ## Agents without Agent ID (classic service principals)

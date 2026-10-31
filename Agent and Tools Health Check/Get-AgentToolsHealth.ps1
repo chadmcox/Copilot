@@ -16,9 +16,12 @@
       - Blueprints: All allowed inheritable permissions, no sponsor or owner, client secrets,
         expiring secrets, unclear names, no description, nothing active under them.
       - Tenant: Conditional Access for agent identities and for risky agents.
-      - Discovered agents (Microsoft Defender): agents in Defender's AgentsInfo inventory that
-        aren't in the Agent 365 registry, cloud agents with no Entra agent identity, and local AI
-        agents seen on devices.
+      - Discovered agents (Microsoft Defender, KQL through Graph advanced hunting): agents in
+        Defender's AgentsInfo inventory that aren't in the Agent 365 registry, cloud agents with no
+        Entra agent identity, MCP servers reached without TLS or run outside Microsoft, and local AI
+        agents seen on devices. Without the Agent 365 catalog, AgentsInfo becomes the agent list
+        (availability, owner and name checks). Agent 365 activity in CloudAppEvents (last 30 days)
+        counts as use in the stale checks.
       - Agents without Agent ID: older Copilot Studio and Foundry agents that run as classic
         service principals (tags AgentCreatedBy:CopilotStudio, AgenticApp, AIAgentBuilder,
         AgenticInstance, power-virtual-agents-*), not as Entra agent identities.
@@ -143,6 +146,7 @@ function Get-Category([string]$Check) {
         'sponsor|owner'                                    { "Ownership"; break }
         'Agent ID|classic service principal'               { "Identity"; break }
         'Defender|registry|Local AI agent'                 { "Inventory"; break }
+        'MCP server'                                       { "Tools"; break }
         'permission|secret|credential|agent user'          { "Permissions"; break }
         "^Group '|Available|Installed|Assigned"           { "Access"; break }
         'name|description'                                 { "Naming"; break }
@@ -156,6 +160,8 @@ function Get-Reference([string]$Check) {
     switch -Regex ($Check) {
         'not in the Agent 365 registry|Not in the registry'      { "CIS 1.1, 2.1, 2.3 | CISA: accountability"; break }
         'Local AI agent'                                         { "CIS 2.1, 2.3, 2.5 | CISA: design and configuration"; break }
+        'MCP server without TLS'                                 { "CIS 3.10 | CISA: design and configuration"; break }
+        'external MCP server'                                    { "CIS 2.5, 15.1 | CISA: design and configuration"; break }
         '\(Agent ID\)|not an Agent ID'                        { "CIS 5.5, 5.6 | CISA: strong agent identity"; break }
         'No sponsor|no longer exists|is disabled|One sponsor|No owner|no owner' { "CIS 5.1, 5.5 | CISA: accountability"; break }
         "^Group '.*owner"                                        { "CIS 5.1, 6.1 | CISA: accountability"; break }
@@ -229,7 +235,7 @@ function Get-PackageRow {
     }
 }
 
-function Test-Package($P) {
+function Test-Package($P, $ActivityByKey) {
     if ($P.kind -eq "App") { return }   # Office add-ins and other apps aren't in scope
     $area = if ($P.kind -eq "Agent") { "Agents" } else { "Tools" }
     $name = $P.displayName
@@ -252,7 +258,9 @@ function Test-Package($P) {
     if ($P.requestStatus -eq "pending" -and $P.lastModifiedDateTime -and $P.lastModifiedDateTime -lt $now.AddDays(-$PendingRequestDays)) {
         New-Finding $area $name "Low" "Request ($($P.requestType)) pending for more than $PendingRequestDays days" "Approve or reject it"
     }
-    if ($custom -and -not $P.isBlocked -and -not ($P.activeUsers30d -gt 0) -and (-not $P.lastUsedDateTime -or $P.lastUsedDateTime -lt $cutoff) -and $P.lastModifiedDateTime -lt $cutoff) {
+    $defenderLast = @($P.id, $P.appId, $P.manifestId, $P.assetId, $P.agentIdentityId) | Where-Object { $_ -and $ActivityByKey["$_"] } | ForEach-Object { $ActivityByKey["$_"] } | Sort-Object -Descending | Select-Object -First 1
+    $lastUsed = @($P.lastUsedDateTime, $defenderLast) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1
+    if ($custom -and -not $P.isBlocked -and -not ($P.activeUsers30d -gt 0) -and (-not $lastUsed -or $lastUsed -lt $cutoff) -and $P.lastModifiedDateTime -lt $cutoff) {
         New-Finding $area $name "Medium" "Not used in $StaleDays days" "Block it, or run Agent and Tools Cleanup"
     }
 }
@@ -357,12 +365,59 @@ AgentsInfo
 | summarize arg_max(Timestamp, *) by AgentId
 | where LifecycleStatus != "Deleted"
 | project AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
-    PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount = array_length(Owners)
+    PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount = array_length(Owners),
+    McpServerUrls = strcat_array(extract_all(@'(https?://[^\s"\],}]+)', tostring(McpServers)), ";"),
+    SkillCount = array_length(Skills), ToolCount = array_length(DeclaredTools)
 '@
-    $body = @{ Query = $kql; Timespan = "P30D" } | ConvertTo-Json
-    $result = Invoke-MgGraphRequest -Method POST -Uri "$graph/security/runHuntingQuery" -Body $body -ContentType "application/json" -OutputType PSObject
-    $result.results | Select-Object AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
-        PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount
+    $activity = Get-DefenderActivity
+    Invoke-HuntingQuery $kql | Select-Object AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
+        PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount, McpServerUrls, SkillCount, ToolCount,
+        @{ n = "LastActivity";   e = { $activity[$_.AgentId].LastActivity } },
+        @{ n = "Invocations30d"; e = { $activity[$_.AgentId].Invocations } },
+        @{ n = "ToolCalls30d";   e = { $activity[$_.AgentId].ToolCalls } }
+}
+
+# Runs a KQL query through Graph advanced hunting and returns the rows.
+function Invoke-HuntingQuery([string]$Kql) {
+    $body = @{ Query = $Kql; Timespan = "P30D" } | ConvertTo-Json
+    (Invoke-MgGraphRequest -Method POST -Uri "$graph/security/runHuntingQuery" -Body $body -ContentType "application/json" -OutputType PSObject).results
+}
+
+# Agent 365 activity (CloudAppEvents) for the last 30 days, keyed by agent ID. Only agents that send
+# Agent 365 observability data appear, so a missing agent isn't proof that it's unused.
+function Get-DefenderActivity {
+    $kql = @'
+CloudAppEvents
+| where ActionType in ("InvokeAgent", "ExecuteToolByMCPServer", "ExecuteToolByGateway", "ExecuteToolBySDK")
+| extend AgentId = tostring(RawEventData.AgentId)
+| where isnotempty(AgentId)
+| summarize LastActivity = max(Timestamp), Invocations = countif(ActionType == "InvokeAgent"), ToolCalls = countif(ActionType startswith "ExecuteTool") by AgentId
+'@
+    $index = @{}
+    try { Invoke-HuntingQuery $kql | ForEach-Object { $index[$_.AgentId] = $_ } }
+    catch { Write-Warning "Couldn't read agent activity from CloudAppEvents. $($_.Exception.Message)" }
+    $index
+}
+
+# Defender's last activity for each registry key (package id, app ID, agent identity...), for usage checks.
+function Get-ActivityByKey($Agents) {
+    $index = @{}
+    $Agents | Where-Object LastActivity | ForEach-Object {
+        $a = $_
+        @($a.AgentId, $a.SourceAgentId, $a.EntraAgentId) | Where-Object { $_ } | ForEach-Object { $index["$_"] = ConvertTo-Utc $a.LastActivity }
+    }
+    $index
+}
+
+# Microsoft-hosted MCP server hosts. Anything else is an external MCP server to check against the allowlist.
+$microsoftHosts = '\.(microsoft|cloud\.microsoft|office|office365|sharepoint|azure|azure-api|windows|dynamics|powerplatform|powerapps|azurewebsites|svc\.cloud\.microsoft)\.(com|net|microsoft)$|\.cloud\.microsoft$'
+
+function Test-AgentTools([string]$Area, [string]$Name, [string]$Urls) {
+    @($Urls -split ";") | Where-Object { $_ } | Sort-Object -Unique | ForEach-Object {
+        $uri = $_ -as [uri]
+        if ($_ -like "http://*") { New-Finding $Area $Name "High" "Connects to an MCP server without TLS: $_" "Use HTTPS only, or remove the server" }
+        elseif ($uri -and $uri.Host -notmatch $microsoftHosts) { New-Finding $Area $Name "Low" "Connects to an external MCP server: $($uri.Host)" "Check it's on your approved tools list (Agents > Tools), and who runs it" }
+    }
 }
 
 # Every ID a registry package can be known by, so Defender's agents can be matched to it.
@@ -382,7 +437,14 @@ function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry) {
             if ("$($_.Availability)" -match "all") { New-Finding "Discovered agents" $name "High" "Not in the registry, and available to all users" "Limit it to a group, then register it" }
             if (-not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "Not in the registry, and no owner" "Find who built it and make them the owner, or remove it" }
         }
+        if (-not $HaveRegistry) {
+            # No Agent 365 catalog: use Defender's inventory as the agent list.
+            if ("$($_.Availability)" -match "all") { New-Finding "Discovered agents" $name "High" "Available to all users" "Make it available to specific groups" }
+            if (-not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "No owner" "Find who built it and make them the owner, or remove it" }
+            if (Test-UnclearName $_.AgentName) { New-Finding "Discovered agents" $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
+        }
         if (-not $_.EntraAgentId) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Recreate or register it with an Agent ID so it gets a sponsor, Conditional Access and lifecycle controls" }
+        Test-AgentTools "Discovered agents" $name $_.McpServerUrls
     }
     # Local AI agents (coding assistants and the like) seen on devices: one finding per agent name.
     $Agents | Where-Object Platform -eq "LocalAgents" | Group-Object AgentName | ForEach-Object {
@@ -466,7 +528,8 @@ $children = $identities | Where-Object agentIdentityBlueprintId | Group-Object a
 if (-not $children) { $children = @{} }
 
 $findings = @(
-    $packages | ForEach-Object { Test-Package $_ }
+    $activityByKey = Get-ActivityByKey $defenderAgents
+    $packages | ForEach-Object { Test-Package $_ $activityByKey }
     $identities | ForEach-Object { Write-Host "  $($_.displayName)"; Test-Identity $_ $signIns $roleNames }
     $agentUsers | ForEach-Object {
         $parent = $identities | Where-Object id -eq $_.identityParentId | Select-Object -First 1
@@ -583,14 +646,15 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "GET /beta/groups/{id} (+ owners), GET /beta/users/{id}"
                           "GET /beta/identity/conditionalAccess/policies"
                           "GET /beta/servicePrincipals?`$filter=tags/any(t:t eq 'AgentCreatedBy:CopilotStudio') (and AgenticApp, AIAgentBuilder, AgenticInstance, power-virtual-agents-*)"
-                          "POST /beta/security/runHuntingQuery: AgentsInfo | summarize arg_max(Timestamp, *) by AgentId")
+                          "POST /beta/security/runHuntingQuery: AgentsInfo | summarize arg_max(Timestamp, *) by AgentId (MCP servers, skills, tools)"
+                          "POST /beta/security/runHuntingQuery: CloudAppEvents | where ActionType in (InvokeAgent, ExecuteTool...) | summarize max(Timestamp) by AgentId")
         notes        = @(
                           "References in brackets: CIS Controls v8.1 safeguards (AI Agent and MCP Companion Guides, April 2026) and the CISA risk category from 'Careful Adoption of Agentic AI Services' (CISA, NSA and Five Eyes partners, May 2026). CIS 5.3 disables dormant accounts after 45 days; run with -StaleDays 45 to match it."
                           "Scores: each item starts at 100 (High -25, Medium -10, Low -3); an area's score is the average of its items."
                           "Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names or descriptions."
                           if ($SkipPackages -or -not $packages) { "Agents and tools weren't checked: the Agent 365 catalog wasn't read." }
                           if (-not $haveDefender) { "Discovered agents weren't checked: the Defender hunting query didn't run (needs ThreatHunting.Read.All and Security Reader)." }
-                          if ($haveDefender -and -not $packages) { "Defender agents couldn't be compared with the Agent 365 registry, because the registry wasn't read." }
+                          if ($haveDefender -and -not $packages) { "The Agent 365 registry wasn't read, so Defender's AgentsInfo inventory was used as the agent list." }
                           if (-not $signIns.Count) { "Sign-in activity wasn't available, so stale checks on identities and blueprints are incomplete." })
         prompt       = $coworkPrompt
     }

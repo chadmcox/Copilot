@@ -33,7 +33,7 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 | **Agent identities** | No sponsor, or a sponsor or owner disabled or gone (High). High-privilege Graph permissions such as Mail.Send or Directory.ReadWrite.All (High). One sponsor and no owner. Unclear name. No sign-in for 90 days, or never. Agent user accounts |
 | **Blueprints** | Inheritable permissions set to All allowed (High). No sponsor (High). Client secrets instead of certificates or federated credentials, expiring credentials. Unclear name, no description. Nothing active under it |
 | **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents |
-| **Discovered agents** (Microsoft Defender) | Agents Defender found (`AgentsInfo`: Copilot Studio, Foundry, third-party) that aren't in the Agent 365 registry, especially ones available to everyone (High) or with no owner. Cloud agents with no Entra Agent ID. Local AI agents seen on devices |
+| **Discovered agents** (Microsoft Defender, KQL) | Agents Defender found (`AgentsInfo`: Copilot Studio, Foundry, third-party) that aren't in the Agent 365 registry, especially ones available to everyone (High) or with no owner. Cloud agents with no Entra Agent ID. **MCP servers** the agents use: over plain http (High), or run outside Microsoft (check against your allowlist). Local AI agents seen on devices. Without the Agent 365 catalog, Defender's list becomes the agent list |
 | **Agents without Agent ID** | Older Copilot Studio and Foundry agents still running as classic service principals (found by their `AgentCreatedBy:CopilotStudio`, `AgenticApp` and similar tags), with no blueprint, sponsor or agent-specific controls. Recreate them with Agent ID; there's no in-place migration |
 
 **Unclear names** are flagged when a name has *test*, *demo*, *temp*, *copy*, *draft*, *sample*, *POC*, *sandbox*, *untitled*, *dummy*, *do not use*, starts with *new agent* or *my agent*, ends in *Agent 2* or *(1)*, or is under four characters. Change the list with `-UnclearNamePattern`.
@@ -66,6 +66,15 @@ The checks follow two recent government and industry sources, plus Microsoft's o
 **Not checked here, but in the guidance:** logging and monitoring of agent actions (CIS 8.2; confirm Purview audit and Defender), human approval for high-impact actions (set in each agent's design), and tool allowlisting (Agents > Tools; block unused tools with [Agent and Tools Cleanup](../Agent%20and%20Tools%20Cleanup/README.md)).
 
 The CIS safeguard numbers are this repo's mapping to CIS Controls v8.1; check them against the companion guides before citing them in an audit.
+
+## KQL through Microsoft Graph
+
+The Defender parts run KQL through Graph advanced hunting (`POST /beta/security/runHuntingQuery`, scope ThreatHunting.Read.All, role Security Reader). Hunting covers the last 30 days.
+
+- **AgentsInfo**: the agent inventory, with each agent's Entra Agent ID, availability, owners, MCP servers, skills and tools.
+- **CloudAppEvents**: Agent 365 activity (`InvokeAgent`, `ExecuteToolByMCPServer` and other tool calls), used as another "last used" date. Only agents that send Agent 365 observability data show up, so no activity here isn't proof an agent is unused.
+
+The same queries work in the Defender portal under **Hunting > Advanced hunting**; they're in the script (`Get-DefenderAgent`, `Get-DefenderActivity`).
 
 ## Not covered by any API (manual checklist in the report)
 

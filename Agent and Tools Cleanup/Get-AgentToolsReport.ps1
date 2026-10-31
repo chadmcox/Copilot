@@ -21,9 +21,13 @@
       - Packages: the package detail call (GET /copilot/admin/catalog/packages/{id}) returns
         lastUsedDateTime, activeUsers and totalSessions (last 30 days). The script also uses the
         sign-in of the package's agent identity, the admin center Agent usage export
-        (-AgentUsageCsv) and, with -AuditDays, Copilot audit records. It keeps the newest date.
+        (-AgentUsageCsv), Agent 365 activity in Microsoft Defender (CloudAppEvents, last 30 days,
+        through Graph advanced hunting) and, with -AuditDays, Copilot audit records. It keeps the
+        newest date.
       - Agent identities and blueprints: the Entra service principal sign-in activity report
-        (reports/servicePrincipalSignInActivities, preview).
+        (reports/servicePrincipalSignInActivities, preview), plus Agent 365 activity in Defender
+        matched through AgentsInfo.EntraAgentId. Many agents run without a recorded sign-in of their
+        own, so the Defender activity matters.
 
     Not covered: standalone MCP servers and standalone skills that aren't inside a package.
     Check those in the Microsoft 365 admin center under Agents > Tools > Registry.
@@ -34,6 +38,8 @@
         Global Administrator role. Use -SkipPackages if you don't have it.
       - Sign-in activity: AuditLog.Read.All and a Reports Reader or Security Reader role.
       - -AuditDays: AuditLogsQuery.Read.All and a Purview role that can search the audit log.
+      - Defender activity: ThreatHunting.Read.All and the Security Reader role. Use -SkipDefender
+        without Defender. Only agents that send Agent 365 observability data show activity.
 
 .PARAMETER Days
     An object with no use in this many days is stale. Default 90.
@@ -56,7 +62,7 @@
     .\Get-AgentToolsReport.ps1
     .\Get-AgentToolsReport.ps1 -Days 60 -AuditDays 90
     .\Get-AgentToolsReport.ps1 -AgentUsageCsv .\AgentUsage.csv
-    .\Get-AgentToolsReport.ps1 -SkipPackages
+    .\Get-AgentToolsReport.ps1 -SkipPackages -SkipDefender
 #>
 [CmdletBinding()]
 param(
@@ -64,6 +70,7 @@ param(
     [string]$AgentUsageCsv,
     [ValidateRange(0, 180)][int]$AuditDays = 0,
     [switch]$SkipPackages,
+    [switch]$SkipDefender,
     [string]$OutFolder = ".\AgentToolsReport-$(Get-Date -Format yyyyMMdd-HHmm)"
 )
 
@@ -80,6 +87,7 @@ $scopes = @(
     "AuditLog.Read.All"
     if (-not $SkipPackages) { "CopilotPackages.Read.All" }
     if ($AuditDays)         { "AuditLogsQuery.Read.All" }
+    if (-not $SkipDefender) { "ThreatHunting.Read.All" }
 )
 Connect-MgGraph -Scopes $scopes -NoWelcome
 
@@ -133,6 +141,32 @@ function Get-SignInIndex {
     $index
 }
 
+# Agent 365 activity in Microsoft Defender (CloudAppEvents), last 30 days. KQL through Graph advanced
+# hunting. Keyed by Defender agent ID, Entra agent ID and source agent ID (joined from AgentsInfo).
+function Get-DefenderActivity {
+    $index = @{}
+    if ($SkipDefender) { return $index }
+    $kql = @'
+CloudAppEvents
+| where ActionType in ("InvokeAgent", "ExecuteToolByMCPServer", "ExecuteToolByGateway", "ExecuteToolBySDK")
+| extend AgentId = tostring(RawEventData.AgentId)
+| where isnotempty(AgentId)
+| summarize LastActivity = max(Timestamp) by AgentId
+| join kind=leftouter (AgentsInfo | summarize arg_max(Timestamp, EntraAgentId, SourceAgentId) by AgentId) on AgentId
+| project AgentId, EntraAgentId, SourceAgentId, LastActivity
+'@
+    try {
+        $body = @{ Query = $kql; Timespan = "P30D" } | ConvertTo-Json
+        (Invoke-MgGraphRequest -Method POST -Uri "$graph/security/runHuntingQuery" -Body $body -ContentType "application/json" -OutputType PSObject).results | ForEach-Object {
+            $last = ConvertTo-Utc $_.LastActivity
+            @($_.AgentId, $_.EntraAgentId, $_.SourceAgentId) | Where-Object { $_ } | ForEach-Object { if (-not $index["$_"] -or $last -gt $index["$_"]) { $index["$_"] = $last } }
+        }
+        Write-Host "Defender activity: $($index.Count) agent IDs with Agent 365 activity in the last 30 days."
+    }
+    catch { Write-Warning "Couldn't read agent activity from Defender (needs ThreatHunting.Read.All and Security Reader). Run with -SkipDefender to skip it. $($_.Exception.Message)" }
+    $index
+}
+
 # Agent ID / App ID / External app ID -> last activity date, from the admin center export
 function Get-UsageIndex($path) {
     $index = @{}
@@ -169,10 +203,12 @@ function Get-AgentIdentityReport($signIns, $blueprintPrincipals) {
         Get-GraphCollection |
         Select-Object id, displayName, appId, accountEnabled, agentIdentityBlueprintId, createdByAppId,
             @{ n = "createdDateTime";    e = { ConvertTo-Utc $_.createdDateTime } },
-            @{ n = "lastSignInDateTime"; e = { if ($_.appId) { $signIns[$_.appId] } } } |
+            @{ n = "lastSignInDateTime"; e = { if ($_.appId) { $signIns[$_.appId] } } },
+            @{ n = "defenderLastActivity"; e = { $script:defenderActivity[$_.id] } } |
+        Select-Object *, @{ n = "lastUsedDateTime"; e = { @($_.lastSignInDateTime, $_.defenderLastActivity) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1 } } |
         Select-Object *,
-            @{ n = "daysSinceSignIn";   e = { Get-DaysSince $_.lastSignInDateTime } },
-            @{ n = "status";            e = { Get-UsageStatus $_.lastSignInDateTime $_.createdDateTime } },
+            @{ n = "daysSinceUsed";     e = { Get-DaysSince $_.lastUsedDateTime } },
+            @{ n = "status";            e = { Get-UsageStatus $_.lastUsedDateTime $_.createdDateTime } },
             @{ n = "blueprintInTenant"; e = { [bool]($_.agentIdentityBlueprintId -and $blueprintPrincipals[$_.agentIdentityBlueprintId]) } } |
         Select-Object *,
             @{ n = "sponsorCount"; e = { if ($_.status -in "Stale", "NoActivity") { Get-RelatedCount $_.id "microsoft.graph.agentIdentity" "sponsors" } } },
@@ -300,9 +336,10 @@ function Get-PackageReport($identityIndex, $usage, $audit) {
             detailLastUsed, activeUsers30d, sessions30d,
             @{ n = "reportLastActivity"; e = { $p = $_; @($p.id, $p.manifestId, $p.appId) | Where-Object { $_ -and $usage[$_] } | ForEach-Object { $usage[$_] } | Sort-Object -Descending | Select-Object -First 1 } },
             @{ n = "auditLastUsed";      e = { $p = $_; @($p.id, $p.manifestId, $p.appId, $p.displayName) | Where-Object { $_ -and $audit[$_] } | ForEach-Object { $audit[$_] } | Sort-Object -Descending | Select-Object -First 1 } },
-            @{ n = "identityLastSignIn"; e = { if ($_.agentIdentityId) { $identityIndex[$_.agentIdentityId] } } } |
+            @{ n = "identityLastSignIn"; e = { if ($_.agentIdentityId) { $identityIndex[$_.agentIdentityId] } } },
+            @{ n = "defenderLastActivity"; e = { $p = $_; @($p.id, $p.appId, $p.manifestId, $p.agentIdentityId) | Where-Object { $_ -and $script:defenderActivity["$_"] } | ForEach-Object { $script:defenderActivity["$_"] } | Sort-Object -Descending | Select-Object -First 1 } } |
         Select-Object *, @{ n = "lastUsedDateTime"; e = {
-            @($_.detailLastUsed, $_.reportLastActivity, $_.auditLastUsed, $_.identityLastSignIn) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1
+            @($_.detailLastUsed, $_.reportLastActivity, $_.auditLastUsed, $_.identityLastSignIn, $_.defenderLastActivity) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1
         } } |
         Select-Object *,
             @{ n = "daysSinceUsed"; e = { Get-DaysSince $_.lastUsedDateTime } },
@@ -327,6 +364,9 @@ New-Item -ItemType Directory -Path $OutFolder -Force | Out-Null
 Write-Host "Reading service principal sign-in activity..."
 $signIns = Get-SignInIndex
 $script:haveSignInData = $signIns.Count -gt 0
+
+Write-Host "Reading Agent 365 activity from Microsoft Defender..."
+$script:defenderActivity = Get-DefenderActivity
 
 Write-Host "Reading agent identity blueprints..."
 $blueprintApps = @{}
@@ -358,7 +398,7 @@ $packages = @()
 if (-not $SkipPackages) {
     Write-Host "Reading agents and tools from the Agent 365 catalog (one detail call per package)..."
     $identityIndex = @{}
-    $identities | ForEach-Object { $identityIndex[$_.id] = $_.lastSignInDateTime }
+    $identities | ForEach-Object { $identityIndex[$_.id] = $_.lastUsedDateTime }
     try {
         $packages = @(Get-PackageReport $identityIndex (Get-UsageIndex $AgentUsageCsv) $audit)
         $packages | Export-Csv -Path (Join-Path $OutFolder "Packages.csv") -NoTypeInformation -Encoding UTF8

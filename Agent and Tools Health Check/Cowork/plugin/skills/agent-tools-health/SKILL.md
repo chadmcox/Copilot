@@ -33,7 +33,10 @@ the call returns 403). Get it from a file the user attaches:
 Also attach **DefenderAgents.csv** (written by the same script) for agents Microsoft Defender found:
 the Enterprise MCP server can't run Defender advanced hunting queries. Columns: AgentId, AgentName,
 Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability, PublishedStatus,
-LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount. If it isn't attached and the
+LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount, McpServerUrls (semicolon-separated),
+SkillCount, ToolCount, LastActivity, Invocations30d, ToolCalls30d. The last three are Agent 365
+activity from Defender's CloudAppEvents over the last 30 days. If Packages.csv isn't attached but
+DefenderAgents.csv is, use Defender's agents as the agent list (rules.md says which checks apply). If it isn't attached and the
 browser is available, you may open **Microsoft Defender portal > Investigation & response > Hunting >
 Advanced hunting**, run this read-only query and read the results:
 `AgentsInfo | summarize arg_max(Timestamp, *) by AgentId | where LifecycleStatus != "Deleted" | project AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, Availability, LifecycleStatus, OwnerCount = array_length(Owners)`.

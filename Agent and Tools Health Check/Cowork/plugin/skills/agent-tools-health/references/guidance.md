@@ -15,6 +15,8 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | 2.1 | Establish and Maintain a Software Inventory | Agents, plugins, skills and MCP servers are software; they need a name and purpose people can recognize |
 | 2.3 | Address Unauthorized Software | Agents Defender finds outside the registry, and unapproved local agents |
 | 2.5 | Allowlist Authorized Software | Local AI agents and tools should be on an approved list |
+| 2.5 (MCP) | Allowlist Authorized Software | MCP servers outside Microsoft should be on the approved tools list |
+| 3.10 | Encrypt Sensitive Data in Transit | Agents should reach MCP servers over HTTPS only |
 | 3.3 | Configure Data Access Control Lists | Agents should reach only the data they need (least privilege) |
 | 4.1 | Establish and Maintain a Secure Configuration Process | Credentials and Conditional Access for agents are part of their secure configuration |
 | 5.1 | Establish and Maintain an Inventory of Accounts | Each agent identity has an accountable sponsor and owner |
@@ -26,6 +28,7 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | 6.2 | Establish an Access Revoking Process | Unused agents and tools get blocked or disabled |
 | 6.7 | Centralize Access Control | Conditional Access covers agent identities |
 | 6.8 | Define and Maintain Role-Based Access Control | Access by group; inheritable permissions limited to what agents need |
+| 15.1 | Establish and Maintain an Inventory of Service Providers | External MCP servers are third-party services the agent depends on |
 
 ## Checks mapped to the guidance
 
@@ -46,11 +49,13 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | Pending request older than 14 days | 6.1 | None |
 | Found by Defender but not in the registry | 1.1, 2.1, 2.3 | Accountability |
 | Local AI agent on devices | 2.1, 2.3, 2.5 | Design and configuration |
+| MCP server reached over http (no TLS) | 3.10 | Design and configuration |
+| MCP server outside Microsoft | 2.5, 15.1 | Design and configuration (third-party components) |
 | No Entra Agent ID, or a classic service principal | 5.5, 5.6 | Strong agent identity (CISA's identity recommendation) |
 
 ## Not checked here, but in the guidance
 
 - **Logging and monitoring** (CISA: detailed logs of agent actions and ongoing monitoring; CIS 8.2 Collect Audit Logs): confirm Purview audit is on and Defender monitors agent activity.
 - **Human oversight** (CISA: designed-in human oversight; CIS AI Agent guide: human approval for high-impact actions): check in each agent's design (Copilot Studio, Foundry), not through Graph.
-- **Tool allowlisting** (CIS AI Agent and MCP guides): use **Agents > Tools** to allow only approved MCP servers, and the Agent and Tools Cleanup scripts to block unused ones.
+- **Tool allowlisting** (CIS AI Agent and MCP guides): this check flags MCP servers outside Microsoft and over http, from Defender's AgentsInfo. Use **Agents > Tools** to allow only approved MCP servers, and the Agent and Tools Cleanup scripts to block unused ones.
 - **Starting with low-risk use cases** (CISA): a deployment decision; use group-scoped pilots.
