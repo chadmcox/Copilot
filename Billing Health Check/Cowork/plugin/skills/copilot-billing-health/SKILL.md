@@ -38,7 +38,7 @@ connector isn't available, skip to Step 4 and work from those files.
 **Call the Enterprise MCP connector's `microsoft_graph_get` tool directly, one call per request.
 Never write or run a script to call Microsoft Graph.** Scripts run in a sandbox that isn't signed
 in to the tenant, so every read from a script fails. Scripts are fine afterwards, for scoring the
-data you already read or building the Excel workbook.
+data you already read or writing the report file.
 
 Use `$select`, `$top=999`, and follow every `@odata.nextLink` with another `microsoft_graph_get`
 call. The server allows about 100 calls a minute, so don't read users one at a time.
@@ -55,6 +55,8 @@ stop and tell the user the connector can't read the tenant, with the error. Don'
 | Everyone, including nested | `GET /beta/groups/{id}/transitiveMembers/microsoft.graph.user?$select=id,userPrincipalName,accountEnabled,userType,assignedLicenses,licenseAssignmentStates&$top=999` |
 | Inactive people (one call for the whole tenant) | `GET /beta/users?$filter=signInActivity/lastSuccessfulSignInDateTime le {today minus 90 days, ISO 8601}&$select=id,userPrincipalName,signInActivity&$top=999`, then match by id |
 | Alert recipients | `GET /beta/users/{id or UPN}?$select=id,userPrincipalName,accountEnabled` |
+| Copilot-licensed people (for readiness) | `GET /beta/users?$filter=assignedLicenses/any(x:x/skuId eq {Copilot skuId})&$select=id,userPrincipalName,accountEnabled,assignedLicenses,licenseAssignmentStates&$count=true&$top=999` with the header `ConsistencyLevel: eventual`, once per Copilot SKU |
+| Copilot activity (for readiness) | `GET /beta/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D28')`. A person is active when `lastActivityDate` isn't empty. If `userPrincipalName` values have no `@`, the tenant hides names: count active people, but don't match them to anyone |
 | Access reviews (optional) | `GET /beta/identityGovernance/accessReviews/definitions?$select=id,displayName,scope` and look for the group id in each scope query |
 
 If a call returns 403, say which permission is missing and carry on with the rest.
@@ -71,6 +73,27 @@ groups like "Copilot + Cowork Spend Limit" look like they don't exist.
 
 Use **references/rules.md**. Each finding has a Policy, Area, Severity (High, Medium, Low,
 Info), Target (the person, group or policy), Check (what's wrong) and Fix.
+
+## Step 3b: Cowork readiness
+
+Answer "how many active Copilot users are set up to use Cowork, with billing?" as a funnel. A
+person's Copilot license is **working** when a Copilot SKU is assigned, the Copilot service plan
+isn't in its `disabledPlans`, and its `licenseAssignmentStates` entry isn't `Error` or `Disabled`.
+
+1. **Copilot license assigned**: the Copilot-licensed people.
+2. **Copilot turned on**: of those, a working license and an enabled account.
+3. **Active in Copilot**: of those, active in the usage report (if names are hidden, use the
+   report's count of active people instead and say so).
+4. **Covered by a Cowork policy**: of those, in the groups of an enabled policy in Policies.csv
+   whose Services include `cowork` (an all-users policy covers everyone).
+5. **Billing set**: of those, the policy's Billing isn't `notSpecified`.
+
+Ready % = step 5 ÷ step 3. Add these findings (only these, so nothing is reported twice):
+- Medium, policy "(Copilot licenses)": licensed and not in a Cowork policy, but Copilot is turned
+  off in the license or the assignment has an error.
+- Info, policy "(no Cowork policy)": active Copilot users with a working license and no Cowork policy
+  (candidates).
+- Info, their policy: covered for Cowork but no Copilot activity in 28 days.
 
 ## Step 4: Score
 
@@ -90,6 +113,8 @@ don't improvise. Don't make a spreadsheet unless the user asks for one.
    run's data. Don't change anything else in the file. Fill it like this:
    - `title`: "Copilot Billing Health"; `generated`: the date and time; `source`: "Copilot Cowork";
      `subjectLabel`: "Policy"; `sample`: false.
+   - `funnelTitle`: "Cowork readiness: {ready %}% of active Copilot users are ready", and `funnel`:
+     the five steps from Step 3b, each `{ "label", "count", "note" }`.
    - `scorecard`: one entry per policy: `name`, `score`, `rating`, `high`, `medium`, `low`, `info`,
      and `detail` (for example "Group: Copilot + Cowork Spend Limit · 12 members").
    - `findings`: one entry per finding: `subject` (the policy), `area`, `severity`, `target`,
@@ -105,7 +130,7 @@ don't improvise. Don't make a spreadsheet unless the user asks for one.
 3. Use a script to write the file if that's easiest. That's fine here; only Graph calls must not
    come from scripts.
 4. Open the report in the session so the user sees it, and give a short summary in chat: the
-   average score, how many High and Medium findings, and the three fixes.
+   average score, the ready %, how many High and Medium findings, and the three fixes.
 
 The report works offline and has filters, search, CSV export and print, so there's no need for a
 separate CSV or workbook. Use plain, short sentences. Treat the results as sensitive: they name

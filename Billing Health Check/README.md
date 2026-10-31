@@ -10,7 +10,7 @@ A plan for a health check that reviews Microsoft 365 Copilot **billing policies*
 
 | Way | Best for | How |
 | --- | --- | --- |
-| **PowerShell** | The full check, including each person's credit balance | `.\Get-CopilotBillingHealth.ps1`. It writes Findings.csv, Scorecard.csv, Policies.csv and an interactive Report.html |
+| **PowerShell** | The full check, including each person's credit balance and Cowork readiness | `.\Get-CopilotBillingHealth.ps1`. It writes Findings.csv, Scorecard.csv, Readiness.csv, Policies.csv and an interactive Report.html |
 | **Copilot Cowork** | Asking in plain language, follow-ups, and drafting notes to group owners | Attach Policies.csv and paste the prompt. Cowork reads groups and members live through the Microsoft MCP Server for Enterprise. See [Cowork/readme.md](Cowork/readme.md) |
 
 The script uses only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Microsoft.Graph.Authentication) and changes nothing. Every Report.html ends with the Cowork prompt, so people can see it and rerun the check in Cowork.
@@ -23,7 +23,7 @@ The script uses only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Micro
 
 ## How many active Copilot users are ready for Cowork?
 
-`Get-CopilotCoworkReadiness.ps1` answers that with a funnel, and lists who drops out at each step. It's read-only.
+The health check answers this too, as a funnel at the top of the report:
 
 | Step | Counts people who… |
 | --- | --- |
@@ -32,27 +32,21 @@ The script uses only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Micro
 | Active in Copilot | used Copilot in the period (`-Period`, 28 days by default) |
 | Covered by a Cowork policy | are in an enabled spending policy that selects Cowork |
 | Billing set | are in such a policy with a billing method (not "not specified") |
-| Can use Cowork now | Microsoft says can use Cowork right now (only with `-CheckBalances`) |
+| Can use Cowork now | Microsoft says can use Cowork right now (skipped with `-SkipBalances`) |
 
-The report shows "% of active Copilot users ready for Cowork", a card per Cowork policy with the share of its people who are ready, and these gaps:
+The funnel heading gives the headline: "% of active Copilot users ready for Cowork". Readiness.csv has one row per person. The findings add:
 
-- **High:** covered for Cowork but the Copilot license is missing, turned off or in error, so they can't use it.
-- **Medium:** covered for Cowork but the policy has no billing method.
-- **Low:** covered for Cowork but no Copilot activity in the period.
-- **Info:** active Copilot users without Cowork, as candidates.
+- **High:** looks ready, but Microsoft says they can't use Cowork.
+- **Medium:** Copilot turned off in the license, or a license assignment error.
+- **Info:** active Copilot users without Cowork (candidates), and Cowork users with no Copilot activity in the period.
+
+Missing licenses and missing billing for Cowork users are already reported by the member and policy checks, so they aren't repeated.
 
 ```powershell
-.\Get-CopilotCoworkReadiness.ps1                       # 28 days
-.\Get-CopilotCoworkReadiness.ps1 -Period D90 -CheckBalances
+.\Get-CopilotBillingHealth.ps1 -Period D90   # readiness over 90 days
 ```
 
-It writes CoworkReadiness.csv (one row per person), CoworkGaps.csv and CoworkReadiness.html.
-
-> If the usage report hides names (Microsoft 365 admin center > **Settings > Org settings > Reports** > *Display concealed user, group, and site names in all reports*), "Active in Copilot" is a count only and can't be matched to people. The script tells you; it doesn't change the setting.
-
-> **Start here:** this builds on the [Copilot Group Assignment Guide](../Group%20Assignment%20Guide/readme.md), which creates the groups and spending policies this checks.
-
-Microsoft changes these features often, and some APIs here are in preview (beta). Check each path in your own tenant.
+> If the Copilot usage report hides names (Microsoft 365 admin center > **Settings > Org settings > Reports** > *Display concealed user, group, and site names in all reports*), "Active in Copilot" is a count only and can't be matched to people. The script tells you; it doesn't change the setting.
 
 ## Microsoft has two kinds of Copilot policy
 

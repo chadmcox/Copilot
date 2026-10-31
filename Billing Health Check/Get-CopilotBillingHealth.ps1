@@ -16,8 +16,17 @@
       - Members: disabled, guest, inactive, no Copilot license, near or at their limit.
       - Across policies: people in both Cowork Limited and Cowork Unlimited, and Temp members
         who aren't in Limited.
+      - Cowork readiness: how many active Copilot users are set up to use Cowork with billing.
+        Funnel: Copilot license assigned > Copilot turned on > active in Copilot (-Period) >
+        covered by an enabled Cowork policy > billing set > can use Cowork now (unless
+        -SkipBalances). Also lists active Copilot users without Cowork, Cowork users with no
+        Copilot activity, and licenses with Copilot turned off or in error.
 
-    Output (in -OutputFolder): Findings.csv, Scorecard.csv, Policies.csv and Report.html.
+    If the Copilot usage report hides names (admin center > Settings > Org settings > Reports),
+    "active" is a count only. The script tells you; it doesn't change the setting.
+
+    Output (in -OutputFolder): Findings.csv, Scorecard.csv, Readiness.csv, Policies.csv and
+    Report.html.
     The files show each person's spending. Keep them private and out of source control.
 
     Policies.csv is also the file you attach in Copilot Cowork. The Enterprise MCP server
@@ -27,6 +36,7 @@
 
     Permissions (delegated): CopilotCostManagement-Policy.Read.All,
     CopilotCostManagement-Assignment.Read.All, CopilotCostManagement-UserData.Read.All,
+    Reports.Read.All (Copilot usage), CopilotCostManagement.Read.All (tenant credits),
     Group.Read.All, GroupMember.Read.All, User.Read.All, AuditLog.Read.All (sign-in dates,
     needs Entra ID P1), Organization.Read.All (license names).
 
@@ -42,6 +52,8 @@ param(
     [int]$NearLimitPercent = 80,
     [switch]$SkipBalances,
     [switch]$PoliciesOnly,
+    [ValidateSet("D7", "D28", "D90", "D180")]
+    [string]$Period = "D28",
     [string]$OutputFolder  = ".\CopilotBillingHealth-$(Get-Date -Format yyyyMMdd-HHmm)",
 
     # Policy names used for the Cowork tier checks (from the Copilot Group Assignment Guide).
@@ -64,6 +76,8 @@ Connect-MgGraph -NoWelcome -Scopes @(
     "CopilotCostManagement-Policy.Read.All",
     "CopilotCostManagement-Assignment.Read.All",
     "CopilotCostManagement-UserData.Read.All",
+    "CopilotCostManagement.Read.All",
+    "Reports.Read.All",
     "Group.Read.All",
     "GroupMember.Read.All",
     "User.Read.All",
@@ -302,6 +316,49 @@ function Get-Score($Findings) {
     }
 }
 
+
+# ---------------------------------------------------------------------------
+# Cowork readiness: how many active Copilot users are set up for Cowork and billing
+# ---------------------------------------------------------------------------
+
+# Everyone with a Copilot license assigned, once each.
+function Get-LicensedUser([string[]]$SkuIds) {
+    $SkuIds | ForEach-Object {
+        $filter = [uri]::EscapeDataString("assignedLicenses/any(x:x/skuId eq $_)")
+        $page = "$graph/users?`$filter=$filter&`$select=id,userPrincipalName,accountEnabled,assignedLicenses,licenseAssignmentStates&`$count=true&`$top=999"
+        while ($page) {
+            $result = Invoke-MgGraphRequest -Method GET -Uri $page -Headers @{ ConsistencyLevel = "eventual" } -OutputType PSObject
+            $result.value
+            $page = $result.'@odata.nextLink'
+        }
+    } | Sort-Object id -Unique
+}
+
+# Copilot activity per person. Names may be hidden (hashed) by the tenant's report setting.
+function Get-CopilotActivity {
+    Get-GraphAll "$graph/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='$Period')" |
+        Select-Object @{ n = "Upn"; e = { "$($_.userPrincipalName)".ToLower() } }, @{ n = "LastActivity"; e = { $_.lastActivityDate } }
+}
+
+# One row per person a Cowork policy covers. An all-users policy covers every licensed person.
+function Get-CoworkCoverage([string[]]$LicensedIds) {
+    process {
+        $policy = $_
+        $ids = if ($policy.AllUsers) { $LicensedIds } else { $policy.GroupIds | ForEach-Object { (Get-Group $_).MemberIds } }
+        $ids | Select-Object @{ n = "UserId"; e = { $_ } }, @{ n = "Policy"; e = { $policy.Name } },
+            @{ n = "BillingSet"; e = { $policy.Billing -and $policy.Billing -ne "notSpecified" } }
+    }
+}
+
+function Get-CoworkAccess([string]$UserId) {
+    $row = Get-GraphOptional "$cm/userBalances/$UserId/serviceBalances/cowork"
+    if ($row) { if ($row.isConsumptionAllowed) { "Yes" } else { "No ($($row.accessDecisionReason))" } } else { "Unknown" }
+}
+
+function New-ReadinessFinding([string]$Policy, [string]$Severity, [string]$Check, [string]$Fix) {
+    process { New-Finding $Policy "Readiness" $Severity $_.User $Check $Fix }
+}
+
 # ---------------------------------------------------------------------------
 # Run
 # ---------------------------------------------------------------------------
@@ -330,11 +387,76 @@ $findings = @(
     Test-CoworkTiers $policies
 )
 
+# Cowork readiness. Reuses the groups and members already read above.
+$licensed    = @(if ($copilotSkus) { Get-LicensedUser $copilotSkus })
+$activity    = @(Get-CopilotActivity)
+$concealed   = [bool]($activity | Where-Object { $_.Upn -and $_.Upn -notlike "*@*" } | Select-Object -First 1)
+$activeByUpn = $activity | Where-Object LastActivity | Group-Object Upn -AsHashTable -AsString
+if (-not $activeByUpn) { $activeByUpn = @{} }
+if ($concealed) { Write-Warning "The Copilot usage report hides names, so active users are counted but not matched to people. Turn off 'Display concealed user, group, and site names in all reports' in Microsoft 365 admin center > Settings > Org settings > Reports to match them." }
+
+$coworkPolicies = @($policies | Where-Object { $_.Status -eq "enabled" -and $_.Services -contains "cowork" })
+$coveredById = $coworkPolicies | Get-CoworkCoverage @($licensed.id) | Group-Object UserId -AsHashTable -AsString
+if (-not $coveredById) { $coveredById = @{} }
+$licensedIds = @($licensed.id)
+
+$people = @(@($licensed; $coveredById.Keys | Where-Object { $_ -notin $licensedIds } | ForEach-Object { Get-User $_ } | Where-Object { $_ }) |
+    Select-Object @{ n = "User"; e = { $_.userPrincipalName } }, @{ n = "UserId"; e = { $_.id } },
+        @{ n = "Enabled"; e = { $_.accountEnabled } },
+        @{ n = "License"; e = { Get-LicenseState $_ $copilotSkus } },
+        @{ n = "Active"; e = { if ($concealed) { "Unknown" } elseif ($activeByUpn.ContainsKey("$($_.userPrincipalName)".ToLower())) { "Yes" } else { "No" } } },
+        @{ n = "LastActivity"; e = { if (-not $concealed) { ($activeByUpn["$($_.userPrincipalName)".ToLower()] | Select-Object -First 1).LastActivity } } },
+        @{ n = "CoworkPolicy"; e = { ($coveredById[$_.id].Policy | Sort-Object -Unique) -join "; " } },
+        @{ n = "BillingSet"; e = { if ($coveredById[$_.id]) { [bool]($coveredById[$_.id] | Where-Object BillingSet) } } })
+
+$working     = { $_.License -eq "Working" -and $_.Enabled }
+$isActive    = { $concealed -or $_.Active -eq "Yes" }
+$readyFilter = { (& $working) -and (& $isActive) -and $_.CoworkPolicy -and $_.BillingSet }
+$people = @($people | Select-Object *, @{ n = "CanUseCowork"; e = { if (-not $SkipBalances -and (& $readyFilter)) { Get-CoworkAccess $_.UserId } } })
+
+function Measure-People([scriptblock]$Filter) { @($people | Where-Object $Filter).Count }
+$activeCount = if ($concealed) { @($activity | Where-Object LastActivity).Count } else { Measure-People { (& $working) -and $_.Active -eq "Yes" } }
+$readyCount  = Measure-People $readyFilter
+$readyPercent = if ($activeCount) { [int][math]::Min(100, [math]::Round(100 * $readyCount / $activeCount)) } else { 0 }
+
+function New-FunnelStep([string]$Label, [int]$Count, [string]$Note) {
+    $Label | Select-Object @{ n = "label"; e = { $Label } }, @{ n = "count"; e = { $Count } }, @{ n = "note"; e = { $Note } }
+}
+
+$funnel = @(
+    New-FunnelStep "Copilot license assigned" $licensed.Count "License includes the Copilot service plan"
+    New-FunnelStep "Copilot turned on" (Measure-People $working) "Plan enabled, no license error, account enabled"
+    New-FunnelStep "Active in Copilot" $activeCount $(if ($concealed) { "Count only: the usage report hides names" } else { "Any Copilot activity in $Period" })
+    New-FunnelStep "Covered by a Cowork policy" (Measure-People { (& $working) -and (& $isActive) -and $_.CoworkPolicy }) "Enabled spending policy that selects Cowork"
+    New-FunnelStep "Billing set" $readyCount "That policy has a billing method"
+    if (-not $SkipBalances) { New-FunnelStep "Can use Cowork now" (Measure-People { (& $readyFilter) -and $_.CanUseCowork -eq "Yes" }) "Microsoft's answer per person" }
+)
+
+# Readiness findings that the policy, group and member checks don't already cover.
+$findings = @(
+    $findings
+    $people | Where-Object { -not $_.CoworkPolicy -and $_.License -in "Turned off", "Error" } | ForEach-Object {
+        $_ | New-ReadinessFinding "(Copilot licenses)" "Medium" $(if ($_.License -eq "Error") { "Copilot license assignment has an error" } else { "Copilot is turned off in their license" }) "Turn on the Copilot service plan, or fix the license assignment"
+    }
+    $people | Where-Object $readyFilter | Where-Object { $_.CanUseCowork -like "No*" } | ForEach-Object {
+        $_ | New-ReadinessFinding (($_.CoworkPolicy -split "; ")[0]) "High" "Looks ready, but Microsoft says they can't use Cowork: $($_.CanUseCowork)" "Check their policy limits and license in Copilot > Cost management"
+    }
+    if (-not $concealed) {
+        $people | Where-Object { $_.CoworkPolicy -and $_.Active -eq "No" } | ForEach-Object {
+            $_ | New-ReadinessFinding (($_.CoworkPolicy -split "; ")[0]) "Info" "Covered for Cowork, but no Copilot activity in $Period" "Check they need Cowork"
+        }
+        $people | Where-Object { -not $_.CoworkPolicy -and (& $working) -and $_.Active -eq "Yes" } |
+            New-ReadinessFinding "(no Cowork policy)" "Info" "Active Copilot user without Cowork" "Candidate for a Cowork spending policy"
+    }
+)
+
 $scorecard = @($policies | Get-Score $findings | Sort-Object Score)
 
 $findings  | Sort-Object @{ e = { @("High", "Medium", "Low", "Info").IndexOf($_.Severity) } }, Policy |
     Export-Csv (Join-Path $OutputFolder "Findings.csv") -NoTypeInformation
 $scorecard | Export-Csv (Join-Path $OutputFolder "Scorecard.csv") -NoTypeInformation
+$people | Select-Object User, Enabled, License, Active, LastActivity, CoworkPolicy, BillingSet, CanUseCowork |
+    Export-Csv (Join-Path $OutputFolder "Readiness.csv") -NoTypeInformation
 
 # The same check in Copilot Cowork, so people can rerun it and follow up without PowerShell.
 $coworkPrompt = @"
@@ -348,8 +470,9 @@ Apply the copilot-billing-health rules and give me:
 1. A scorecard: one row per policy with a score out of 100 (High -25, Medium -10, Low -3) and Green 80+, Amber 50-79, Red under 50.
 2. A findings table sorted High, Medium, Low, with the person or group, what's wrong, and the fix.
 3. The top 3 fixes to do first.
-4. The Microsoft Graph calls you ran.
-5. The HTML report from the skill's report template, named Copilot Billing Health.html.
+4. The Cowork readiness funnel: Copilot license assigned, Copilot turned on, active in Copilot in the last 28 days, covered by a Cowork policy, billing set, and the % of active Copilot users who are ready.
+5. The Microsoft Graph calls you ran.
+6. The HTML report from the skill's report template, named Copilot Billing Health.html.
 "@
 
 # The report template ships with the Cowork skill. Use the local copy, or download it from GitHub.
@@ -368,6 +491,8 @@ function New-HtmlReport([string]$Template, [string]$Path) {
         source       = "PowerShell: Get-CopilotBillingHealth.ps1"
         subjectLabel = "Policy"
         sample       = $false
+        funnelTitle  = "Cowork readiness: $readyPercent% of active Copilot users are ready"
+        funnel       = $funnel
         scorecard    = @($scorecard | Select-Object @{ n = "name"; e = { $_.Policy } },
                           @{ n = "score"; e = { $_.Score } }, @{ n = "rating"; e = { $_.Rating } },
                           @{ n = "high"; e = { $_.High } }, @{ n = "medium"; e = { $_.Medium } },
@@ -376,9 +501,9 @@ function New-HtmlReport([string]$Template, [string]$Path) {
         findings     = @($findings | Select-Object @{ n = "subject"; e = { $_.Policy } },
                           @{ n = "area"; e = { $_.Area } }, @{ n = "severity"; e = { $_.Severity } },
                           @{ n = "target"; e = { $_.Target } }, @{ n = "check"; e = { $_.Check } }, @{ n = "fix"; e = { $_.Fix } })
-        fixFirst     = @($findings | Where-Object Severity -in "High", "Medium" |
-                          Sort-Object @{ e = { @("High", "Medium").IndexOf($_.Severity) } } |
-                          Select-Object -First 3 | ForEach-Object { "$($_.Fix): $($_.Target) ($($_.Policy))." })
+        fixFirst     = @($findings | Where-Object Severity -in "High", "Medium" | Group-Object Fix |
+                          Sort-Object @{ e = { @("High", "Medium").IndexOf($_.Group[0].Severity) } }, @{ e = { $_.Count }; Descending = $true } |
+                          Select-Object -First 3 | ForEach-Object { "$($_.Name): $($_.Count) $(if ($_.Count -eq 1) { 'item' } else { 'items' }) ($(($_.Group.Target | Select-Object -First 3) -join ', ')$(if ($_.Count -gt 3) { ', …' }))." })
         manualChecks = @(
                           "Allow new Agents and services is off on every policy except the pilot one."
                           "Each Cowork policy has the right model profile."
@@ -388,8 +513,16 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "GET /beta/subscribedSkus?`$select=skuId,servicePlans"
                           "GET /beta/groups/{id} (+ owners, members/microsoft.graph.group, transitiveMembers/microsoft.graph.user)"
                           "GET /beta/users/{id}?`$select=accountEnabled,userType,assignedLicenses,licenseAssignmentStates,signInActivity"
-                          "GET /beta/copilot/costManagement/userBalances/{id}/serviceBalances")
-        notes        = @("Scores start at 100: High -25, Medium -10, Low -3.")
+                          "GET /beta/copilot/costManagement/userBalances/{id}/serviceBalances"
+                          "GET /beta/users?`$filter=assignedLicenses/any(x:x/skuId eq {sku}) (ConsistencyLevel: eventual)"
+                          "GET /beta/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='$Period')"
+                          "GET /beta/copilot/costManagement/getTenantCreditBalance")
+        notes        = @(
+                          "Scores start at 100: High -25, Medium -10, Low -3. Readiness findings outside a policy don't change any score."
+                          "Ready for Cowork means: working Copilot license, active in $Period, in an enabled Cowork spending policy that has a billing method."
+                          if ($concealed) { "The Copilot usage report hides names, so 'Active in Copilot' is a count only." }
+                          if (-not $coworkPolicies) { "No enabled spending policy selects Cowork, so nobody can use Cowork yet." }
+                          (Get-GraphOptional "$cm/getTenantCreditBalance").billingMethodBalances | Where-Object { $_ } | ForEach-Object { "Tenant credits ($($_.billingMethod)): $($_.remainingQuantity) left of $($_.purchasedQuantity)." })
         prompt       = $coworkPrompt
     }
     # "</" inside the JSON would end the script block early, so escape it.
@@ -402,4 +535,6 @@ $template = Get-ReportTemplate
 if ($template) { New-HtmlReport $template (Join-Path ((Resolve-Path $OutputFolder).Path) "Report.html") }
 
 $scorecard | Format-Table -AutoSize
-Write-Host "Saved Findings.csv, Scorecard.csv, Policies.csv and Report.html to $OutputFolder. Keep these files private."
+$funnel | Format-Table @{ n = "Cowork readiness"; e = { $_.label } }, @{ n = "People"; e = { $_.count } } -AutoSize
+Write-Host "$readyPercent% of active Copilot users are ready for Cowork."
+Write-Host "Saved Findings.csv, Scorecard.csv, Readiness.csv, Policies.csv and Report.html to $OutputFolder. Keep these files private."

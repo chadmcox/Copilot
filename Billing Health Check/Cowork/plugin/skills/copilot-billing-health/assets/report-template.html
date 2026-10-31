@@ -17,6 +17,7 @@
     "findings":  [ { "subject": "", "area": "", "severity": "High|Medium|Low|Info", "target": "", "check": "", "fix": "" } ],
     "fixFirst": [ "" ], "manualChecks": [ "" ], "graphCalls": [ "" ], "notes": [ "" ], "prompt": "",
     "dial":   { "value": 0, "label": "" },        // optional: replaces the average score in the big dial
+    "funnelTitle": "",                              // optional: heading for the funnel
     "funnel": [ { "label": "", "count": 0, "note": "" } ]   // optional: shows a funnel chart
   }
 -->
@@ -228,7 +229,7 @@ footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
     tile(countBy("Low"), "Low", "var(--low)"), tile(countBy("Info"), "Info", "var(--info)")]));
 
   if ((data.funnel || []).length) {
-    app.appendChild(el("h2", { text: "Funnel" }));
+    app.appendChild(el("h2", { text: data.funnelTitle || "Funnel" }));
     var top = Math.max.apply(null, data.funnel.map(function (f) { return f.count || 0; }).concat([1]));
     app.appendChild(el("div", { class: "funnel" }, data.funnel.map(function (f) {
       return el("div", { class: "frow" }, [el("div", { class: "lbl" }, [f.label, f.note ? el("small", { text: f.note }) : null]),
