@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent and Tools Health</title>
+<!--
+  Agent and Tools Health report template.
+  To make a report, replace ONLY the JSON inside <script id="report-data"> with the run's data.
+  Everything else stays as is. No external files or libraries, so it opens anywhere, offline.
+  Data shape:
+  {
+    "title": "Agent and Tools Health", "generated": "2026-10-31 09:00", "source": "Copilot Cowork",
+    "subjectLabel": "Area",                        // Agents, Tools, Agent identities, Blueprints, Tenant
+    "areaLabel": "Category",                       // optional: header for the area column (default "Area")
+    "sample": false,                               // true shows a "sample data" banner
+    "scorecard": [ { "name": "", "score": 0, "rating": "Green|Amber|Red", "high": 0, "medium": 0, "low": 0, "info": 0, "detail": "" } ],
+    "findings":  [ { "subject": "", "area": "", "severity": "High|Medium|Low|Info", "target": "", "check": "", "fix": "" } ],
+    "fixFirst": [ "" ], "manualChecks": [ "" ], "graphCalls": [ "" ], "notes": [ "" ], "prompt": "",
+    "dial":   { "value": 0, "label": "" },        // optional: replaces the average score in the big dial
+    "funnelTitle": "",                              // optional: heading for the funnel
+    "funnel": [ { "label": "", "count": 0, "note": "" } ]   // optional: shows a funnel chart
+  }
+-->
+<style>
+:root {
+  --bg: #f6f7fb; --panel: #ffffff; --ink: #172033; --muted: #5c667a; --line: #e3e7ef;
+  --accent: #3b5bdb; --accent-soft: #e8edff; --on-accent: #ffffff;
+  --high: #d6336c; --high-soft: #fde8ef; --medium: #e8590c; --medium-soft: #fff0e6;
+  --low: #1c7ed6; --low-soft: #e7f2fd; --info: #6b7280; --info-soft: #f0f1f4;
+  --green: #2b8a3e; --amber: #e67700; --red: #c92a2a; --track: #e9ecf3;
+  --shadow: 0 1px 2px rgba(16,24,40,.05), 0 4px 16px rgba(16,24,40,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1420; --panel: #171e2d; --ink: #e8ecf4; --muted: #9aa4b8; --line: #283246;
+    --accent: #8ea2ff; --accent-soft: #1f2a48; --on-accent: #0f1420;
+    --high: #ff6b9a; --high-soft: #3a1626; --medium: #ff922b; --medium-soft: #3a2412;
+    --low: #4dabf7; --low-soft: #13283d; --info: #a1a9b8; --info-soft: #222a38;
+    --green: #51cf66; --amber: #fcc419; --red: #ff6b6b; --track: #283246;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1420; --panel: #171e2d; --ink: #e8ecf4; --muted: #9aa4b8; --line: #283246;
+  --accent: #8ea2ff; --accent-soft: #1f2a48; --on-accent: #0f1420;
+  --high: #ff6b9a; --high-soft: #3a1626; --medium: #ff922b; --medium-soft: #3a2412;
+  --low: #4dabf7; --low-soft: #13283d; --info: #a1a9b8; --info-soft: #222a38;
+  --green: #51cf66; --amber: #fcc419; --red: #ff6b6b; --track: #283246;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 64px; }
+header.top { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; margin-bottom: 24px; }
+.dial { position: relative; width: 148px; height: 148px; flex: none; }
+.dial svg { transform: rotate(-90deg); }
+.dial .num { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.dial .num b { font-size: 40px; line-height: 1; display: block; }
+.dial .num span { display: block; font-size: 12px; line-height: 1.25; color: var(--muted); max-width: 96px; margin: 2px auto 0; }
+.dial .num i { display: block; font-style: normal; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+.headline { flex: 1; min-width: 240px; }
+.eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: 12px; color: var(--muted); font-weight: 600; }
+h1 { margin: 2px 0 6px; font-size: 30px; letter-spacing: -.01em; }
+.meta { color: var(--muted); font-size: 13px; }
+.sample { background: var(--medium-soft); color: var(--medium); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 16px; font-weight: 600; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
+.tile { background: var(--panel); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); border-top: 4px solid var(--c, var(--accent)); }
+.tile .v { font-size: 28px; font-weight: 700; line-height: 1.1; }
+.tile .k { color: var(--muted); font-size: 13px; }
+h2 { font-size: 18px; margin: 32px 0 12px; display: flex; align-items: center; gap: 8px; }
+h2 .count { font-size: 12px; background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 2px 9px; font-weight: 600; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.card { background: var(--panel); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); display: flex; gap: 14px; align-items: center; cursor: pointer; border: 2px solid transparent; transition: border-color .15s, transform .15s; }
+.card:hover { transform: translateY(-1px); }
+.card.on { border-color: var(--accent); }
+.card .mini { width: 64px; height: 64px; position: relative; flex: none; }
+.card .mini svg { transform: rotate(-90deg); }
+.card .mini b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 17px; }
+.card .nm { font-weight: 650; line-height: 1.25; }
+.card .rt { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.pills { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.pill { font-size: 12px; border-radius: 999px; padding: 1px 8px; font-weight: 600; background: var(--b); color: var(--f); }
+.pill.High { --b: var(--high-soft); --f: var(--high); } .pill.Medium { --b: var(--medium-soft); --f: var(--medium); }
+.pill.Low { --b: var(--low-soft); --f: var(--low); } .pill.Info { --b: var(--info-soft); --f: var(--info); }
+.funnel { display: grid; gap: 8px; background: var(--panel); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+.frow { display: grid; grid-template-columns: minmax(140px, 260px) 1fr 64px; gap: 12px; align-items: center; }
+.frow .lbl { font-weight: 600; font-size: 14px; } .frow .lbl small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.frow .bar { height: 14px; background: var(--track); border-radius: 999px; overflow: hidden; }
+.frow .bar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.frow .n { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .frow { grid-template-columns: 1fr 56px; } .frow .bar { grid-column: 1 / -1; grid-row: 2; } }
+.fixfirst { counter-reset: n; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.fixfirst li { background: var(--panel); border-radius: 12px; padding: 12px 14px 12px 52px; position: relative; box-shadow: var(--shadow); }
+.fixfirst li::before { counter-increment: n; content: counter(n); position: absolute; left: 14px; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.chip { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.search { flex: 1; min-width: 180px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 10px; padding: 7px 12px; font: inherit; }
+.btn { border: 0; background: var(--accent); color: var(--on-accent); border-radius: 10px; padding: 7px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.tablewrap { background: var(--panel); border-radius: 14px; box-shadow: var(--shadow); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.fix { color: var(--muted); }
+.sev { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; color: var(--f); white-space: nowrap; }
+.sev::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.sev.High { --f: var(--high); } .sev.Medium { --f: var(--medium); } .sev.Low { --f: var(--low); } .sev.Info { --f: var(--info); }
+.empty { padding: 28px; text-align: center; color: var(--muted); }
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.checks label { display: flex; gap: 10px; align-items: flex-start; background: var(--panel); padding: 10px 14px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; }
+.checks input { margin-top: 4px; accent-color: var(--accent); }
+.checks input:checked + span { text-decoration: line-through; color: var(--muted); }
+details { background: var(--panel); border-radius: 14px; box-shadow: var(--shadow); padding: 12px 16px; margin-top: 12px; }
+summary { cursor: pointer; font-weight: 650; }
+pre, code { font-family: Consolas, "Cascadia Mono", ui-monospace, monospace; font-size: 13px; }
+pre { white-space: pre-wrap; word-break: break-word; background: var(--bg); padding: 12px; border-radius: 10px; margin: 10px 0 0; }
+.notes { color: var(--muted); font-size: 13px; }
+footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
+.themebtn { align-self: flex-start; }
+@media print {
+  .toolbar, .themebtn, .btn { display: none !important; }
+  body { background: #fff; } .card, .tile, .tablewrap, .fixfirst li, .checks label, details { box-shadow: none; border: 1px solid #ddd; }
+  details { display: block; } details > * { display: block; }
+}
+</style>
+</head>
+<body>
+<button class="btn ghost themebtn" id="theme" type="button" aria-label="Switch between light and dark">Light / dark</button>
+<div class="wrap" id="app"></div>
+
+<script id="report-data" type="application/json">
+{
+  "title": "Agent and Tools Health",
+  "generated": "Sample",
+  "source": "Template preview",
+  "subjectLabel": "Area",
+  "areaLabel": "Category",
+  "sample": true,
+  "funnelTitle": "Well-governed agent identities: 40%",
+  "funnel": [
+    { "label": "Agent identities", "count": 10, "note": "Every agent identity in Entra" },
+    { "label": "With an active sponsor", "count": 8, "note": "A sponsor, and every sponsor and owner is an active account" },
+    { "label": "With a clear name", "count": 6, "note": "No test, demo, copy, draft or similar" },
+    { "label": "Least privilege", "count": 5, "note": "No high-privilege Microsoft Graph permissions" },
+    { "label": "In use", "count": 4, "note": "Signed in within 90 days" }
+  ],
+  "scorecard": [
+    { "name": "Tenant", "score": 65, "rating": "Amber", "high": 1, "medium": 1, "low": 0, "info": 0, "detail": "1 item checked" },
+    { "name": "Agent identities", "score": 74, "rating": "Amber", "high": 2, "medium": 3, "low": 1, "info": 0, "detail": "10 items checked" },
+    { "name": "Agents", "score": 81, "rating": "Green", "high": 1, "medium": 2, "low": 0, "info": 0, "detail": "8 items checked" },
+    { "name": "Blueprints", "score": 85, "rating": "Green", "high": 0, "medium": 2, "low": 0, "info": 0, "detail": "4 items checked" },
+    { "name": "Tools", "score": 93, "rating": "Green", "high": 0, "medium": 1, "low": 0, "info": 0, "detail": "5 items checked" }
+  ],
+  "findings": [
+    { "subject": "Tenant", "area": "Security", "severity": "High", "target": "Conditional Access", "check": "No Conditional Access policy targets agent identities", "fix": "Create agent policies (start in report-only): block high-risk agents, and limit what non-production agents reach" },
+    { "subject": "Agents", "area": "Access", "severity": "High", "target": "Contoso HR Agent", "check": "Available to all users", "fix": "Make it available to specific groups" },
+    { "subject": "Agent identities", "area": "Ownership", "severity": "High", "target": "Invoice Bot", "check": "No sponsor", "fix": "Add a sponsor: the person accountable for what it does" },
+    { "subject": "Agent identities", "area": "Permissions", "severity": "High", "target": "Mail Helper", "check": "High-privilege Graph permissions: Mail.Send", "fix": "Replace them with narrower permissions (least privilege), or remove them" },
+    { "subject": "Blueprints", "area": "Permissions", "severity": "Medium", "target": "Sales Assistant Agent", "check": "Uses a client secret", "fix": "Use a certificate or a federated credential (managed identity) instead" },
+    { "subject": "Agents", "area": "Naming", "severity": "Medium", "target": "Test agent 2", "check": "Unclear name", "fix": "Rename it so people can tell what it does and who owns it" },
+    { "subject": "Tools", "area": "Usage", "severity": "Medium", "target": "Old Jira Plugin", "check": "Not used in 90 days", "fix": "Block it, or run Agent and Tools Cleanup" },
+    { "subject": "Agent identities", "area": "Usage", "severity": "Low", "target": "Draft FAQ Agent", "check": "No sign-in recorded, created more than 90 days ago", "fix": "Ask the sponsor if it's still needed" }
+  ],
+  "fixFirst": [
+    "Create a Conditional Access policy for agent identities, starting in report-only.",
+    "Scope Contoso HR Agent to a group instead of all users.",
+    "Add a sponsor to Invoice Bot."
+  ],
+  "manualChecks": [
+    "Entra > Entra ID > Users > User settings: Users can register agent identity blueprints is No.",
+    "Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID: the default inactivity policy is on.",
+    "Microsoft 365 admin center > Agents > Settings > Agent and plugin access: external publishers are off, or reviewed."
+  ],
+  "graphCalls": [
+    "GET /beta/servicePrincipals/graph.agentIdentity?$expand=sponsors($select=id)",
+    "GET /beta/identity/conditionalAccess/policies"
+  ],
+  "notes": [ "This is sample data with made-up names." ],
+  "prompt": ""
+}
+</script>
+
+<script>
+(function () {
+  var data = JSON.parse(document.getElementById("report-data").textContent);
+  var order = ["High", "Medium", "Low", "Info"];
+  var subject = data.subjectLabel || "Area";
+  var findings = (data.findings || []).slice().sort(function (a, b) { return order.indexOf(a.severity) - order.indexOf(b.severity); });
+  var cards = (data.scorecard || []).slice().sort(function (a, b) { return a.score - b.score; });
+  var state = { sev: "All", subj: null, q: "" };
+
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === "text") n.textContent = attrs[k];
+      else if (k === "class") n.className = attrs[k];
+      else if (k.slice(0, 2) === "on") n.addEventListener(k.slice(2), attrs[k]);
+      else n.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) { if (c) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function ratingColor(r) { return r === "Green" ? "var(--green)" : r === "Amber" ? "var(--amber)" : "var(--red)"; }
+  function rating(score) { return score >= 80 ? "Green" : score >= 50 ? "Amber" : "Red"; }
+  function ring(size, stroke, score, color) {
+    var r = (size - stroke) / 2, c = 2 * Math.PI * r, ns = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(ns, "svg"); svg.setAttribute("width", size); svg.setAttribute("height", size);
+    [["var(--track)", c], [color, c * Math.max(0, Math.min(100, score)) / 100]].forEach(function (p, i) {
+      var circle = document.createElementNS(ns, "circle");
+      circle.setAttribute("cx", size / 2); circle.setAttribute("cy", size / 2); circle.setAttribute("r", r);
+      circle.setAttribute("fill", "none"); circle.setAttribute("stroke", p[0]); circle.setAttribute("stroke-width", stroke);
+      circle.setAttribute("stroke-linecap", "round"); circle.setAttribute("stroke-dasharray", p[1] + " " + c);
+      if (i === 1 && p[1] === 0) circle.setAttribute("stroke-opacity", "0");
+      svg.appendChild(circle);
+    });
+    return svg;
+  }
+  function countBy(sev) { return findings.filter(function (f) { return f.severity === sev; }).length; }
+
+  var app = document.getElementById("app");
+  var overall = data.dial && typeof data.dial.value === "number" ? Math.round(data.dial.value)
+    : cards.length ? Math.round(cards.reduce(function (s, c) { return s + c.score; }, 0) / cards.length) : 100;
+  var dialLabel = data.dial && data.dial.label ? data.dial.label : "average of 100";
+  var overallRating = rating(overall);
+
+  if (data.sample) app.appendChild(el("div", { class: "sample", text: "Sample data: this is the template preview, not a real run." }));
+
+  var dial = el("div", { class: "dial" }, [ring(148, 14, overall, ratingColor(overallRating)),
+    el("div", { class: "num" }, [el("div", {}, [el("b", { text: String(overall) }), el("span", { text: dialLabel }), el("i", { style: "color:" + ratingColor(overallRating), text: overallRating })])])]);
+  app.appendChild(el("header", { class: "top" }, [dial, el("div", { class: "headline" }, [
+    el("div", { class: "eyebrow", text: "Microsoft 365 Copilot" }),
+    el("h1", { text: data.title || "Agent and Tools Health" }),
+    el("div", { class: "meta", text: [data.generated, data.source].filter(Boolean).join(" · ") })]), document.getElementById("theme")]));
+
+  function tile(v, k, c) { return el("div", { class: "tile", style: c ? "--c:" + c : "" }, [el("div", { class: "v", text: String(v) }), el("div", { class: "k", text: k })]); }
+  app.appendChild(el("div", { class: "tiles" }, [
+    tile(cards.length, subject === "Group" ? "Groups checked" : subject === "Area" ? "Areas checked" : "Policies checked"),
+    tile(countBy("High"), "High", "var(--high)"), tile(countBy("Medium"), "Medium", "var(--medium)"),
+    tile(countBy("Low"), "Low", "var(--low)"), tile(countBy("Info"), "Info", "var(--info)")]));
+
+  if ((data.funnel || []).length) {
+    app.appendChild(el("h2", { text: data.funnelTitle || "Funnel" }));
+    var top = Math.max.apply(null, data.funnel.map(function (f) { return f.count || 0; }).concat([1]));
+    app.appendChild(el("div", { class: "funnel" }, data.funnel.map(function (f) {
+      return el("div", { class: "frow" }, [el("div", { class: "lbl" }, [f.label, f.note ? el("small", { text: f.note }) : null]),
+        el("div", { class: "bar" }, [el("i", { style: "width:" + Math.round(100 * (f.count || 0) / top) + "%" })]),
+        el("div", { class: "n", text: String(f.count == null ? "–" : f.count) })]);
+    })));
+  }
+
+  if ((data.fixFirst || []).length) {
+    app.appendChild(el("h2", { text: "Fix these first" }));
+    app.appendChild(el("ol", { class: "fixfirst" }, data.fixFirst.map(function (t) { return el("li", { text: t }); })));
+  }
+
+  app.appendChild(el("h2", {}, ["Scorecard ", el("span", { class: "count", text: "select a card to filter" })]));
+  var cardWrap = el("div", { class: "cards" });
+  cards.forEach(function (c) {
+    var color = ratingColor(c.rating || rating(c.score));
+    var card = el("div", { class: "card", role: "button", tabindex: "0", onclick: function () { state.subj = state.subj === c.name ? null : c.name; render(); },
+      onkeydown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.click(); } } }, [
+      el("div", { class: "mini" }, [ring(64, 8, c.score, color), el("b", { text: String(c.score) })]),
+      el("div", {}, [el("div", { class: "nm", text: c.name }),
+        el("div", { class: "rt", style: "color:" + color, text: c.rating || rating(c.score) }),
+        c.detail ? el("div", { class: "meta", text: c.detail }) : null,
+        el("div", { class: "pills" }, order.filter(function (s) { return c[s.toLowerCase()]; }).map(function (s) { return el("span", { class: "pill " + s, text: c[s.toLowerCase()] + " " + s }); }))])]);
+    card.dataset.name = c.name; cardWrap.appendChild(card);
+  });
+  app.appendChild(cardWrap);
+
+  var fh = el("h2", {}, ["Findings ", el("span", { class: "count", id: "fcount" })]);
+  app.appendChild(fh);
+  var toolbar = el("div", { class: "toolbar" });
+  ["All"].concat(order).forEach(function (s) {
+    toolbar.appendChild(el("button", { class: "chip", type: "button", "aria-pressed": String(s === "All"), "data-sev": s, text: s,
+      onclick: function () { state.sev = s; render(); } }));
+  });
+  toolbar.appendChild(el("input", { class: "search", type: "search", placeholder: "Search people, groups, checks…", "aria-label": "Search findings",
+    oninput: function (e) { state.q = e.target.value.toLowerCase(); render(); } }));
+  toolbar.appendChild(el("button", { class: "btn", type: "button", text: "Export CSV", onclick: exportCsv }));
+  toolbar.appendChild(el("button", { class: "btn ghost", type: "button", text: "Print", onclick: function () { window.print(); } }));
+  app.appendChild(toolbar);
+  var tbody = el("tbody");
+  app.appendChild(el("div", { class: "tablewrap" }, [el("table", {}, [
+    el("thead", {}, [el("tr", {}, ["Severity", subject, data.areaLabel || "Area", "Who or what", "What's wrong", "Fix"].map(function (h) { return el("th", { text: h }); }))]), tbody])]));
+
+  function visible() {
+    return findings.filter(function (f) {
+      if (state.sev !== "All" && f.severity !== state.sev) return false;
+      if (state.subj && f.subject !== state.subj) return false;
+      if (state.q && [f.subject, f.area, f.target, f.check, f.fix].join(" ").toLowerCase().indexOf(state.q) < 0) return false;
+      return true;
+    });
+  }
+  function render() {
+    var rows = visible();
+    tbody.textContent = "";
+    rows.forEach(function (f) {
+      tbody.appendChild(el("tr", {}, [el("td", {}, [el("span", { class: "sev " + f.severity, text: f.severity })]),
+        el("td", { text: f.subject || "" }), el("td", { text: f.area || "" }), el("td", { text: f.target || "" }),
+        el("td", { text: f.check || "" }), el("td", { class: "fix", text: f.fix || "" })]));
+    });
+    if (!rows.length) tbody.appendChild(el("tr", {}, [el("td", { colspan: "6", class: "empty", text: findings.length ? "No findings match this filter." : "No findings. Nice work." })]));
+    document.getElementById("fcount").textContent = rows.length + " of " + findings.length + (state.subj ? " · " + state.subj : "");
+    Array.prototype.forEach.call(toolbar.querySelectorAll(".chip"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.sev === state.sev)); });
+    Array.prototype.forEach.call(cardWrap.children, function (c) { c.classList.toggle("on", c.dataset.name === state.subj); });
+  }
+  function exportCsv() {
+    var q = function (v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; };
+    var lines = [["Severity", subject, data.areaLabel || "Area", "Target", "Check", "Fix"].map(q).join(",")].concat(
+      visible().map(function (f) { return [f.severity, f.subject, f.area, f.target, f.check, f.fix].map(q).join(","); }));
+    var a = el("a", { href: URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/csv" })), download: "AgentToolsHealth-Findings.csv" });
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  if ((data.manualChecks || []).length) {
+    app.appendChild(el("h2", { text: "Check by hand" }));
+    app.appendChild(el("ul", { class: "checks" }, data.manualChecks.map(function (t) {
+      return el("li", {}, [el("label", {}, [el("input", { type: "checkbox" }), el("span", { text: t })])]);
+    })));
+  }
+  if ((data.graphCalls || []).length) {
+    app.appendChild(el("details", {}, [el("summary", { text: "Microsoft Graph calls (" + data.graphCalls.length + ")" }), el("pre", { text: data.graphCalls.join("\n") })]));
+  }
+  if (data.prompt) {
+    app.appendChild(el("details", {}, [el("summary", { text: "Run this check in Copilot Cowork" }),
+      el("p", { class: "notes", text: "Attach Packages.csv in Copilot Cowork and paste this prompt. The Agent and Tools Health plugin reads agent identities, blueprints, groups and Conditional Access live through the Microsoft MCP Server for Enterprise." }),
+      el("pre", { text: data.prompt })]));
+  }
+  if ((data.notes || []).length) {
+    app.appendChild(el("h2", { text: "Notes" }));
+    app.appendChild(el("ul", { class: "notes" }, data.notes.map(function (t) { return el("li", { text: t }); })));
+  }
+  app.appendChild(el("footer", { text: "Read-only check. This report names people; share it only with the people who need it." }));
+  render();
+
+  var themeBtn = document.getElementById("theme");
+  themeBtn.addEventListener("click", function () {
+    var root = document.documentElement, dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+  });
+})();
+</script>
+</body>
+</html>
