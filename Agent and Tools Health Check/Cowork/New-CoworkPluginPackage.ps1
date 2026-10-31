@@ -39,6 +39,7 @@ $pluginFiles = @(
     "outline.png",
     "skills/agent-tools-health/SKILL.md",
     "skills/agent-tools-health/references/rules.md",
+    "skills/agent-tools-health/references/guidance.md",
     "skills/agent-tools-health/assets/report-template.html"
 )
 

@@ -117,6 +117,15 @@ Each run writes `cleanup-undo-<date-time>.json` to the report folder.
 - Deleting a blueprint or its principal deletes every child agent identity and agent user account with it (cascade cleanup). The 30-day soft-delete window is the only way back.
 - Let Entra do the deleting. Turn on the **Agent ID default inactivity policy** (preview, no extra license): Entra admin center > **ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID (Preview)**. It notifies sponsors and owners at 60 days inactive, disables at 90 and deletes at 455. Use **All Agent IDs except selected** to exclude seasonal agents. Custom lifecycle policies need an ID Governance license.
 
+## CISA and CIS guidance
+
+Cleaning up unused agents, tools and identities is what both sources ask for:
+
+- **CIS Controls v8.1 5.3, Disable Dormant Accounts**: CIS sets **45 days** of inactivity. This folder defaults to 90 days; run `.\Get-AgentToolsReport.ps1 -Days 45` to match CIS. **6.2, Establish an Access Revoking Process**: block or disable what isn't used, with a record (the undo file). **5.5, Inventory of Service Accounts**: agent identities are non-human accounts to review at least quarterly. **2.3, Address Unauthorized Software**: block tools nobody approved or uses. The [CIS AI Agent and MCP Companion Guides](https://www.cisecurity.org/insights/white-papers/controls-v8-1-ai-agents-companion-guide) (April 2026) apply these controls to agents and MCP.
+- **CISA and partners, [*Careful Adoption of Agentic AI Services*](https://www.cisa.gov/resources-tools/resources/careful-adoption-agentic-ai-services)** (May 2026): unused agents with standing access add to the **privilege** and **accountability** risk categories, and the guidance asks for least privilege and no broad or unrestricted access. Disabling instead of deleting keeps the audit trail it asks for.
+
+For the full check-by-check mapping, see the [Agent and Tools Health Check](../Agent%20and%20Tools%20Health%20Check/README.md#cisa-and-cis-guidance).
+
 ## Run it in Copilot Cowork
 
 See **[Cowork/readme.md](Cowork/readme.md)**. The plugin has two skills:

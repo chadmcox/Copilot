@@ -38,9 +38,34 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 
 **Unclear names** are flagged when a name has *test*, *demo*, *temp*, *copy*, *draft*, *sample*, *POC*, *sandbox*, *untitled*, *dummy*, *do not use*, starts with *new agent* or *my agent*, ends in *Agent 2* or *(1)*, or is under four characters. Change the list with `-UnclearNamePattern`.
 
+**Guidance**: every finding names the CIS Controls v8.1 safeguards and the CISA risk category behind it, in the Reference column of Findings.csv and in brackets after the fix in the report. See [CISA and CIS guidance](#cisa-and-cis-guidance).
+
 **Scores**: every item starts at 100 (High −25, Medium −10, Low −3); an area's score is the average of its items. Green 80+, Amber 50–79, Red under 50.
 
 Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names, descriptions or use, because they aren't yours to fix.
+
+## CISA and CIS guidance
+
+The checks follow two recent government and industry sources, plus Microsoft's own best practices. The full mapping, check by check, is in [guidance.md](Cowork/plugin/skills/agent-tools-health/references/guidance.md).
+
+- **CISA, NSA and Five Eyes partners: [*Careful Adoption of Agentic AI Services*](https://www.cisa.gov/resources-tools/resources/careful-adoption-agentic-ai-services)** (May 1, 2026). Sorts agent risk into five categories (privilege, design and configuration, behavioral, structural, accountability) and asks for strong agent identity, least privilege, no broad or unrestricted access, detailed logs, monitoring and human oversight, built into the frameworks you already run.
+- **CIS: [AI Agent and MCP Companion Guides](https://www.cisecurity.org/insights/white-papers/controls-v8-1-ai-agents-companion-guide) for CIS Controls v8.1** (April 20, 2026). Apply the CIS Controls to agents and MCP: tool allowlisting, least privilege, identity for every tool call, human approval for high-impact actions, auditability, and non-human identity management.
+
+| What this check covers | CIS v8.1 | CISA risk category |
+| --- | --- | --- |
+| One inventory of agents; unregistered and local agents | 1.1, 2.1, 2.3, 2.5 | Accountability; design and configuration |
+| Sponsors, owners, clear names and descriptions | 5.1, 5.5, 2.1 | Accountability |
+| Group-scoped access instead of everyone | 6.1, 6.8 | Privilege |
+| Least-privilege permissions; no All allowed inheritance | 3.3, 5.4, 6.8 | Privilege; structural |
+| Agent ID instead of classic service principals | 5.5, 5.6 | Strong agent identity |
+| Credentials and Conditional Access for agents | 4.1, 6.7 | Design and configuration; behavioral |
+| Stale agents and tools | 5.3, 6.2 | Accountability |
+
+**Stale threshold:** CIS 5.3 disables dormant accounts after **45 days**. The default here is 90; run `-StaleDays 45` to match CIS.
+
+**Not checked here, but in the guidance:** logging and monitoring of agent actions (CIS 8.2; confirm Purview audit and Defender), human approval for high-impact actions (set in each agent's design), and tool allowlisting (Agents > Tools; block unused tools with [Agent and Tools Cleanup](../Agent%20and%20Tools%20Cleanup/README.md)).
+
+The CIS safeguard numbers are this repo's mapping to CIS Controls v8.1; check them against the companion guides before citing them in an audit.
 
 ## Not covered by any API (manual checklist in the report)
 

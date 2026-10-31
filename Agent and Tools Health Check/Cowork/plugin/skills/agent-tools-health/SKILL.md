@@ -89,7 +89,9 @@ sponsor or owner names in the results unless the user asks; "a sponsor is disabl
 ## Step 3: Apply the rules
 
 Use **references/rules.md**. Each finding has an Area, Item, Category, Severity (High, Medium, Low,
-Info), Check (what's wrong) and Fix. Skip the name, description and use checks for
+Info), Check (what's wrong), Fix and Reference. Take the Reference from **references/guidance.md**:
+the CIS Controls v8.1 safeguards and the CISA risk category for that check, written like
+"CIS 5.1, 5.5 | CISA: accountability". Skip the name, description and use checks for
 Microsoft-published packages and for blueprints from other publishers.
 
 ## Step 4: Score and funnel
@@ -121,11 +123,14 @@ document instead**, even a short one. If you can't read the template, say so and
      Discovered agents and Agents without Agent ID when you have data for them): `name`,
      `score`, `rating`, `high`, `medium`, `low`, `info`, and `detail` ("12 items checked").
    - `findings`: one entry per finding: `subject` (the area), `area` (the category), `severity`,
-     `target` (the item), `check`, `fix`.
+     `target` (the item), `check`, and `fix` with the reference in brackets at the end, for example
+     "Add a sponsor [CIS 5.1, 5.5 | CISA: accountability]".
    - `fixFirst`: the three changes that raise the most scores, in plain words.
    - `manualChecks`: the manual checks from rules.md, with what you saw if you read them in the browser.
    - `graphCalls`: every Graph call you ran, without object IDs.
-   - `notes`: anything the user should know, such as calls that failed or areas you skipped.
+   - `notes`: start with "References in brackets: CIS Controls v8.1 safeguards (AI Agent and MCP
+     Companion Guides, April 2026) and the CISA risk category from Careful Adoption of Agentic AI
+     Services (May 2026)." Then anything else the user should know, such as calls that failed or areas you skipped.
    It must stay valid JSON: escape quotes and backslashes in names.
 3. Use a script to write the file if that's easiest. Only Graph calls must not come from scripts.
 4. Open the report in the session so the user sees it, and give a short summary in chat: the score
@@ -138,6 +143,7 @@ permissions. Keep them in the user's session and OneDrive output folder only.
 
 - "Draft a note to each sponsor listing what to fix on their agents." Draft it; don't send it until the user approves.
 - "Which agents aren't in the registry?" or "Which agents have no Agent ID?" List the Discovered agents and Agents without Agent ID findings.
+- "How does this map to CISA or CIS?" Use references/guidance.md: group the findings by CIS safeguard or CISA risk category, and list what the guidance asks for that this check doesn't cover (logging, human oversight, tool allowlisting).
 - "Which agents are stale?" List the Usage findings, and point to Agent and Tools Cleanup to block or disable them with an undo file.
 - "Show only High findings" or "only blueprints." The report's filters already do this; say so.
 - "Make me a spreadsheet." Build an Excel workbook with Scorecard and Findings sheets from the same data.
