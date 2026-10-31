@@ -18,11 +18,11 @@
       - Tenant: Conditional Access for agent identities and for risky agents.
       - Discovered agents (Microsoft Defender, KQL through Graph advanced hunting): agents in
         Defender's AgentsInfo inventory that aren't in the Agent 365 registry, cloud agents with no
-        Entra agent identity, MCP servers reached without TLS or run outside Microsoft, and local AI
-        agents seen on devices. Without the Agent 365 catalog, AgentsInfo becomes the agent list
+        Entra agent identity, MCP servers reached without TLS or on a host outside this script's list
+        of Microsoft domains, and local AI agents found on devices. Without the Agent 365 catalog, AgentsInfo becomes the agent list
         (availability, owner and name checks). Agent 365 activity in CloudAppEvents (last 30 days)
         counts as use in the stale checks.
-      - Agents without Agent ID: older Copilot Studio and Foundry agents that run as classic
+      - Agents without Agent ID: older Copilot Studio agents that run as classic
         service principals (tags AgentCreatedBy:CopilotStudio, AgenticApp, AIAgentBuilder,
         AgenticInstance, power-virtual-agents-*), not as Entra agent identities.
 
@@ -68,7 +68,7 @@ param(
 
 $scopes = @(
     if (-not $SkipPackages) { "CopilotPackages.Read.All" }
-    if (-not $PackagesOnly) { "Application.Read.All", "AgentIdentityBlueprint.Read.All", "AuditLog.Read.All", "User.Read.All", "Group.Read.All", "Policy.Read.All" }
+    if (-not $PackagesOnly) { "Application.Read.All", "AgentIdentity.Read.All", "AgentIdentityBlueprint.Read.All", "AgentIdentityBlueprintPrincipal.Read.All", "AuditLog.Read.All", "User.Read.All", "Group.Read.All", "Policy.Read.All" }
     if ($PackagesOnly)      { "Group.Read.All" }
     if (-not $SkipDefender) { "ThreatHunting.Read.All" }
 )
@@ -162,7 +162,7 @@ function Get-Reference([string]$Check) {
         'Local AI agent'                                         { "CIS 2.1, 2.3, 2.5 | CISA: design and configuration"; break }
         'MCP server without TLS'                                 { "CIS 3.10 | CISA: design and configuration"; break }
         'external MCP server'                                    { "CIS 2.5, 15.1 | CISA: design and configuration"; break }
-        '\(Agent ID\)|not an Agent ID'                        { "CIS 5.5, 5.6 | CISA: strong agent identity"; break }
+        '\(Agent ID\)|not an Agent ID'                        { "CIS 5.5, 5.6 | CISA: design and configuration, accountability"; break }
         'No sponsor|no longer exists|is disabled|One sponsor|No owner|no owner' { "CIS 5.1, 5.5 | CISA: accountability"; break }
         "^Group '.*owner"                                        { "CIS 5.1, 6.1 | CISA: accountability"; break }
         'High-privilege|Tenant-wide write'                       { "CIS 3.3, 5.4 | CISA: privilege"; break }
@@ -251,7 +251,7 @@ function Test-Package($P, $ActivityByKey) {
         elseif (-not $g.description) { New-Finding $area $name "Low" "Group '$($g.displayName)' has no description" "Describe the group and name the agent or tool it's for" }
     }
     if ($custom -and $P.kind -eq "Agent" -and $P.elementTypes -match 'customEngine|bot' -and -not $P.agentIdentityId) {
-        New-Finding $area $name "Low" "No Entra agent identity (Agent ID)" "Recreate it with Agent ID so it gets a sponsor, Conditional Access and lifecycle controls"
+        New-Finding $area $name "Low" "No Entra agent identity (Agent ID)" "If it's a custom agent you own, move it to Agent ID so it gets a sponsor, Conditional Access and lifecycle controls"
     }
     if ($custom -and (Test-UnclearName $name)) { New-Finding $area $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
     if ($custom -and (Test-PoorDescription $P.shortDescription $name)) { New-Finding $area $name "Medium" "Missing or too-short description" "Describe what it does, for whom, and what data it uses" }
@@ -273,7 +273,7 @@ function Test-Package($P, $ActivityByKey) {
 function Get-GraphRoleNames {
     $index = @{}
     $sp = Get-GraphOptional "$graph/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')?`$select=id,appRoles"
-    $sp.appRoles | ForEach-Object { $index[$_.id] = $_.value }
+    $sp.appRoles | Where-Object id | ForEach-Object { $index[$_.id] = $_.value }
     $index["__id"] = $sp.id
     $index
 }
@@ -364,17 +364,22 @@ function Get-DefenderAgent {
 AgentsInfo
 | summarize arg_max(Timestamp, *) by AgentId
 | where LifecycleStatus != "Deleted"
+| extend AgentName = iff(isempty(AgentName), tostring(column_ifexists("Name", "")), AgentName)
 | project AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
     PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount = array_length(Owners),
     McpServerUrls = strcat_array(extract_all(@'(https?://[^\s"\],}]+)', tostring(McpServers)), ";"),
     SkillCount = array_length(Skills), ToolCount = array_length(DeclaredTools)
 '@
     $activity = Get-DefenderActivity
-    Invoke-HuntingQuery $kql | Select-Object AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
-        PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount, McpServerUrls, SkillCount, ToolCount,
-        @{ n = "LastActivity";   e = { $activity[$_.AgentId].LastActivity } },
-        @{ n = "Invocations30d"; e = { $activity[$_.AgentId].Invocations } },
-        @{ n = "ToolCalls30d";   e = { $activity[$_.AgentId].ToolCalls } }
+    Invoke-HuntingQuery $kql | ForEach-Object {
+        # CloudAppEvents names agents by their Entra appId. For Agent ID agents that equals EntraAgentId.
+        $hit = @($_.EntraAgentId, $_.SourceAgentId, $_.AgentId) | Where-Object { $_ -and $activity["$_"] } | ForEach-Object { $activity["$_"] } | Select-Object -First 1
+        $_ | Select-Object AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
+            PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount, McpServerUrls, SkillCount, ToolCount,
+            @{ n = "LastActivity";   e = { $hit.LastActivity } },
+            @{ n = "Invocations30d"; e = { $hit.Invocations } },
+            @{ n = "ToolCalls30d";   e = { $hit.ToolCalls } }
+    }
 }
 
 # Runs a KQL query through Graph advanced hunting and returns the rows.
@@ -383,18 +388,21 @@ function Invoke-HuntingQuery([string]$Kql) {
     (Invoke-MgGraphRequest -Method POST -Uri "$graph/security/runHuntingQuery" -Body $body -ContentType "application/json" -OutputType PSObject).results
 }
 
-# Agent 365 activity (CloudAppEvents) for the last 30 days, keyed by agent ID. Only agents that send
-# Agent 365 observability data appear, so a missing agent isn't proof that it's unused.
+# Agent 365 activity (CloudAppEvents) for the last 30 days, keyed by the agent's Entra appId. Only agents
+# that send Agent 365 observability data appear, so a missing agent isn't proof that it's unused.
+# Per Microsoft's attribute reference, on InvokeAgent records AgentId is the *calling* agent (all zeros
+# when a person invokes it) and TargetAgentId is the invoked agent; on tool calls AgentId is the agent.
 function Get-DefenderActivity {
     $kql = @'
 CloudAppEvents
 | where ActionType in ("InvokeAgent", "ExecuteToolByMCPServer", "ExecuteToolByGateway", "ExecuteToolBySDK")
-| extend AgentId = tostring(RawEventData.AgentId)
-| where isnotempty(AgentId)
-| summarize LastActivity = max(Timestamp), Invocations = countif(ActionType == "InvokeAgent"), ToolCalls = countif(ActionType startswith "ExecuteTool") by AgentId
+| extend Raw = parse_json(tostring(RawEventData))
+| extend AgentAppId = iff(ActionType == "InvokeAgent", tostring(Raw.TargetAgentId), tostring(Raw.AgentId))
+| where isnotempty(AgentAppId) and AgentAppId != "00000000-0000-0000-0000-000000000000"
+| summarize LastActivity = max(Timestamp), Invocations = countif(ActionType == "InvokeAgent"), ToolCalls = countif(ActionType startswith "ExecuteTool") by AgentAppId
 '@
     $index = @{}
-    try { Invoke-HuntingQuery $kql | ForEach-Object { $index[$_.AgentId] = $_ } }
+    try { Invoke-HuntingQuery $kql | ForEach-Object { $index[$_.AgentAppId] = $_ } }
     catch { Write-Warning "Couldn't read agent activity from CloudAppEvents. $($_.Exception.Message)" }
     $index
 }
@@ -409,7 +417,8 @@ function Get-ActivityByKey($Agents) {
     $index
 }
 
-# Microsoft-hosted MCP server hosts. Anything else is an external MCP server to check against the allowlist.
+# This script's own list of Microsoft domains (not a Microsoft-published list). A host outside it is
+# flagged Low as an external MCP server to check against your approved tools list.
 $microsoftHosts = '\.(microsoft|cloud\.microsoft|office|office365|sharepoint|azure|azure-api|windows|dynamics|powerplatform|powerapps|azurewebsites|svc\.cloud\.microsoft)\.(com|net|microsoft)$|\.cloud\.microsoft$'
 
 function Test-AgentTools([string]$Area, [string]$Name, [string]$Urls) {
@@ -443,12 +452,13 @@ function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry) {
             if (-not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "No owner" "Find who built it and make them the owner, or remove it" }
             if (Test-UnclearName $_.AgentName) { New-Finding "Discovered agents" $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
         }
-        if (-not $_.EntraAgentId) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Recreate or register it with an Agent ID so it gets a sponsor, Conditional Access and lifecycle controls" }
+        if (-not $_.EntraAgentId) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls" }
         Test-AgentTools "Discovered agents" $name $_.McpServerUrls
     }
     # Local AI agents (coding assistants and the like) seen on devices: one finding per agent name.
-    $Agents | Where-Object Platform -eq "LocalAgents" | Group-Object AgentName | ForEach-Object {
-        New-Finding "Discovered agents" "$($_.Name) (local)" "Low" "Local AI agent seen on $($_.Count) device$(if ($_.Count -ne 1) { 's' })" "Check it's an approved tool; govern it with Defender for Endpoint and Intune"
+    # Each AgentsInfo row for a local agent is one installation (one agent, device and account).
+    $Agents | Where-Object { $_.Platform -eq "LocalAgents" -and $_.LifecycleStatus -ne "Uninstalled" } | Group-Object AgentName | ForEach-Object {
+        New-Finding "Discovered agents" "$($_.Name) (local)" "Low" "Local AI agent found in $($_.Count) installation$(if ($_.Count -ne 1) { 's' }) on devices" "Check it's an approved tool; govern it with Defender for Endpoint and Intune"
     }
 }
 
@@ -475,7 +485,7 @@ function Test-ClassicAgent($S, $SignIns) {
     $name = $S.displayName
     $last = ConvertTo-Utc $SignIns[$S.appId]
     $made = if ($S.tags -contains "AgentCreatedBy:CopilotStudio" -or ($S.tags -match '^power-virtual-agents-')) { "Copilot Studio" } else { "an older platform" }
-    New-Finding "Agents without Agent ID" $name "Medium" "Agent from $made runs as a classic service principal, not an Agent ID" "Recreate it with Agent ID (there's no in-place migration), then retire this service principal"
+    New-Finding "Agents without Agent ID" $name "Medium" "Agent from $made runs as a classic service principal, not an Agent ID" "There's no in-place migration. Unused: retire it. Lightly used: recreate it with Agent ID, then retire this one. Busy production agent: Microsoft says wait for an automated migration path"
     if (-not @(Get-GraphAllOptional "$graph/servicePrincipals/$($S.id)/owners?`$select=id").Count) { New-Finding "Agents without Agent ID" $name "Medium" "No owner" "Find who built it and make them the owner" }
     if ($S.accountEnabled -and (-not $last -or $last -lt $cutoff) -and (ConvertTo-Utc $S.createdDateTime) -lt $cutoff) {
         New-Finding "Agents without Agent ID" $name "Low" "No sign-in for $StaleDays days" "Check with the owner, then retire it instead of recreating it"
@@ -629,10 +639,10 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           Sort-Object @{ e = { @("High", "Medium").IndexOf($_.Group[0].Severity) } }, @{ e = { $_.Count }; Descending = $true } |
                           Select-Object -First 3 | ForEach-Object { "$($_.Name): $($_.Count) $(if ($_.Count -eq 1) { 'item' } else { 'items' }) ($(($_.Group | ForEach-Object Item | Select-Object -Unique -First 3) -join ', ')$(if ($_.Count -gt 3) { ', …' }))." })
         manualChecks = @(
-                          "Entra > Entra ID > Users > User settings: Users can register agent identity blueprints is No."
-                          "Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID: the default inactivity policy is on."
-                          "Microsoft 365 admin center > Agents > Settings > Agent and plugin access: external publishers are off, or reviewed."
-                          "Microsoft 365 admin center > Agents > Settings > Sharing: limited to a group."
+                          "Entra > Entra ID > Users > User settings: Users can register agent identity blueprints (docs: Users can create agent blueprints) is No."
+                          "Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID (Preview): the default inactivity policy is on."
+                          "Microsoft 365 admin center > Agents > Settings > Agent and plugin access: Allow agents and plugins built by external publishers is off, or reviewed."
+                          "Microsoft 365 admin center > Agents > Settings > Sharing: Specific users, not All users (applies to Agent Builder agents only)."
                           "Agents > Tools > Registry: standalone MCP servers and skills (no API) have clear names, owners and group-scoped availability."
                           "Sponsors attested each agent in the last 12 months (access review or attestation).")
         graphCalls   = @(
@@ -647,9 +657,9 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "GET /beta/identity/conditionalAccess/policies"
                           "GET /beta/servicePrincipals?`$filter=tags/any(t:t eq 'AgentCreatedBy:CopilotStudio') (and AgenticApp, AIAgentBuilder, AgenticInstance, power-virtual-agents-*)"
                           "POST /beta/security/runHuntingQuery: AgentsInfo | summarize arg_max(Timestamp, *) by AgentId (MCP servers, skills, tools)"
-                          "POST /beta/security/runHuntingQuery: CloudAppEvents | where ActionType in (InvokeAgent, ExecuteTool...) | summarize max(Timestamp) by AgentId")
+                          "POST /beta/security/runHuntingQuery: CloudAppEvents | where ActionType in (InvokeAgent, ExecuteTool...) | summarize max(Timestamp) by agent appId (TargetAgentId or AgentId)")
         notes        = @(
-                          "References in brackets: CIS Controls v8.1 safeguards (AI Agent and MCP Companion Guides, April 2026) and the CISA risk category from 'Careful Adoption of Agentic AI Services' (CISA, NSA and Five Eyes partners, May 2026). CIS 5.3 disables dormant accounts after 45 days; run with -StaleDays 45 to match it."
+                          "References in brackets: this repo's mapping of each check to CIS Controls v8.1 safeguards (AI Agent and MCP Companion Guides, April 2026) and to the CISA risk categories in 'Careful Adoption of Agentic AI Services' (CISA, NSA and partners, 2026). The mapping is a judgment, not published by CIS or CISA. CIS 5.3 says to disable dormant accounts after 45 days; run with -StaleDays 45 to match it."
                           "Scores: each item starts at 100 (High -25, Medium -10, Low -3); an area's score is the average of its items."
                           "Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names or descriptions."
                           if ($SkipPackages -or -not $packages) { "Agents and tools weren't checked: the Agent 365 catalog wasn't read." }

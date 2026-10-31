@@ -82,7 +82,7 @@ Output goes to `.\AgentToolsReport-<date-time>\`: `Packages.csv`, `AgentIdentiti
 Safety rules built into the recommendations:
 - **Microsoft-built packages are Keep. Apps are Review.**
 - **No sign-in data means Review, never Disable.**
-- **NoActivity identities are Review, not Disable.** Copilot Studio agent identities can be in use without a recorded sign-in of their own. Only identities that signed in before and then stopped get Disable.
+- **NoActivity identities are Review, not Disable.** In testing, some Copilot Studio agent identities that were in use had no recorded sign-in of their own (an observation, not documented behavior). Only identities that signed in before and then stopped get Disable.
 - **Blueprints from Microsoft or other publishers are Review.** A blueprint principal with no blueprint registered in your tenant (such as the Copilot Studio agent identity blueprint) backs every agent built on that product. Disabling it breaks all of them.
 
 ### 2. Review the CSVs

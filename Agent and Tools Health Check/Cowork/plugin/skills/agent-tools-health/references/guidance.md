@@ -1,11 +1,11 @@
 # CISA and CIS guidance behind the checks
 
-Every finding names the guidance it comes from, in brackets after the fix: the **CIS Controls v8.1 safeguards** and the **CISA risk category**. The safeguard numbers are this repo's mapping of the checks to CIS Controls v8.1, the version the CIS AI companion guides apply to agents. Check them against the companion guides themselves before you cite them in an audit.
+Every finding names the guidance it comes from, in brackets after the fix: the **CIS Controls v8.1 safeguards** and the **CISA risk category**. The safeguard titles are CIS's. **Which safeguard and which CISA category each check maps to is this repo's judgment**, not something CIS or CISA published. Check it against the guides before you cite it in an audit, and say so when you present it.
 
 ## Sources
 
-- **CISA and partners, *Careful Adoption of Agentic Artificial Intelligence (AI) Services*** (May 1, 2026). Joint guidance from CISA, NSA, Australia's ASD ACSC, the Canadian Centre for Cyber Security, New Zealand's NCSC and the UK's NCSC. It sorts agentic AI risk into five categories: **privilege**, **design and configuration**, **behavioral**, **structural** and **accountability**. It recommends building strong identity into agents, keeping least-privilege access, never giving agents broad or unrestricted access (especially to sensitive data or critical systems), starting with low-risk use cases, keeping detailed logs of agent actions, monitoring for anomalous behavior, and designing in human oversight. It asks organizations to fold agent security into the frameworks they already run (zero trust, defense in depth, least privilege) rather than start a new discipline. https://www.cisa.gov/resources-tools/resources/careful-adoption-agentic-ai-services
-- **CIS, AI Agent Companion Guide and MCP Companion Guide for CIS Controls v8.1** (April 20, 2026, with Astrix Security and Cequence Security). They apply the CIS Controls to the agent layer (safe tool execution, governed autonomy, access to enterprise systems, tool allowlisting, least privilege, identity for every tool call, human approval for high-impact actions, auditability) and to MCP (secure tool access, management of non-human identities, auditable interactions). https://www.cisecurity.org/insights/white-papers/controls-v8-1-ai-agents-companion-guide
+- **CISA and partners, *Careful Adoption of Agentic AI Services*** (published summaries date it April 30 or May 1, 2026). Joint guidance from CISA, NSA, Australia's ASD ACSC, the Canadian Centre for Cyber Security, New Zealand's NCSC and the UK's NCSC. It sorts agentic AI risk into five categories: **privilege**, **design and configuration**, **behavioral**, **structural** and **accountability**, and summaries say it stresses least privilege. The original couldn't be opened when this was written, so these points come from several published summaries; don't quote other recommendations from it without reading it. https://www.cisa.gov/resources-tools/resources/careful-adoption-agentic-ai-services
+- **CIS, AI Agent Companion Guide and MCP Companion Guide for CIS Controls v8.1** (April 20, 2026, with Astrix Security and Cequence Security). Per CIS, the agent guide covers safe tool execution, governed autonomy and appropriate access to enterprise systems, and the MCP guide covers secure tool access, management of non-human identities and auditable interactions. https://www.cisecurity.org/insights/white-papers/controls-v8-1-ai-agents-companion-guide and https://www.cisecurity.org/insights/white-papers/controls-v8-1-model-context-protocol-companion-guide
 
 ## CIS Controls v8.1 safeguards used
 
@@ -20,7 +20,7 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | 3.3 | Configure Data Access Control Lists | Agents should reach only the data they need (least privilege) |
 | 4.1 | Establish and Maintain a Secure Configuration Process | Credentials and Conditional Access for agents are part of their secure configuration |
 | 5.1 | Establish and Maintain an Inventory of Accounts | Each agent identity has an accountable sponsor and owner |
-| 5.3 | Disable Dormant Accounts | CIS sets 45 days of inactivity. These scripts default to 90; use `-StaleDays 45` to match CIS |
+| 5.3 | Disable Dormant Accounts | CIS: delete or disable dormant accounts after 45 days of inactivity, where supported. These scripts default to 90; use `-StaleDays 45` to match CIS |
 | 5.4 | Restrict Administrator Privileges to Dedicated Administrator Accounts | No high-privilege Graph permissions on agents |
 | 5.5 | Establish and Maintain an Inventory of Service Accounts | Agent identities and agent user accounts are non-human accounts: inventory them with owner, purpose and review date, and review them at least quarterly |
 | 5.6 | Centralize Account Management | Agents should use Entra Agent ID, not one-off service principals |
@@ -32,7 +32,7 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 
 ## Checks mapped to the guidance
 
-| Check | CIS v8.1 | CISA risk category |
+| Check | CIS v8.1 (our mapping) | CISA risk category (our mapping) |
 | --- | --- | --- |
 | Available to all users, installed for everyone, assigned to people instead of groups | 6.1, 6.8 | Privilege |
 | Group with fewer than two owners | 5.1, 6.1 | Accountability |
@@ -51,11 +51,10 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | Local AI agent on devices | 2.1, 2.3, 2.5 | Design and configuration |
 | MCP server reached over http (no TLS) | 3.10 | Design and configuration |
 | MCP server outside Microsoft | 2.5, 15.1 | Design and configuration (third-party components) |
-| No Entra Agent ID, or a classic service principal | 5.5, 5.6 | Strong agent identity (CISA's identity recommendation) |
+| No Entra Agent ID, or a classic service principal | 5.5, 5.6 | Design and configuration; accountability |
 
 ## Not checked here, but in the guidance
 
-- **Logging and monitoring** (CISA: detailed logs of agent actions and ongoing monitoring; CIS 8.2 Collect Audit Logs): confirm Purview audit is on and Defender monitors agent activity.
-- **Human oversight** (CISA: designed-in human oversight; CIS AI Agent guide: human approval for high-impact actions): check in each agent's design (Copilot Studio, Foundry), not through Graph.
-- **Tool allowlisting** (CIS AI Agent and MCP guides): this check flags MCP servers outside Microsoft and over http, from Defender's AgentsInfo. Use **Agents > Tools** to allow only approved MCP servers, and the Agent and Tools Cleanup scripts to block unused ones.
-- **Starting with low-risk use cases** (CISA): a deployment decision; use group-scoped pilots.
+- **Logging and monitoring** (CISA's accountability category; CIS 8.2 Collect Audit Logs): confirm Purview audit is on and Defender monitors agent activity.
+- **Human oversight of high-impact actions** (CIS agent guide: governed autonomy): check in each agent's design (Copilot Studio, Foundry), not through Graph.
+- **Approved tools** (CIS MCP guide: secure tool access): this check flags MCP servers over http and on hosts outside this repo's Microsoft domain list, from Defender's AgentsInfo. Use **Agents > Tools** to allow only approved MCP servers, and the Agent and Tools Cleanup scripts to block unused ones.

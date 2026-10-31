@@ -685,7 +685,7 @@ For agent settings (who can build, share, publish and receive agents), see the [
 | Copilot SharePoint Admin | SharePoint Administrator | 8 hours, needs approval | SharePoint admin center |
 | Copilot Studio Environment Admin | Power Platform Administrator (or a smaller environment admin role) | 8 hours, needs approval | Power Platform admin center |
 | Copilot Plugin Approvers | None | 8 hours | See the next section |
-| Copilot Health Check Users | AI Reader, Security Reader, Reports Reader | 8 hours | **New.** Running the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks, read-only. Also the scope of their Cowork plugins. See [Copilot Health Check Users](#copilot-health-check-users) |
+| Copilot Health Check Users | AI Reader, Security Reader, Reports Reader | 8 hours, needs approval | **New.** Running the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks, read-only. Also the scope of their Cowork plugins. See [Copilot Health Check Users](#copilot-health-check-users) |
 
 I checked every role name above in the tenant on Oct 26, 2026. They all exist.
 
@@ -697,17 +697,17 @@ One group for the people who run the two Copilot health checks: the [Copilot Bil
 
 Why role-assignable:
 - The Entra roles go on the **group**, not on each person, so adding or removing someone is one change, and an access review covers it.
-- Only Privileged Role Administrators and Global Administrators can change who's in it. A group owner or a Groups Administrator can't quietly add themselves to get Security Reader.
-- With PIM for Groups, nobody holds the readers all the time: they activate for 8 hours with MFA and a reason, and every activation is logged.
+- Groups Administrators, User Administrators and Exchange Administrators can't change who's in it. Global Administrators, Privileged Role Administrators **and the group's owners** can, so give the group no owners (or only people who already hold Privileged Role Administrator).
+- With PIM for Groups, nobody holds the readers all the time: they activate for 8 hours with MFA, a reason and approval, and every activation is logged. `New-CopilotAdminPim.ps1` turns approval on, because Microsoft recommends approval for groups used to activate Entra roles, and Microsoft labels AI Reader a privileged role. Turn it off only if you accept that trade-off.
 - Rules that come with it: it can't be dynamic, other groups can't be nested in it, and you can only set role-assignable when you create the group.
 
 | Role | Why the health checks need it |
 | --- | --- |
-| **AI Reader** | Reads all of Copilot: spending policies and consumption, Copilot settings, agents. Also reads users, groups, owners, licenses, agent identities, blueprints, their permissions and role assignments |
+| **AI Reader** | Reads Copilot settings and agents ("read all aspects of Microsoft Copilot" in the roles reference), users, groups, owners, licenses, agent identities, blueprints, their permissions and role assignments. Two gaps to test: the Graph pages for listing agent identities and blueprints name only Agent ID Administrator for non-owners, and the Copilot cost management API (spending policies) documents Global Reader and Billing Administrator for reads, not AI Reader. Microsoft labels AI Reader a privileged role |
 | **Security Reader** | Reads sign-in activity, Conditional Access policies, and Microsoft Defender (the advanced hunting queries for agents) |
-| **Reports Reader** | Reads the Microsoft 365 Copilot usage report (the Cowork readiness funnel) |
+| **Reports Reader** | Reads the Microsoft 365 Copilot usage report (the Cowork readiness funnel), where it's a listed role, and service principal sign-in activity |
 
-**Broader option:** Global Reader covers almost all of this in one role, but it can read the whole tenant. Prefer the three readers above.
+**Broader option:** Global Reader covers almost all of this in one role, including the documented readers for spending policies, advanced hunting and Conditional Access, but it can read the whole tenant. Start with the three readers above; if a read returns 403, Global Reader for that run is the documented fallback.
 
 Not covered by these readers, by design:
 - **Agent 365 catalog** (`copilot/admin/catalog/packages`, used for agents and tools): Microsoft documents AI Administrator or Global Administrator. AI Reader reads "all aspects of Copilot", so test it first; if the catalog returns 403, activate **Copilot Agent Management Admin** for that run, or use `-SkipPackages` and let the Agent and Tools Health Check use Defender's agent list.
