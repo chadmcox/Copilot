@@ -39,12 +39,22 @@ param(
     [switch]$DisableBlueprints,
     [switch]$BlockPackages,
     [switch]$Restore,
-    [string]$UndoFile
+    [string]$UndoFile,
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
 
-$graph = "https://graph.microsoft.com/beta"
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
+
+$graph = "$graphEndpoint/beta"
 
 # ---------------------------------------------------------------------------
 # What to change
@@ -116,7 +126,7 @@ if ($Restore) {
     if (-not $UndoFile -or -not (Test-Path $UndoFile)) { throw "Use -UndoFile with a cleanup-undo-*.json file from an earlier run." }
     $items = Get-Content -Path $UndoFile -Raw | ConvertFrom-Json
     $items = @($items | ForEach-Object { $_ })
-    Connect-MgGraph -Scopes @(Get-Scopes $items) -NoWelcome
+    Connect-MgGraph -Environment $Environment -Scopes @(Get-Scopes $items) -NoWelcome
     $restored = @($items | Invoke-AgentChange -Undo)
     Write-Host "Restored $($restored.Count) of $($items.Count) objects."
     return
@@ -129,7 +139,7 @@ if (-not $items) {
 }
 
 $items | Group-Object kind | Select-Object @{ n = "Change"; e = { $_.Name } }, Count | Format-Table -AutoSize
-Connect-MgGraph -Scopes @(Get-Scopes $items) -NoWelcome
+Connect-MgGraph -Environment $Environment -Scopes @(Get-Scopes $items) -NoWelcome
 
 $changed = @($items | Invoke-AgentChange)
 

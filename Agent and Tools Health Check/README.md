@@ -19,7 +19,10 @@ A read-only check of how well your Copilot agents and tools, Entra agent identit
 .\Get-AgentToolsHealth.ps1 -PackagesOnly    # just Packages.csv and DefenderAgents.csv, to attach in Cowork
 .\Get-AgentToolsHealth.ps1 -SkipPackages    # no Agent 365 license
 .\Get-AgentToolsHealth.ps1 -SkipDefender    # no Defender (or no Security Reader)
+.\Get-AgentToolsHealth.ps1 -Environment USGov  # GCC High, without the cloud question
 ```
+
+The script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High), **USGovDoD** or **China**. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High, DoD and China use the scripts.
 
 Both give the same HTML report from the same template: a score dial, a card per area, the well-governed funnel for agent identities, filterable findings, CSV export, print, and a manual checklist.
 

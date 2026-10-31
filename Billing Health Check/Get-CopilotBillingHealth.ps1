@@ -67,12 +67,22 @@ param(
     # A license counts as Copilot when it includes one of these service plans.
     # 3f30311c-... is M365_COPILOT_BUSINESS_CHAT ("Microsoft Copilot with Graph-grounded chat"),
     # which is in every Microsoft 365 Copilot SKU.
-    [string[]]$CopilotServicePlanIds = @("3f30311c-6b1e-48a4-ab79-725b469da960")
+    [string[]]$CopilotServicePlanIds = @("3f30311c-6b1e-48a4-ab79-725b469da960"),
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
 
-Connect-MgGraph -NoWelcome -Scopes @(
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
+
+Connect-MgGraph -Environment $Environment -NoWelcome -Scopes @(
     "CopilotCostManagement-Policy.Read.All",
     "CopilotCostManagement-Assignment.Read.All",
     "CopilotCostManagement-UserData.Read.All",
@@ -85,8 +95,8 @@ Connect-MgGraph -NoWelcome -Scopes @(
     "Organization.Read.All"
 )
 
-$cm = "https://graph.microsoft.com/beta/copilot/costManagement"
-$graph = "https://graph.microsoft.com/beta"   # beta everywhere; it usually has more
+$cm = "$graphEndpoint/beta/copilot/costManagement"
+$graph = "$graphEndpoint/beta"   # beta everywhere; it usually has more
 
 $userCache = @{}
 $groupCache = @{}

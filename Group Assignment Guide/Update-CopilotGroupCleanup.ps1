@@ -24,13 +24,23 @@
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
 param(
     [switch]$DeleteEvenIfMembers,
-    [string]$ExportFolder = ".\CopilotGroupCleanup-$(Get-Date -Format yyyyMMdd-HHmm)"
+    [string]$ExportFolder = ".\CopilotGroupCleanup-$(Get-Date -Format yyyyMMdd-HHmm)",
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
 
-Connect-MgGraph -Scopes "Group.ReadWrite.All" -NoWelcome
-$graph = "https://graph.microsoft.com/v1.0"
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
+
+Connect-MgGraph -Environment $Environment -Scopes "Group.ReadWrite.All" -NoWelcome
+$graph = "$graphEndpoint/v1.0"
 
 # ---------------------------------------------------------------------------
 # 1. Groups to delete (replaced in the current design)
