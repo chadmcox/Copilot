@@ -101,7 +101,7 @@ The files have group IDs and agent names. Keep it private and out of source cont
 
 **Already set up the [Billing Health Check plugin](../../Billing%20Health%20Check/Cowork/readme.md) or the [Agent and Tools Cleanup plugin](../../Agent%20and%20Tools%20Cleanup/Cowork/readme.md)?** Reuse that app registration and OAuth client registration. Run step 3 with the same Application (client) ID to add the scopes below (the cmdlet adds them and keeps the old ones), then go to step 5 with the same registration ID.
 
-You need **Application Administrator** or **Cloud Application Administrator** for steps 1 to 3, and a Microsoft 365 admin for step 5. The people who run the check need a Microsoft 365 Copilot license, Cowork access, and **Global Reader** (the MCP server acts as the signed-in person, so it can't see more than they can).
+You need **Application Administrator** or **Cloud Application Administrator** for steps 1 to 3, and a Microsoft 365 admin for step 5. The people who run the check go in **Copilot Health Check Users**: a role-assignable group under PIM that holds **AI Reader**, **Security Reader** and **Reports Reader**. They also need a Microsoft 365 Copilot license and Cowork access. The MCP server acts as the signed-in person, so it can't see more than their activated roles allow. See [Who runs it](../README.md#who-runs-it-copilot-health-check-users).
 
 ### 1. Turn on the Enterprise MCP server in your tenant
 
@@ -167,7 +167,7 @@ Save, then copy the **OAuth client registration ID**. (`e8c77dc2-...` is the Mic
 
 This writes **AgentToolsHealth-Cowork.zip**. If the `plugin` folder isn't next to the script, it downloads the plugin files from this repo on GitHub.
 
-In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose the admins who should run the check. Don't pick all users.
+In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose **Copilot Health Check Users** from the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md#copilot-health-check-users). Don't pick all users.
 
 ### 6. Test it
 

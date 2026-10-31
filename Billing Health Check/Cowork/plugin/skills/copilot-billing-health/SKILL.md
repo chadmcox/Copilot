@@ -59,7 +59,7 @@ stop and tell the user the connector can't read the tenant, with the error. Don'
 | Copilot activity (for readiness) | `GET /beta/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D28')`. A person is active when `lastActivityDate` isn't empty. If `userPrincipalName` values have no `@`, the tenant hides names: count active people, but don't match them to anyone |
 | Access reviews (optional) | `GET /beta/identityGovernance/accessReviews/definitions?$select=id,displayName,scope` and look for the group id in each scope query |
 
-If a call returns 403, say which permission is missing and carry on with the rest.
+If a call returns 403, say which permission is missing and carry on with the rest. The person running the check should be an activated member of **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader, through PIM). If many calls return 403, ask whether they activated the group in PIM (My roles > Groups) before going on.
 
 If you couldn't read any of the groups, stop before Step 3. Tell the user how many groups you read
 (0) and the errors you got. Don't score or report findings from Policies.csv alone: without the

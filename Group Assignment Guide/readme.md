@@ -123,7 +123,7 @@ The access package script puts every package in a catalog named **Copilot Access
 
 These get roles through PIM, not through an admin center setting. The roles and activation times are in the Admin groups section below. Access packages for them are only made with `-IncludeAdminPackages` (Admin tier).
 
-Copilot Platform Admin, Copilot Delegated Admin, Copilot Agent Management Admin, Copilot Agent Registry Admin, Copilot AI Reader, Copilot Billing Admin, Copilot Cost Reader, Copilot Agent ID Admin, Copilot Agent ID Developers, Copilot Office Apps Admin, Copilot Compliance Admin, Copilot Teams Admin, Copilot SharePoint Admin, Copilot Studio Environment Admin, Copilot Plugin Approvers.
+Copilot Platform Admin, Copilot Delegated Admin, Copilot Agent Management Admin, Copilot Agent Registry Admin, Copilot AI Reader, Copilot Billing Admin, Copilot Cost Reader, Copilot Agent ID Admin, Copilot Agent ID Developers, Copilot Office Apps Admin, Copilot Compliance Admin, Copilot Teams Admin, Copilot SharePoint Admin, Copilot Studio Environment Admin, Copilot Plugin Approvers, Copilot Health Check Users.
 
 Copilot Platform Admin is made by `New-CopilotAdminPim.ps1` and has no access package.
 
@@ -685,8 +685,37 @@ For agent settings (who can build, share, publish and receive agents), see the [
 | Copilot SharePoint Admin | SharePoint Administrator | 8 hours, needs approval | SharePoint admin center |
 | Copilot Studio Environment Admin | Power Platform Administrator (or a smaller environment admin role) | 8 hours, needs approval | Power Platform admin center |
 | Copilot Plugin Approvers | None | 8 hours | See the next section |
+| Copilot Health Check Users | AI Reader, Security Reader, Reports Reader | 8 hours | **New.** Running the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks, read-only. Also the scope of their Cowork plugins. See [Copilot Health Check Users](#copilot-health-check-users) |
 
 I checked every role name above in the tenant on Oct 26, 2026. They all exist.
+
+## Copilot Health Check Users
+
+One group for the people who run the two Copilot health checks: the [Copilot Billing Health Check](../Billing%20Health%20Check/README.md) and the [Agent and Tools Health Check](../Agent%20and%20Tools%20Health%20Check/README.md). Both are read-only, so the group holds only reader roles.
+
+**Make it role-assignable, and put it under PIM.** Both scripts here do that: `New-CopilotGroups.ps1` creates it as role-assignable, and `New-CopilotAdminPim.ps1` gives it the roles and makes people *eligible* members.
+
+Why role-assignable:
+- The Entra roles go on the **group**, not on each person, so adding or removing someone is one change, and an access review covers it.
+- Only Privileged Role Administrators and Global Administrators can change who's in it. A group owner or a Groups Administrator can't quietly add themselves to get Security Reader.
+- With PIM for Groups, nobody holds the readers all the time: they activate for 8 hours with MFA and a reason, and every activation is logged.
+- Rules that come with it: it can't be dynamic, other groups can't be nested in it, and you can only set role-assignable when you create the group.
+
+| Role | Why the health checks need it |
+| --- | --- |
+| **AI Reader** | Reads all of Copilot: spending policies and consumption, Copilot settings, agents. Also reads users, groups, owners, licenses, agent identities, blueprints, their permissions and role assignments |
+| **Security Reader** | Reads sign-in activity, Conditional Access policies, and Microsoft Defender (the advanced hunting queries for agents) |
+| **Reports Reader** | Reads the Microsoft 365 Copilot usage report (the Cowork readiness funnel) |
+
+**Broader option:** Global Reader covers almost all of this in one role, but it can read the whole tenant. Prefer the three readers above.
+
+Not covered by these readers, by design:
+- **Agent 365 catalog** (`copilot/admin/catalog/packages`, used for agents and tools): Microsoft documents AI Administrator or Global Administrator. AI Reader reads "all aspects of Copilot", so test it first; if the catalog returns 403, activate **Copilot Agent Management Admin** for that run, or use `-SkipPackages` and let the Agent and Tools Health Check use Defender's agent list.
+- **Per-person credit balances** in the Billing Health Check (`userBalances`): if a reader gets 403, run with `-SkipBalances`.
+- **Purview audit search** (`-AuditDays` in the cleanup report): needs a Purview role such as **Audit Reader**, which is assigned in the Purview portal, not Entra.
+- **Making changes** (blocking agents, disabling agent identities): not for this group. Use **Copilot Agent Management Admin** and **Copilot Agent ID Admin**.
+
+Members also need a Microsoft 365 Copilot license and Cowork access (one of the Cowork spend groups) to run the checks in Copilot Cowork. Scope both health check plugins to this group when you upload them (**Agents > Tools > Registry > Upload > Scope users > Specific users or groups**).
 
 ## Groups with no setting yet
 
