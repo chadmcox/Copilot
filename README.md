@@ -40,4 +40,4 @@ Do these in order.
 
 ## About this repo
 
-Scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` against Microsoft Graph beta. The coding rules are in [CLAUDE.md](CLAUDE.md). Reports the scripts write can name people and groups, so keep them out of source control.
+Scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` against Microsoft Graph beta. The coding rules for people and AI coding agents are in [AGENTS.md](AGENTS.md). Reports the scripts write can name people and groups, so keep them out of source control.
