@@ -79,8 +79,11 @@ For each policy, start at 100. Take off 25 for each High, 10 for each Medium and
 
 ## Step 5: Report
 
-The main result is an **HTML report** built from **assets/report-template.html**. Don't make a
-spreadsheet unless the user asks for one.
+The main result is an **HTML report** built from **assets/report-template.html**, a companion file
+of this skill. **Always use that template. Never write your own report layout, Markdown report or
+document instead**, even a short one: the template has the score dial, policy cards, filters,
+search, CSV export and print that people expect. If you can't read the template, say so and stop;
+don't improvise. Don't make a spreadsheet unless the user asks for one.
 
 1. Copy assets/report-template.html to the output folder as **Copilot Billing Health.html**.
 2. Replace only the JSON inside `<script id="report-data" type="application/json">` with this
