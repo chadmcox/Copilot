@@ -8,7 +8,7 @@ Thresholds: stale after 90 days, credential warning 30 days before expiry, pendi
 
 **High-privilege Microsoft Graph permissions**: `Directory.*`, `RoleManagement.*`, `Application.*`, `AppRoleAssignment.*`, `Policy.*`, `User.*`, `Group.*`, `GroupMember.*`, `Domain.*`, `Organization.*` when they're ReadWrite, plus `Mail.Send`, `Mail.ReadWrite`, `Sites.FullControl.All`, `Sites.ReadWrite.All`, `Files.ReadWrite.All`, `Directory.AccessAsUser.All`, `full_access_as_app`. Any other `*.ReadWrite.All` is **tenant-wide write**.
 
-Each finding has an **Area** (Agents, Tools, Agent identities, Blueprints, Tenant), an **Item** (the agent, tool, identity, blueprint or setting), a **Category** (Access, Ownership, Permissions, Naming, Usage, Security), a **Severity**, a **Check** and a **Fix**.
+Each finding has an **Area** (Agents, Tools, Agent identities, Blueprints, Tenant, Discovered agents, Agents without Agent ID), an **Item** (the agent, tool, identity, blueprint or setting), a **Category** (Access, Ownership, Permissions, Naming, Usage, Security, Identity, Inventory), a **Severity**, a **Check** and a **Fix**.
 
 Microsoft-published agents and tools, and blueprints from other publishers (a blueprint principal with no blueprint registered in this tenant), aren't checked for names, descriptions or use. Packages of kind **App** (Office add-ins, tabs) aren't checked.
 
@@ -25,6 +25,7 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 | Unclear name | Medium | Naming | Rename it so people can tell what it does and who owns it |
 | Poor description (`shortDescription`) | Medium | Naming | Describe what it does, for whom, and what data it uses |
 | `requestStatus` is pending and `lastModifiedDateTime` is more than 14 days ago | Low | Usage | Approve or reject it |
+| Custom agent whose `elementTypes` include customEngine or bot, with no `agentIdentityId` | Low | Identity | Recreate it with Agent ID so it gets a sponsor, Conditional Access and lifecycle controls |
 | Not blocked, no `activeUsers30d`, `lastUsedDateTime` empty or older than 90 days, and `lastModifiedDateTime` older than 90 days | Medium | Usage | Block it, or run Agent and Tools Cleanup |
 
 ## Agent identities
@@ -64,9 +65,31 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 | Agent policies exist, but none is `enabled` | Medium | Security | Review the report-only results, then turn them on |
 | No enabled policy with `agentIdRiskLevels` including high and a `block` grant | Medium | Security | Add a policy that blocks agent identities at high risk |
 
+## Discovered agents (from DefenderAgents.csv)
+
+Microsoft Defender's `AgentsInfo` inventory covers Copilot Studio, Foundry, third-party and local (endpoint) agents. An agent is **in the registry** when its `AgentId`, `SourceAgentId` or `EntraAgentId` matches a Packages.csv `id`, `appId`, `manifestId`, `assetId` or `agentIdentityId`. Skip the registry checks if Packages.csv isn't attached. Ignore agents whose `LifecycleStatus` is `Uninstalled`. Item name: "AgentName (Platform)".
+
+| Check | Severity | Category | Fix |
+| --- | --- | --- | --- |
+| Cloud agent (Platform isn't `LocalAgents`) not in the registry | Medium | Inventory | Add it to the registry (registry sync) with an owner, or remove it |
+| Not in the registry, and `Availability` is all users | High | Inventory | Limit it to a group, then register it |
+| Not in the registry, and `OwnerCount` is 0 | Medium | Ownership | Find who built it and make them the owner, or remove it |
+| Cloud agent with no `EntraAgentId` | Medium | Identity | Recreate or register it with an Agent ID so it gets a sponsor, Conditional Access and lifecycle controls |
+| Local agent (Platform `LocalAgents`), one finding per agent name with the device count | Low | Inventory | Check it's an approved tool; govern it with Defender for Endpoint and Intune |
+
+## Agents without Agent ID (classic service principals)
+
+Older Copilot Studio and Foundry agents run as ordinary service principals. Find them by tag: `AgentCreatedBy:CopilotStudio`, `AgenticApp`, `AIAgentBuilder`, `AgenticInstance`, or a tag starting with `power-virtual-agents-`. Leave out anything that's an agent identity or a blueprint principal.
+
+| Check | Severity | Category | Fix |
+| --- | --- | --- | --- |
+| Runs as a classic service principal, not an Agent ID | Medium | Identity | Recreate it with Agent ID (there's no in-place migration), then retire this service principal |
+| No owner | Medium | Ownership | Find who built it and make them the owner |
+| Enabled, no sign-in for 90 days, older than 90 days | Low | Usage | Check with the owner, then retire it instead of recreating it |
+
 ## Scoring
 
-Every item starts at 100: High −25, Medium −10, Low −3 (Info 0), never below 0. An area's score is the average of its items' scores; an area with no items scores 100. Rating: Green 80+, Amber 50–79, Red under 50. The Tenant area has one item, "Conditional Access".
+Every item starts at 100: High −25, Medium −10, Low −3 (Info 0), never below 0. An area's score is the average of its items' scores; an area with no items scores 100. Rating: Green 80+, Amber 50–79, Red under 50. The Tenant area has one item, "Conditional Access". Discovered agents and Agents without Agent ID only appear when there is data for them.
 
 ## Well-governed funnel (agent identities)
 
