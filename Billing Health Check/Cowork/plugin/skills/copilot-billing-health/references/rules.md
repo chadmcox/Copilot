@@ -38,7 +38,7 @@ Thresholds: per-user minimum 2,000 credits, inactive after 90 days. The user can
 | Account disabled | Medium | Remove them from the group |
 | Guest (`userType` is `Guest`) | Medium | Remove them, unless guests should spend credits |
 | No successful sign-in for 90 days | Medium | Remove them from the group |
-| No Copilot license, and the policy covers a licensed service | Medium | License them, or remove them |
+| No working Copilot license, and the policy covers a licensed service. Working means: a license with the Copilot service plan, that plan not in `disabledPlans`, and its `licenseAssignmentStates` entry not in `Error` or `Disabled` | Medium | Assign a working Copilot license, or remove them |
 | A person in a Teams Phone Agent policy group (it should hold resource accounts) | Medium | Keep resource accounts only |
 
 ## Across the Cowork tiers

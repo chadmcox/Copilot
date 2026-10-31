@@ -52,7 +52,7 @@ stop and tell the user the connector can't read the tenant, with the error. Don'
 | Group | `GET /beta/groups/{id}?$select=id,displayName,description,groupTypes,securityEnabled,membershipRule` |
 | Owners | `GET /beta/groups/{id}/owners?$select=id,userPrincipalName,accountEnabled` |
 | Nested groups | `GET /beta/groups/{id}/members/microsoft.graph.group?$select=id,displayName` |
-| Everyone, including nested | `GET /beta/groups/{id}/transitiveMembers/microsoft.graph.user?$select=id,userPrincipalName,accountEnabled,userType,assignedLicenses&$top=999` |
+| Everyone, including nested | `GET /beta/groups/{id}/transitiveMembers/microsoft.graph.user?$select=id,userPrincipalName,accountEnabled,userType,assignedLicenses,licenseAssignmentStates&$top=999` |
 | Inactive people (one call for the whole tenant) | `GET /beta/users?$filter=signInActivity/lastSuccessfulSignInDateTime le {today minus 90 days, ISO 8601}&$select=id,userPrincipalName,signInActivity&$top=999`, then match by id |
 | Alert recipients | `GET /beta/users/{id or UPN}?$select=id,userPrincipalName,accountEnabled` |
 | Access reviews (optional) | `GET /beta/identityGovernance/accessReviews/definitions?$select=id,displayName,scope` and look for the group id in each scope query |
