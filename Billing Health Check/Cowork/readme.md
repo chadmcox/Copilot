@@ -92,14 +92,14 @@ Good follow-ups:
 
 Pick one:
 
-- **Run the script** (quickest, about 1 minute): `.\Get-CopilotBillingHealth.ps1 -PoliciesOnly`. It writes only Policies.csv. It needs a Billing Administrator or Global Reader who can sign in to Graph.
+- **Run the script** (quickest, about 1 minute): `.\Get-CopilotBillingHealth.ps1 -PoliciesOnly`. It writes only Policies.csv. Run it as a member of **Copilot Health Check Users** with the group activated (AI Reader is enough for Policies.csv).
 - **Type it by hand**: copy [Policies-template.csv](Policies-template.csv) and fill it from **Microsoft 365 admin center > Copilot > Cost management > Configuration**. You can leave **GroupIds** blank; Cowork then finds each group by its exact name.
 
 Policies.csv has group IDs and alert recipients. Keep it private and out of source control.
 
 ## Way A: admin setup (once per tenant)
 
-You need **Application Administrator** or **Cloud Application Administrator** for steps 1 to 3, and a Microsoft 365 admin for step 5. The people who run the check need a Microsoft 365 Copilot license, Cowork access, and **Global Reader** (the MCP server acts as the signed-in person, so it can't see more than they can).
+You need **Application Administrator** or **Cloud Application Administrator** for steps 1 to 3, and a Microsoft 365 admin for step 5. The people who run the check go in **Copilot Health Check Users**: a role-assignable group under PIM that holds **AI Reader** and **Reports Reader** (plus Security Reader for the Agent and Tools Health Check). They also need a Microsoft 365 Copilot license and Cowork access. The MCP server acts as the signed-in person, so it can't see more than their activated roles allow. See [Who runs it](../README.md#who-runs-it-copilot-health-check-users).
 
 ### 1. Turn on the Enterprise MCP server in your tenant
 
@@ -156,7 +156,7 @@ Save, then copy the **OAuth client registration ID**.
 
 This writes **CopilotBillingHealth-Cowork.zip**. You can download just the script: if the `plugin` folder isn't next to it, the script downloads the plugin files from this repo on GitHub.
 
-In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose the group of people who should run the check, such as *Copilot Billing Admin* from the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md). Don't pick all users.
+In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose **Copilot Health Check Users** from the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md#copilot-health-check-users). Don't pick all users.
 
 ### 6. Test it
 

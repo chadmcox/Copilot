@@ -33,7 +33,7 @@ For an agent identity, `appId` equals `id`. Use it in the sign-in filter.
 
 For agents and tools, use **Packages.csv** from `Get-AgentToolsReport.ps1` if the user attached it. It has a `kind` column (Agent, Tool, App), last use from the catalog's own usage fields, status and recommendation. If it isn't attached, review identities and blueprints only, and offer the browser skill for the rest.
 
-If a call fails with 403, say which scope or role is missing and carry on with the other sections. The MCP server acts as the signed-in person, so they also need a role that can read these objects and sign-in reports (Global Reader works).
+If a call fails with 403, say which scope or role is missing and carry on with the other sections. The MCP server acts as the signed-in person, so they also need read roles: the Copilot Health Check Users group (AI Reader, Security Reader, Reports Reader), activated in PIM. If calls fail with 403, ask whether they activated it.
 
 ## Steps
 

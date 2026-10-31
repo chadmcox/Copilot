@@ -66,6 +66,23 @@ Two checks work in opposite directions because of this:
 - **Billing policies:** someone who already has a Copilot license doesn't need the policy. Remove them.
 - **Cowork and Code spending policies:** someone *without* a Copilot license can't use the service. License them or remove them. The license doesn't include Cowork or Code usage, so licensed users still use credits.
 
+## Who runs it: Copilot Health Check Users
+
+Put the people who run the health checks in one group: **Copilot Health Check Users**. The same group runs both the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks.
+
+1. **Create it as a role-assignable security group, and put it under PIM.** `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1` in the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md#copilot-health-check-users) do both. The roles sit on the group, only Privileged Role Administrators can change its members, and people activate it for 8 hours with MFA and a reason instead of holding reader roles all the time.
+2. **Give the group reader roles only** (table below). Prefer these to Global Reader, which reads the whole tenant.
+3. **Scope the Cowork plugin to the group** when you upload it: Agents > Tools > Registry > Upload > Scope users > Specific users or groups > Copilot Health Check Users.
+4. Members also need a Microsoft 365 Copilot license and Cowork access to run the check in Copilot Cowork. The Enterprise MCP server acts as the signed-in person, so they see only what their activated roles allow.
+
+| Entra role | What this check reads with it |
+| --- | --- |
+| **AI Reader** | Spending policies, their groups, service settings and alerts; tenant credit balance; groups, owners, members; users, licenses and subscribed SKUs |
+| **Reports Reader** | The Microsoft 365 Copilot usage report (Cowork readiness funnel), and sign-in activity (inactive members) |
+| **Security Reader** | Not needed for this check (the Agent and Tools Health Check uses it) |
+
+If per-person credit balances return 403 for readers, run with `-SkipBalances`. Creating or changing spending policies isn't part of the check; that stays with **Copilot Billing Admin**.
+
 ## 1. Collect the data (read-only)
 
 The cost management API only works when an admin signs in. So the check runs in two parts.

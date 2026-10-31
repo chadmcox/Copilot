@@ -65,7 +65,7 @@ The browser skill drives the person's own Microsoft Edge, with their sign-in and
 
 1. Microsoft 365 admin center > **Copilot > Settings > View all > Cowork settings > Allow browser access**: select **Allow Cowork to use the Microsoft Edge browser to perform tasks on behalf of users**, and limit it to the admins who run this review (for example the *Copilot + Cowork Browser Access* group from the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md)). It's off by default.
 2. The person runs Cowork **in a browser** (not the desktop app or mobile), has **Edge 152 or later**, and is signed in to Edge with the same work account. InPrivate and guest profiles don't work.
-3. They need an admin role that can see **Agents > Tools** and the Copilot reports, such as **AI Administrator** or **Global Reader**, activated in PIM before they start. Cowork stops and asks if a sign-in, MFA or PIM prompt appears.
+3. They need read access to **Agents > Tools** and the Copilot reports: activate **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader) in PIM before they start. Cowork stops and asks if a sign-in, MFA or PIM prompt appears.
 4. The first browser task shows a consent notice. Select **I understand**.
 
 Optional: the Edge policy `CopilotCoworkToolActionsEnabled` controls which Edge installs Cowork may drive.
@@ -74,7 +74,7 @@ Optional: the Edge policy `CopilotCoworkToolActionsEnabled` controls which Edge 
 
 **Already set up the [Billing Health Check plugin](../../Billing%20Health%20Check/Cowork/readme.md)?** Reuse its app registration and OAuth client registration. Run step 3 with the same Application (client) ID to add the scopes below (the cmdlet adds them and keeps the old ones), then go to step 5 with the same registration ID.
 
-Roles: **Application Administrator** or **Cloud Application Administrator** for steps 1 to 3, and a Microsoft 365 admin (AI Administrator or Global Administrator) for step 5. The people who run the review need a Microsoft 365 Copilot license, Cowork access, and a role that can read applications and sign-in reports, such as **Global Reader**. The MCP server acts as the signed-in person, so it can't see more than they can.
+Roles: **Application Administrator** or **Cloud Application Administrator** for steps 1 to 3, and a Microsoft 365 admin (AI Administrator or Global Administrator) for step 5. The people who run the review go in **Copilot Health Check Users** (role-assignable, under PIM, with AI Reader, Security Reader and Reports Reader; see the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md#copilot-health-check-users)), and need a Microsoft 365 Copilot license and Cowork access. Scope the plugin to that group when you upload it. Blocking and disabling with the scripts needs **Copilot Agent Management Admin** and **Copilot Agent ID Admin** instead. The MCP server acts as the signed-in person, so it can't see more than they can.
 
 ### 1. Turn on the Enterprise MCP server in your tenant
 

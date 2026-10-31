@@ -86,7 +86,7 @@ Not readable through the Enterprise MCP: the agent attestation date (`.../lifecy
 the Agent 365 catalog, Defender advanced hunting (`getRunHuntingQuery` returns 403), and admin
 center settings. They go on the manual checklist.
 
-If a call returns 403, say which permission is missing and carry on with the rest. Don't list
+If a call returns 403, say which permission is missing and carry on with the rest. The person running the check should be an activated member of **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader, through PIM). If many calls return 403, ask whether they activated the group in PIM (My roles > Groups) before going on. Don't list
 sponsor or owner names in the results unless the user asks; "a sponsor is disabled" is enough.
 
 ## Step 3: Apply the rules

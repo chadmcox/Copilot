@@ -43,7 +43,7 @@ Connect-MgGraph -Scopes $scopes -NoWelcome
 
 $graph = "https://graph.microsoft.com/v1.0"
 
-# Role = Entra role display name to assign when -AssignRoles is used ($null = no role).
+# Role = Entra role display name(s) to assign when -AssignRoles is used ($null = no role). A list assigns each.
 # RoleAssignable = create as a role-assignable group (cannot be changed later).
 $groups = @(
     # ---------- Feature access ----------
@@ -98,6 +98,7 @@ $groups = @(
     @{ Name = "Copilot SharePoint Admin";                   Desc = "RCD/RAC, DAG reports, agent access insights.";        RoleAssignable = $true; Role = "SharePoint Administrator" }
     @{ Name = "Copilot Studio Environment Admin";           Desc = "PPAC data policies and Copilot Studio governance.";   RoleAssignable = $true; Role = "Power Platform Administrator" }
     @{ Name = "Copilot Plugin Approvers";                   Desc = "Reviewers for org-wide agent/plugin publish requests. No Entra role mapped."; RoleAssignable = $true; Role = $null }
+    @{ Name = "Copilot Health Check Users";                 Desc = "People who run the Copilot Billing and Agent and Tools health checks (read-only). Holds AI Reader, Security Reader and Reports Reader through PIM. Scope of the health check Cowork plugins."; RoleAssignable = $true; Role = @("AI Reader", "Security Reader", "Reports Reader") }
 )
 
 if (-not $IncludeCodeGroups) { $groups = $groups | Where-Object { -not $_.Code } }
@@ -154,16 +155,15 @@ $results = foreach ($g in $groups) {
         $status = "WhatIf"
     }
 
-    $roleStatus = ""
-    if ($AssignRoles -and $g.Role -and $group) {
-        $roleId = Get-RoleDefinitionId $g.Role
+    $roleStatus = @(if ($AssignRoles -and $g.Role -and $group) { foreach ($roleName in @($g.Role)) {
+        $roleId = Get-RoleDefinitionId $roleName
         if (-not $roleId) {
-            $roleStatus = "Role '$($g.Role)' not found in tenant"
+            "$($roleName): not found in tenant"
         }
         elseif (Get-Filtered "roleManagement/directory/roleAssignments" "principalId eq '$($group.id)' and roleDefinitionId eq '$roleId'") {
-            $roleStatus = "Already assigned"
+            "$($roleName): already assigned"
         }
-        elseif ($PSCmdlet.ShouldProcess($displayName, "Assign role '$($g.Role)'")) {
+        elseif ($PSCmdlet.ShouldProcess($displayName, "Assign role '$roleName'")) {
             $assignBody = @{
                 principalId      = $group.id
                 roleDefinitionId = $roleId
@@ -175,22 +175,22 @@ $results = foreach ($g in $groups) {
                 try {
                     Invoke-MgGraphRequest -Method POST -Uri "$graph/roleManagement/directory/roleAssignments" `
                         -Body $assignBody -ContentType "application/json" | Out-Null
-                    $roleStatus = "Assigned"
+                    "$($roleName): assigned"
                     break
                 }
                 catch {
-                    if ($i -eq 5) { $roleStatus = "Failed: $($_.Exception.Message)" }
+                    if ($i -eq 5) { "$($roleName): failed: $($_.Exception.Message)" }
                     else { Start-Sleep -Seconds (5 * $i) }
                 }
             }
         }
-    }
+    } }) -join "; "
 
     [pscustomobject]@{
         Group          = $displayName
         Status         = $status
         RoleAssignable = $roleAssignable
-        Role           = $g.Role
+        Role           = @($g.Role) -join ", "
         RoleStatus     = $roleStatus
         Id             = $group.id
     }

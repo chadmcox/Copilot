@@ -86,9 +86,28 @@ The same queries work in the Defender portal under **Hunting > Advanced hunting*
 
 With browser access on, Cowork can read these pages and report what they're set to.
 
+## Who runs it: Copilot Health Check Users
+
+Put the people who run the health checks in one group: **Copilot Health Check Users**. The same group runs both the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks.
+
+1. **Create it as a role-assignable security group, and put it under PIM.** `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1` in the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md#copilot-health-check-users) do both. The roles sit on the group, only Privileged Role Administrators can change its members, and people activate it for 8 hours with MFA and a reason instead of holding reader roles all the time.
+2. **Give the group reader roles only** (table below). Prefer these to Global Reader, which reads the whole tenant.
+3. **Scope the Cowork plugin to the group** when you upload it: Agents > Tools > Registry > Upload > Scope users > Specific users or groups > Copilot Health Check Users.
+4. Members also need a Microsoft 365 Copilot license and Cowork access to run the check in Copilot Cowork. The Enterprise MCP server acts as the signed-in person, so they see only what their activated roles allow.
+
+| Entra role | What this check reads with it |
+| --- | --- |
+| **AI Reader** | Copilot agents and settings; agent identities, blueprints, blueprint principals, sponsors, owners; their app permissions and delegated grants; groups, users and agent users |
+| **Security Reader** | Sign-in activity, Conditional Access policies, and Microsoft Defender advanced hunting (AgentsInfo, CloudAppEvents) |
+| **Reports Reader** | Sign-in activity (also covered by Security Reader) |
+
+**The Agent 365 catalog** (agents and tools) is documented for AI Administrator or Global Administrator. Test it with AI Reader first. If it returns 403, either activate **Copilot Agent Management Admin** for that run, or use `-SkipPackages` and let the check use Defender's agent list instead.
+
+**Making changes** (blocking agents and tools, disabling agent identities with [Agent and Tools Cleanup](../Agent%20and%20Tools%20Cleanup/README.md)) isn't part of the health check. Use **Copilot Agent Management Admin** and **Copilot Agent ID Admin** for that.
+
 ## Permissions (PowerShell)
 
-Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All. Roles: **AI Administrator** (catalog; needs a Microsoft Agent 365 license or Microsoft 365 E7), **Security Reader** (Defender hunting) and **Global Reader**. Activate them in PIM for the run.
+Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All. Roles: activate **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader) in PIM for the run; see above. The catalog also needs a Microsoft Agent 365 license or Microsoft 365 E7.
 
 Only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Microsoft.Graph.Authentication), Graph beta, Windows PowerShell 5.1 and PowerShell 7.
 
