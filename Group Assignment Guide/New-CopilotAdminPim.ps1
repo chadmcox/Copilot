@@ -35,6 +35,10 @@
 .PARAMETER PlatformApproverGroupName
     Approver group for the all-up Copilot Platform Admin group. Defaults to ApproverGroupName.
 
+.PARAMETER Environment
+    The Microsoft cloud to sign in to: Global (also GCC), USGov (GCC High), USGovDoD or China.
+    Leave it out and the script asks.
+
 .EXAMPLE
     .\New-CopilotAdminPim.ps1 -ApproverGroupName "Security Operations" -WhatIf
     .\New-CopilotAdminPim.ps1 -ApproverGroupName "Security Operations" -MembersCsv .\copilot-admins.csv
@@ -47,14 +51,24 @@ param(
     [string]$MembersCsv,
     [switch]$ConvertDirectMembers,
     [int]$EligibilityDays = 365,
-    [int]$MaxActiveAssignmentDays = 15
+    [int]$MaxActiveAssignmentDays = 15,
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
 
 if (-not $PlatformApproverGroupName) { $PlatformApproverGroupName = $ApproverGroupName }
 
-Connect-MgGraph -NoWelcome -Scopes @(
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
+
+Connect-MgGraph -Environment $Environment -NoWelcome -Scopes @(
     "Group.ReadWrite.All",
     "User.Read.All",
     "RoleManagement.ReadWrite.Directory",
@@ -63,7 +77,7 @@ Connect-MgGraph -NoWelcome -Scopes @(
     "PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup"
 )
 
-$graph = "https://graph.microsoft.com/v1.0"
+$graph = "$graphEndpoint/v1.0"
 
 # ---------------------------------------------------------------------------
 # Admin groups: roles held by the group, activation length, approval

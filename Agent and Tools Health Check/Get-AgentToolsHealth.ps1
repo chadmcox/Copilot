@@ -61,7 +61,8 @@ param(
     [string]$UnclearNamePattern = '\b(test\w*|demo\w*|temp\b|tmp\b|copy\b|draft\b|sample\w*|poc\b|sandbox\w*|untitled\b|dummy\b|delete ?me\b|do not use\b)|^(new|my) (agent|plugin|skill|bot)\b|\b(agent|plugin|skill|bot) ?\d+$|\(\d+\)$',
 
     # Microsoft Graph application permissions treated as High risk for an agent. Other *.ReadWrite.All are Medium.
-    [string]$HighPrivilegePattern = '^(Directory|RoleManagement|Application|AppRoleAssignment|Policy|User|Group|GroupMember|Domain|Organization)\.ReadWrite|^(Mail\.Send|Mail\.ReadWrite|Sites\.FullControl\.All|Files\.ReadWrite\.All|Sites\.ReadWrite\.All|Directory\.AccessAsUser\.All|full_access_as_app)$'
+    [string]$HighPrivilegePattern = '^(Directory|RoleManagement|Application|AppRoleAssignment|Policy|User|Group|GroupMember|Domain|Organization)\.ReadWrite|^(Mail\.Send|Mail\.ReadWrite|Sites\.FullControl\.All|Files\.ReadWrite\.All|Sites\.ReadWrite\.All|Directory\.AccessAsUser\.All|full_access_as_app)$',
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
@@ -72,9 +73,18 @@ $scopes = @(
     if ($PackagesOnly)      { "Group.Read.All" }
     if (-not $SkipDefender) { "ThreatHunting.Read.All" }
 )
-Connect-MgGraph -NoWelcome -Scopes $scopes
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
 
-$graph  = "https://graph.microsoft.com/beta"   # beta everywhere; it usually has more
+Connect-MgGraph -Environment $Environment -NoWelcome -Scopes $scopes
+
+$graph  = "$graphEndpoint/beta"   # beta everywhere; it usually has more
 $now    = (Get-Date).ToUniversalTime()
 $cutoff = $now.AddDays(-$StaleDays)
 $userCache  = @{}

@@ -32,16 +32,26 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [switch]$AssignRoles,
-    [switch]$IncludeCodeGroups
+    [switch]$IncludeCodeGroups,
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
 
 $scopes = @("Group.ReadWrite.All")
 if ($AssignRoles) { $scopes += "RoleManagement.ReadWrite.Directory" }
-Connect-MgGraph -Scopes $scopes -NoWelcome
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
 
-$graph = "https://graph.microsoft.com/v1.0"
+Connect-MgGraph -Environment $Environment -Scopes $scopes -NoWelcome
+
+$graph = "$graphEndpoint/v1.0"
 
 # Role = Entra role display name(s) to assign when -AssignRoles is used ($null = no role). A list assigns each.
 # RoleAssignable = create as a role-assignable group (cannot be changed later).

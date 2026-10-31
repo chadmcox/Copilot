@@ -36,7 +36,8 @@
 [CmdletBinding()]
 param(
     [string[]]$UserPrincipalName = @(),
-    [switch]$ExportCsv
+    [switch]$ExportCsv,
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
@@ -49,10 +50,19 @@ $scopes = @(
     "User.Read.All"
 )
 if ($UserPrincipalName) { $scopes += "CopilotCostManagement-UserData.Read.All" }
-Connect-MgGraph -NoWelcome -Scopes $scopes
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
 
-$cm    = "https://graph.microsoft.com/beta/copilot/costManagement"
-$v1    = "https://graph.microsoft.com/v1.0"
+Connect-MgGraph -Environment $Environment -NoWelcome -Scopes $scopes
+
+$cm    = "$graphEndpoint/beta/copilot/costManagement"
+$v1    = "$graphEndpoint/v1.0"
 $stamp = Get-Date -Format yyyyMMdd-HHmm
 
 # Policy names from the Copilot Group Assignment Guide, used to flag anything unexpected.

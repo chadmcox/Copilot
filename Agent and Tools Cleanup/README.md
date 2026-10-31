@@ -61,6 +61,8 @@ Use PIM for the admin roles and activate them only for the run.
 .\Get-AgentToolsReport.ps1 -Days 90 -AuditDays 90
 ```
 
+Each script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High), **USGovDoD** or **China**. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High, DoD and China use the scripts.
+
 Output goes to `.\AgentToolsReport-<date-time>\`: `Packages.csv`, `AgentIdentities.csv`, `Blueprints.csv` and, with `-AuditDays`, `AuditUsage.csv`. Keep it out of source control (the `.gitignore` here already excludes it).
 
 `-AuditDays` starts a Purview audit search for `CopilotInteraction` records and waits for it (up to 30 minutes). It reads `AISystemPlugin` (the plugins used in each interaction) and `AgentId` / `AgentName`, and keeps only the last use and a count per plugin or agent. No user names are saved.

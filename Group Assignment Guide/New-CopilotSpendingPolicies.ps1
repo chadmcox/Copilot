@@ -61,6 +61,10 @@
     Monthly cap for the Cowork Temporary Unlimited policy. Its users have no per-user cap, so
     this is the safety net. Defaults to -PeriodLimit.
 
+.PARAMETER Environment
+    The Microsoft cloud to sign in to: Global (also GCC), USGov (GCC High), USGovDoD or China.
+    Leave it out and the script asks.
+
 .EXAMPLE
     .\New-CopilotSpendingPolicies.ps1 -ShowServiceIds
     .\New-CopilotSpendingPolicies.ps1 -WhatIf
@@ -79,21 +83,31 @@ param(
     [int]$AlertThresholdPercent = 0,
     [string[]]$AlertRecipientUpn = @(),
     [ValidateSet("notSpecified", "prepaidCredits", "payAsYouGo", "prepaidCredits,payAsYouGo")]
-    [string]$BillingMethods = "notSpecified"
+    [string]$BillingMethods = "notSpecified",
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
 
-Connect-MgGraph -NoWelcome -Scopes @(
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
+
+Connect-MgGraph -Environment $Environment -NoWelcome -Scopes @(
     "CopilotCostManagement-Policy.ReadWrite.All",
     "CopilotCostManagement-Assignment.ReadWrite.All",
     "Group.Read.All",
     "User.Read.All"
 )
 
-$beta = "https://graph.microsoft.com/beta"
+$beta = "$graphEndpoint/beta"
 $cm   = "$beta/copilot/costManagement"
-$v1   = "https://graph.microsoft.com/v1.0"
+$v1   = "$graphEndpoint/v1.0"
 
 # ---------------------------------------------------------------------------
 # Service IDs. 'cowork' and 'workIQ' come from Microsoft's documentation.

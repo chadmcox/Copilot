@@ -59,6 +59,10 @@
 .PARAMETER OutFolder
     Folder for the CSV files. Keep it out of source control.
 
+.PARAMETER Environment
+    The Microsoft cloud to sign in to: Global (also GCC), USGov (GCC High), USGovDoD or China.
+    Leave it out and the script asks.
+
 .EXAMPLE
     .\Get-AgentToolsReport.ps1
     .\Get-AgentToolsReport.ps1 -Days 60 -AuditDays 90
@@ -72,13 +76,23 @@ param(
     [ValidateRange(0, 180)][int]$AuditDays = 0,
     [switch]$SkipPackages,
     [switch]$SkipDefender,
-    [string]$OutFolder = ".\AgentToolsReport-$(Get-Date -Format yyyyMMdd-HHmm)"
+    [string]$OutFolder = ".\AgentToolsReport-$(Get-Date -Format yyyyMMdd-HHmm)",
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
 
 $ErrorActionPreference = "Stop"
-$graph  = "https://graph.microsoft.com/beta"
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
+
+$graph  = "$graphEndpoint/beta"
 $now    = (Get-Date).ToUniversalTime()
 $cutoff = $now.AddDays(-$Days)
 
@@ -92,7 +106,7 @@ $scopes = @(
     if ($AuditDays)         { "AuditLogsQuery.Read.All" }
     if (-not $SkipDefender) { "ThreatHunting.Read.All" }
 )
-Connect-MgGraph -Scopes $scopes -NoWelcome
+Connect-MgGraph -Environment $Environment -Scopes $scopes -NoWelcome
 
 # ---------------------------------------------------------------------------
 # Helpers

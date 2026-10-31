@@ -41,6 +41,10 @@
     that is NOT itself granted through these packages (e.g. your security team) to avoid
     people approving their own access.
 
+.PARAMETER Environment
+    The Microsoft cloud to sign in to: Global (also GCC), USGov (GCC High), USGovDoD or China.
+    Leave it out and the script asks.
+
 .EXAMPLE
     .\New-CopilotAccessPackages.ps1 -WhatIf
     .\New-CopilotAccessPackages.ps1 -ApproverGroupName "Copilot Delegated Admin" `
@@ -53,18 +57,28 @@ param(
     [string]$AdminApproverGroupName = "Copilot Delegated Admin",
     [switch]$IncludeAdminPackages,
     [switch]$CreateAdminGroupReviews,
-    [switch]$IncludeCodePackages
+    [switch]$IncludeCodePackages,
+    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
 
-Connect-MgGraph -NoWelcome -Scopes @(
+# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+if (-not $Environment) {
+    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+}
+$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
+
+Connect-MgGraph -Environment $Environment -NoWelcome -Scopes @(
     "EntitlementManagement.ReadWrite.All",
     "AccessReview.ReadWrite.All",
     "Group.Read.All"
 )
 
-$graph = "https://graph.microsoft.com/v1.0"
+$graph = "$graphEndpoint/v1.0"
 $em    = "$graph/identityGovernance/entitlementManagement"
 
 # First day of next month (UTC) as the start of review schedules.
