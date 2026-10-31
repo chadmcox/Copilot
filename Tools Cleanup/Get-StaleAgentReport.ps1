@@ -147,6 +147,7 @@ function Get-IdentityRecommendation {
         $Identity | Select-Object *, @{ n = "recommendation"; e = {
             if (-not $_.accountEnabled)                 { "AlreadyDisabled" }
             elseif ($_.status -in "Active", "New")      { "Keep" }
+            elseif ($_.status -eq "NoActivity")         { "Review" }   # some agents run without a recorded identity sign-in
             elseif (-not $script:haveSignInData)        { "Review" }
             else                                        { "Disable" }
         } }
@@ -190,7 +191,8 @@ function Get-BlueprintReport($blueprintPrincipals, $blueprintApps, $identities, 
         Select-Object *, @{ n = "recommendation"; e = {
             if (-not $_.accountEnabled)                                   { "AlreadyDisabled" }
             elseif ($_.activeChildCount -gt 0 -or $_.status -in "Active", "New") { "Keep" }
-            elseif (-not $script:haveSignInData)                          { "Review" }
+            elseif (-not $_.registeredInTenant)                           { "Review" }   # Microsoft or ISV blueprint: disabling it breaks every agent built on it
+            elseif ($_.status -eq "NoActivity" -or -not $script:haveSignInData) { "Review" }
             else                                                          { "Disable" }
         } }
 

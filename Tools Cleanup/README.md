@@ -8,7 +8,7 @@ These tools find Copilot agents nobody uses, Entra agent identities that haven't
 | --- | --- | --- |
 | [Get-StaleAgentReport.ps1](Get-StaleAgentReport.ps1) | Writes three CSVs with a status and recommendation for every agent, agent identity and blueprint | No |
 | [Invoke-StaleAgentCleanup.ps1](Invoke-StaleAgentCleanup.ps1) | Blocks agents and disables identities and blueprint principals marked in the CSVs. Saves an undo file | Yes. Use `-WhatIf` first |
-| [skill/stale-agent-review/SKILL.md](skill/stale-agent-review/SKILL.md) | The same review as a skill, using a Microsoft Graph MCP server | No |
+| [Cowork/](Cowork/readme.md) | The same review in Copilot Cowork, through the Microsoft MCP Server for Enterprise. Setup guide, plugin and skill | No |
 
 Both scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Microsoft.Graph.Authentication) against Graph beta, and work in Windows PowerShell 5.1 and PowerShell 7.
 
@@ -67,6 +67,10 @@ Output goes to `.\StaleAgentReport-<date-time>\`. Keep it out of source control 
 
 The script never recommends Disable when it couldn't read sign-in activity; you get Review instead. Microsoft-built agents are always Keep.
 
+Two more safety rules, from testing in a live tenant:
+- **NoActivity is Review, not Disable.** Copilot Studio agent identities can be in use without a recorded sign-in of their own, so an identity that has never signed in needs a sponsor check first. Only identities that signed in before and then stopped (Stale) get Disable.
+- **Blueprints from Microsoft or other publishers are Review.** A blueprint principal with no blueprint registered in your tenant (such as the Copilot Studio agent identity blueprint) backs every agent built on that product. Disabling it breaks all of them.
+
 ### 3. Review the CSVs
 
 Open the CSVs and change `recommendation` to `Keep` for anything you want to keep: seasonal agents, break-glass agents, anything a sponsor vouches for. Check `sponsorCount` and `ownerCount` on stale identities; zero for both means nobody is accountable for it.
@@ -100,10 +104,10 @@ Each run writes `cleanup-undo-<date-time>.json` to the report folder.
 - Deleting a blueprint or its principal deletes every child agent identity and agent user account with it (cascade cleanup). The 30-day soft-delete window is the only way back.
 - Let Entra do the deleting. Turn on the **Agent ID default inactivity policy** (preview, no extra license): Entra admin center > **ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID (Preview)**. It notifies sponsors and owners at 60 days inactive, disables at 90 and deletes at 455. Use **All Agent IDs except selected** to exclude seasonal agents. Custom lifecycle policies need an ID Governance license.
 
-## Use it as a skill or through MCP
+## Run it in Copilot Cowork
 
-- **Skill:** [skill/stale-agent-review/SKILL.md](skill/stale-agent-review/SKILL.md) runs the same review in Claude or Copilot Cowork with a Graph MCP server, and returns the tables and recommendations. It's read-only on purpose.
-- **MCP:** the Microsoft MCP Server for Enterprise exposes read-only Graph GET calls, which is all the review needs. The Agent 365 registry and sign-in activity endpoints are preview; check that your MCP server can reach them before you rely on it.
+See **[Cowork/readme.md](Cowork/readme.md)** for setup. Cowork reads agent identities, blueprints and sign-in activity live through the Microsoft MCP Server for Enterprise. The MCP server can't read the Agent 365 registry (no MCP scope covers it, so the call returns 403), so for agents you attach `AgentPackages.csv` or the admin center Agent usage export.
+
 - **Changes stay in the script.** Blocking and disabling need write scopes, `-WhatIf` and an undo file, so keep them in `Invoke-StaleAgentCleanup.ps1` rather than giving an agent write access.
 
 ## References
