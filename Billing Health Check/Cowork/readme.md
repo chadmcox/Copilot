@@ -39,8 +39,9 @@ Apply the copilot-billing-health rules and give me:
 1. A scorecard: one row per policy with a score out of 100 (High -25, Medium -10, Low -3) and Green 80+, Amber 50-79, Red under 50.
 2. A findings table sorted High, Medium, Low, with the person or group, what's wrong, and the fix.
 3. The top 3 fixes to do first.
-4. The Microsoft Graph calls you ran.
-5. The HTML report from the skill's report template, named Copilot Billing Health.html.
+4. The Cowork readiness funnel: Copilot license assigned, Copilot turned on, active in Copilot in the last 28 days, covered by a Cowork policy, billing set, and the % of active Copilot users who are ready.
+5. The Microsoft Graph calls you ran.
+6. The HTML report from the skill's report template, named Copilot Billing Health.html.
 ```
 
 For **way B**, attach `Findings.csv` and `Scorecard.csv` instead and ask: *"Explain these Copilot billing health results and give me the top 3 fixes."*
@@ -74,7 +75,7 @@ An example with made-up names:
 
 You also get **Copilot Billing Health.html** in your OneDrive **Cowork** folder. It's one self-contained file that works offline:
 
-- An average score dial, severity counts and a card for each policy with its own score.
+- An average score dial, severity counts, a card for each policy with its own score, and the Cowork readiness funnel with the % of active Copilot users who are ready.
 - Findings you can filter by severity, by policy (select a card) or by searching.
 - **Export CSV** and **Print** buttons, light and dark themes, and a checklist for the checks no API covers.
 - The Graph calls Cowork ran.
@@ -124,7 +125,7 @@ In the **Microsoft Entra admin center > App registrations > New registration**:
 ```powershell
 Grant-EntraBetaMCPServerPermission -ApplicationId "<Application (client) ID>" -Scopes `
     "MCP.Group.Read.All", "MCP.GroupMember.Read.All", "MCP.User.Read.All", "MCP.AuditLog.Read.All", `
-    "MCP.Organization.Read.All", "MCP.LicenseAssignment.Read.All", "MCP.AccessReview.Read.All"
+    "MCP.Organization.Read.All", "MCP.LicenseAssignment.Read.All", "MCP.AccessReview.Read.All", "MCP.Reports.Read.All"
 ```
 
 ### 4. Register the OAuth client in the Teams Developer Portal
