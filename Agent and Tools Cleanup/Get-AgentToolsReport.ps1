@@ -1,37 +1,39 @@
 <#
 .SYNOPSIS
-    Finds Copilot agents nobody uses, stale Entra agent identities and stale agent identity
-    blueprints. Read-only: it changes nothing.
+    Finds Copilot agents and tools (plugins, skills, MCP servers) nobody uses, stale Entra agent
+    identities and stale agent identity blueprints. Read-only: it changes nothing.
 
 .DESCRIPTION
-    Graph only (Invoke-MgGraphRequest, beta endpoint). Writes three CSV files:
+    Graph only (Invoke-MgGraphRequest, beta endpoint). Writes these CSV files:
 
-      AgentPackages.csv    Agents in the Agent 365 registry (copilot/admin/catalog/packages)
-                           with the last time each one was used.
+      Packages.csv         Everything in the Agent 365 catalog (copilot/admin/catalog/packages):
+                           agents, tools (plugins with skills, MCP servers or connectors) and
+                           other apps, with the last time each one was used.
       AgentIdentities.csv  Entra agent identities with their last sign-in.
       Blueprints.csv       Agent identity blueprints with child counts and last sign-in.
+      AuditUsage.csv       Only with -AuditDays: agents and plugins seen in Copilot audit records.
 
     Every row has a status and a recommendation (Keep, Disable, Block, Review,
-    AlreadyDisabled, AlreadyBlocked). Invoke-StaleAgentCleanup.ps1 acts only on rows marked
+    AlreadyDisabled, AlreadyBlocked). Invoke-AgentToolsCleanup.ps1 acts only on rows marked
     Disable or Block, so review the CSVs and change any row to Keep before you run it.
 
     Where "last used" comes from:
+      - Packages: the package detail call (GET /copilot/admin/catalog/packages/{id}) returns
+        lastUsedDateTime, activeUsers and totalSessions (last 30 days). The script also uses the
+        sign-in of the package's agent identity, the admin center Agent usage export
+        (-AgentUsageCsv) and, with -AuditDays, Copilot audit records. It keeps the newest date.
       - Agent identities and blueprints: the Entra service principal sign-in activity report
-        (reports/servicePrincipalSignInActivities, preview). Needs AuditLog.Read.All and a
-        Reports Reader, Security Reader or Security Administrator role.
-      - Agents (packages): there is no Graph API for per-agent usage yet. The script uses
-          1. the sign-in of the agent identity the package points to (agentIdentityId), and
-          2. the Agent usage report you export from the Microsoft 365 admin center
-             (Reports > Usage > Microsoft Copilot > Agents > Export), passed with -AgentUsageCsv.
-        The admin center report covers the last 7 or 30 days only. An agent that isn't in the
-        export wasn't used in that period; it may have been used before it.
+        (reports/servicePrincipalSignInActivities, preview).
+
+    Not covered: standalone MCP servers and standalone skills that aren't inside a package.
+    Check those in the Microsoft 365 admin center under Agents > Tools > Registry.
 
     Requirements:
       - Microsoft.Graph.Authentication module.
-      - Agent registry (packages) API: Microsoft Agent 365 license (or Microsoft 365 E7) and the
-        AI Administrator or Global Administrator role. Use -SkipPackages if you don't have it.
-      - Agent identities and blueprints: Agent ID Administrator, or a reader role that can read
-        applications and service principals.
+      - Packages: Microsoft Agent 365 license (or Microsoft 365 E7) and the AI Administrator or
+        Global Administrator role. Use -SkipPackages if you don't have it.
+      - Sign-in activity: AuditLog.Read.All and a Reports Reader or Security Reader role.
+      - -AuditDays: AuditLogsQuery.Read.All and a Purview role that can search the audit log.
 
 .PARAMETER Days
     An object with no use in this many days is stale. Default 90.
@@ -39,23 +41,30 @@
 .PARAMETER AgentUsageCsv
     Path to the Agent usage report exported from the Microsoft 365 admin center.
 
+.PARAMETER AuditDays
+    Also search this many days of Copilot audit records (CopilotInteraction) for agent and plugin
+    use. 0 (default) skips it. Audit searches run in the background in Purview and can take
+    several minutes. Up to 180 days with Audit (Standard).
+
 .PARAMETER SkipPackages
-    Skip the Agent 365 registry (for tenants without the Agent 365 license).
+    Skip the Agent 365 catalog (for tenants without the Agent 365 license).
 
 .PARAMETER OutFolder
     Folder for the CSV files. Keep it out of source control.
 
 .EXAMPLE
-    .\Get-StaleAgentReport.ps1
-    .\Get-StaleAgentReport.ps1 -Days 60 -AgentUsageCsv .\AgentUsage.csv
-    .\Get-StaleAgentReport.ps1 -SkipPackages
+    .\Get-AgentToolsReport.ps1
+    .\Get-AgentToolsReport.ps1 -Days 60 -AuditDays 90
+    .\Get-AgentToolsReport.ps1 -AgentUsageCsv .\AgentUsage.csv
+    .\Get-AgentToolsReport.ps1 -SkipPackages
 #>
 [CmdletBinding()]
 param(
     [int]$Days = 90,
     [string]$AgentUsageCsv,
+    [ValidateRange(0, 180)][int]$AuditDays = 0,
     [switch]$SkipPackages,
-    [string]$OutFolder = ".\StaleAgentReport-$(Get-Date -Format yyyyMMdd-HHmm)"
+    [string]$OutFolder = ".\AgentToolsReport-$(Get-Date -Format yyyyMMdd-HHmm)"
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
@@ -70,6 +79,7 @@ $scopes = @(
     "AgentIdentityBlueprint.Read.All"
     "AuditLog.Read.All"
     if (-not $SkipPackages) { "CopilotPackages.Read.All" }
+    if ($AuditDays)         { "AuditLogsQuery.Read.All" }
 )
 Connect-MgGraph -Scopes $scopes -NoWelcome
 
@@ -212,27 +222,99 @@ function Get-BlueprintReport($blueprintPrincipals, $blueprintApps, $identities, 
 }
 
 # ---------------------------------------------------------------------------
-# Agents in the Agent 365 registry
+# Copilot audit records: which agents and plugins people actually used
 # ---------------------------------------------------------------------------
-function Get-PackageReport($identityIndex, $usage) {
-    $filter = [uri]::EscapeDataString("supportedHosts/any(h:h eq 'Copilot')")
-    "$graph/copilot/admin/catalog/packages?`$filter=$filter" | Get-GraphCollection |
-        Select-Object id, displayName, type, publisher, platform, isBlocked, availableTo, deployedTo, appId, manifestId, agentIdentityId,
+function Wait-AuditQuery {
+    param([Parameter(ValueFromPipeline)]$Query)
+    process {
+        $deadline = (Get-Date).AddMinutes(30)
+        $status = $Query.status
+        while ($status -notin "succeeded", "failed", "cancelled") {
+            if ((Get-Date) -gt $deadline) { throw "The audit search $($Query.id) didn't finish in 30 minutes. Run the report again later." }
+            Start-Sleep -Seconds 30
+            $status = (Invoke-MgGraphRequest -Method GET -Uri "$graph/security/auditLog/queries/$($Query.id)" -OutputType PSObject).status
+            Write-Host "  Audit search: $status"
+        }
+        if ($status -ne "succeeded") { throw "The audit search $($Query.id) ended as $status." }
+        $Query.id
+    }
+}
+
+# Key (plugin ID or name, agent ID, the GUID at the end of an agent ID, agent name) -> last use and count.
+# Output is one row per key; no user names are kept.
+function Get-AuditUsage {
+    $body = @{
+        displayName         = "Agent and tools cleanup $(Get-Date -Format yyyy-MM-dd)"
+        filterStartDateTime = $now.AddDays(-$AuditDays).ToString("o")
+        filterEndDateTime   = $now.ToString("o")
+        operationFilters    = @("CopilotInteraction")
+    } | ConvertTo-Json
+    Write-Host "Starting a Purview audit search for $AuditDays days of Copilot interactions (this can take several minutes)..."
+    $queryId = Invoke-MgGraphRequest -Method POST -Uri "$graph/security/auditLog/queries" -Body $body -ContentType "application/json" -OutputType PSObject | Wait-AuditQuery
+
+    "$graph/security/auditLog/queries/$queryId/records" | Get-GraphCollection | ForEach-Object {
+        $created = ConvertTo-Utc $_.createdDateTime
+        $event = $_.auditData.CopilotEventData
+        @(
+            $event.AISystemPlugin | Where-Object { $_ } | ForEach-Object { $_.Id; $_.Name } | Select-Object @{ n = "kind"; e = { "Plugin" } }, @{ n = "key"; e = { $_ } }
+            @($_.auditData.AgentId; $event.AgentId; $_.auditData.AgentName; $event.AgentName) | Where-Object { $_ } | ForEach-Object { $_; ($_ -split '\.')[-1] } |
+                Select-Object @{ n = "kind"; e = { "Agent" } }, @{ n = "key"; e = { $_ } }
+        ) | Where-Object { $_.key -and $_.key -ne "BuiltIn" } | Select-Object kind, key, @{ n = "used"; e = { $created } }
+    } |
+        Group-Object kind, key |
+        Select-Object @{ n = "kind"; e = { $_.Group[0].kind } }, @{ n = "key"; e = { $_.Group[0].key } },
+            @{ n = "lastUsedDateTime"; e = { $_.Group.used | Sort-Object -Descending | Select-Object -First 1 } },
+            @{ n = "interactions";     e = { $_.Count } }
+}
+
+# ---------------------------------------------------------------------------
+# Agents and tools in the Agent 365 catalog
+# ---------------------------------------------------------------------------
+function Get-PackageKind($elementTypes) {
+    $types = @($elementTypes) -join " "
+    if ($types -match 'declarativeAgent|customEngine|bot')        { "Agent" }
+    elseif ($types -match 'skill|connector|mcp|plugin|action')    { "Tool" }
+    else                                                          { "App" }
+}
+
+# Adds the usage fields that only the detail call returns
+function Add-PackageDetail {
+    param([Parameter(ValueFromPipeline)]$Package)
+    process {
+        try   { $detail = Invoke-MgGraphRequest -Method GET -Uri "$graph/copilot/admin/catalog/packages/$([uri]::EscapeDataString($Package.id))" -OutputType PSObject }
+        catch { Write-Warning "Couldn't read details for package '$($Package.displayName)'. $($_.Exception.Message)"; $detail = $null }
+        $Package | Select-Object *,
+            @{ n = "detailLastUsed"; e = { ConvertTo-Utc $detail.lastUsedDateTime } },
+            @{ n = "activeUsers30d"; e = { $detail.activeUsers } },
+            @{ n = "sessions30d";    e = { $detail.totalSessions } }
+    }
+}
+
+function Get-PackageReport($identityIndex, $usage, $audit) {
+    "$graph/copilot/admin/catalog/packages" | Get-GraphCollection | Add-PackageDetail |
+        Select-Object id, displayName,
+            @{ n = "kind";         e = { Get-PackageKind $_.elementTypes } },
+            @{ n = "elementTypes"; e = { @($_.elementTypes) -join ";" } },
+            type, publisher, platform, isBlocked, availableTo, deployedTo, appId, manifestId, agentIdentityId,
             @{ n = "lastModifiedDateTime"; e = { ConvertTo-Utc $_.lastModifiedDateTime } },
-            @{ n = "reportLastActivity";   e = { $p = $_; @($p.id, $p.manifestId, $p.appId) | Where-Object { $_ -and $usage[$_] } | ForEach-Object { $usage[$_] } | Sort-Object -Descending | Select-Object -First 1 } },
-            @{ n = "identityLastSignIn";   e = { if ($_.agentIdentityId) { $identityIndex[$_.agentIdentityId] } } } |
-        Select-Object *, @{ n = "lastUsedDateTime"; e = { @($_.reportLastActivity, $_.identityLastSignIn) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1 } } |
+            detailLastUsed, activeUsers30d, sessions30d,
+            @{ n = "reportLastActivity"; e = { $p = $_; @($p.id, $p.manifestId, $p.appId) | Where-Object { $_ -and $usage[$_] } | ForEach-Object { $usage[$_] } | Sort-Object -Descending | Select-Object -First 1 } },
+            @{ n = "auditLastUsed";      e = { $p = $_; @($p.id, $p.manifestId, $p.appId, $p.displayName) | Where-Object { $_ -and $audit[$_] } | ForEach-Object { $audit[$_] } | Sort-Object -Descending | Select-Object -First 1 } },
+            @{ n = "identityLastSignIn"; e = { if ($_.agentIdentityId) { $identityIndex[$_.agentIdentityId] } } } |
+        Select-Object *, @{ n = "lastUsedDateTime"; e = {
+            @($_.detailLastUsed, $_.reportLastActivity, $_.auditLastUsed, $_.identityLastSignIn) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1
+        } } |
         Select-Object *,
             @{ n = "daysSinceUsed"; e = { Get-DaysSince $_.lastUsedDateTime } },
             @{ n = "status"; e = {
-                if (-not $usage.Count -and -not $_.agentIdentityId) { "NoUsageData" }
+                if ($_.activeUsers30d -gt 0) { "Active" }
                 else { Get-UsageStatus $_.lastUsedDateTime $_.lastModifiedDateTime }
             } } |
         Select-Object *, @{ n = "recommendation"; e = {
             if ($_.isBlocked)                      { "AlreadyBlocked" }
             elseif ($_.type -eq "microsoft")       { "Keep" }
             elseif ($_.status -in "Active", "New") { "Keep" }
-            elseif ($_.status -eq "NoUsageData")   { "Review" }
+            elseif ($_.kind -eq "App")             { "Review" }   # Office add-ins, tabs and other apps: not in scope for automatic blocking
             else                                   { "Block" }
         } }
 }
@@ -259,25 +341,38 @@ $identities | Export-Csv -Path (Join-Path $OutFolder "AgentIdentities.csv") -NoT
 $blueprints = @(Get-BlueprintReport $blueprintPrincipals $blueprintApps $identities $signIns)
 $blueprints | Export-Csv -Path (Join-Path $OutFolder "Blueprints.csv") -NoTypeInformation -Encoding UTF8
 
+$audit = @{}
+if ($AuditDays) {
+    try {
+        $auditRows = @(Get-AuditUsage)
+        $auditRows | Export-Csv -Path (Join-Path $OutFolder "AuditUsage.csv") -NoTypeInformation -Encoding UTF8
+        $auditRows | ForEach-Object { if (-not $audit[$_.key] -or $_.lastUsedDateTime -gt $audit[$_.key]) { $audit[$_.key] = $_.lastUsedDateTime } }
+        Write-Host "Audit records: $($auditRows.Count) agents and plugins with activity."
+    }
+    catch {
+        Write-Warning "The audit search didn't work. It needs AuditLogsQuery.Read.All and a Purview audit role. The report carries on without it. $($_.Exception.Message)"
+    }
+}
+
 $packages = @()
 if (-not $SkipPackages) {
-    Write-Host "Reading agents from the Agent 365 registry..."
+    Write-Host "Reading agents and tools from the Agent 365 catalog (one detail call per package)..."
     $identityIndex = @{}
     $identities | ForEach-Object { $identityIndex[$_.id] = $_.lastSignInDateTime }
     try {
-        $packages = @(Get-PackageReport $identityIndex (Get-UsageIndex $AgentUsageCsv))
-        $packages | Export-Csv -Path (Join-Path $OutFolder "AgentPackages.csv") -NoTypeInformation -Encoding UTF8
+        $packages = @(Get-PackageReport $identityIndex (Get-UsageIndex $AgentUsageCsv) $audit)
+        $packages | Export-Csv -Path (Join-Path $OutFolder "Packages.csv") -NoTypeInformation -Encoding UTF8
     }
     catch {
-        Write-Warning "Couldn't read the agent registry. It needs an Agent 365 license and the AI Administrator role. Run with -SkipPackages to skip it. $($_.Exception.Message)"
+        Write-Warning "Couldn't read the Agent 365 catalog. It needs an Agent 365 license and the AI Administrator role. Run with -SkipPackages to skip it. $($_.Exception.Message)"
     }
 }
 
 # Summary
 @(
-    $packages   | Select-Object @{ n = "Object"; e = { "Agent" } },          recommendation
+    $packages   | Select-Object @{ n = "Object"; e = { $_.kind } },            recommendation
     $identities | Select-Object @{ n = "Object"; e = { "Agent identity" } }, recommendation
     $blueprints | Select-Object @{ n = "Object"; e = { "Blueprint" } },      recommendation
 ) | Group-Object Object, recommendation | Select-Object @{ n = "Object / recommendation"; e = { $_.Name } }, Count | Format-Table -AutoSize
 
-Write-Host "Reports saved to $((Resolve-Path $OutFolder).Path). Review them, then run Invoke-StaleAgentCleanup.ps1 -ReportFolder <folder> -WhatIf."
+Write-Host "Reports saved to $((Resolve-Path $OutFolder).Path). Review them, then run Invoke-AgentToolsCleanup.ps1 -ReportFolder <folder> -WhatIf."

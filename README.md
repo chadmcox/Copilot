@@ -12,4 +12,4 @@ Follow these guides in order:
 
 ## Ongoing cleanup
 
-- **[Tools Cleanup](Tools%20Cleanup/README.md):** find Copilot agents nobody uses, stale Entra agent identities and stale agent identity blueprints, then block or disable them with an undo file. Also available as a read-only skill.
+- **[Agent and Tools Cleanup](Agent%20and%20Tools%20Cleanup/README.md):** find Copilot agents and tools (plugins, skills, MCP servers) nobody uses, stale Entra agent identities and stale agent identity blueprints, then block or disable them with an undo file. Also runs read-only in Copilot Cowork.

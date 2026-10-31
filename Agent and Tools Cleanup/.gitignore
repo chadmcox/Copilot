@@ -1,4 +1,4 @@
 # Report output names agents and tenant objects. Keep it out of source control.
-StaleAgentReport-*/
+AgentToolsReport-*/
 *.csv
 cleanup-undo-*.json

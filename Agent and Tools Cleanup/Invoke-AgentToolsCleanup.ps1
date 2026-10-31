@@ -1,18 +1,18 @@
 <#
 .SYNOPSIS
-    Disables stale agent identities and blueprint principals, and blocks unused agents,
-    from the CSVs that Get-StaleAgentReport.ps1 writes. Nothing is deleted.
+    Disables stale agent identities and blueprint principals, and blocks unused agents and tools,
+    from the CSVs that Get-AgentToolsReport.ps1 writes. Nothing is deleted.
 
 .DESCRIPTION
     Graph only (Invoke-MgGraphRequest, beta endpoint). Acts only on rows whose
-    recommendation is Disable (identities, blueprints) or Block (agents). Edit the CSVs first
+    recommendation is Disable (identities, blueprints) or Block (agents and tools). Edit the CSVs first
     and change any row you want to keep to Keep.
 
     Choose what to change with the switches. With no switch, nothing changes.
       -DisableAgentIdentities  PATCH accountEnabled=false on each agent identity.
       -DisableBlueprints       PATCH accountEnabled=false on each blueprint principal. This stops
                                every agent identity under that blueprint from getting tokens.
-      -BlockPackages           POST .../packages/{id}/block (Agent 365 registry).
+      -BlockPackages           POST .../packages/{id}/block for agents and tools in the Agent 365 catalog.
 
     Every change is saved to cleanup-undo-<time>.json in the report folder. Run again with
     -Restore -UndoFile <file> to re-enable and unblock exactly those objects.
@@ -28,9 +28,9 @@
       - Agents: CopilotPackages.ReadWrite.All, AI Administrator, Agent 365 license.
 
 .EXAMPLE
-    .\Invoke-StaleAgentCleanup.ps1 -ReportFolder .\StaleAgentReport-20261030-2100 -DisableAgentIdentities -BlockPackages -WhatIf
-    .\Invoke-StaleAgentCleanup.ps1 -ReportFolder .\StaleAgentReport-20261030-2100 -DisableAgentIdentities -BlockPackages
-    .\Invoke-StaleAgentCleanup.ps1 -ReportFolder .\StaleAgentReport-20261030-2100 -Restore -UndoFile .\StaleAgentReport-20261030-2100\cleanup-undo-20261030-2115.json
+    .\Invoke-AgentToolsCleanup.ps1 -ReportFolder .\AgentToolsReport-20261030-2100 -DisableAgentIdentities -BlockPackages -WhatIf
+    .\Invoke-AgentToolsCleanup.ps1 -ReportFolder .\AgentToolsReport-20261030-2100 -DisableAgentIdentities -BlockPackages
+    .\Invoke-AgentToolsCleanup.ps1 -ReportFolder .\AgentToolsReport-20261030-2100 -Restore -UndoFile .\AgentToolsReport-20261030-2100\cleanup-undo-20261030-2115.json
 #>
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
 param(
@@ -52,7 +52,7 @@ $graph = "https://graph.microsoft.com/beta"
 function Get-CleanupItems {
     $identities = Join-Path $ReportFolder "AgentIdentities.csv"
     $blueprints = Join-Path $ReportFolder "Blueprints.csv"
-    $packages   = Join-Path $ReportFolder "AgentPackages.csv"
+    $packages   = Join-Path $ReportFolder "Packages.csv"
 
     if ($DisableAgentIdentities -and (Test-Path $identities)) {
         Import-Csv $identities | Where-Object recommendation -eq "Disable" |
@@ -95,7 +95,7 @@ function Invoke-AgentChange {
             "blueprintPrincipal" { $method = "PATCH"; $uri = "$graph/servicePrincipals/$($Item.id)/microsoft.graph.agentIdentityBlueprintPrincipal" }
             "package"            { $method = "POST";  $uri = "$graph/copilot/admin/catalog/packages/$($Item.id)/$(if ($Undo) { 'unblock' } else { 'block' })"; $body = $null }
         }
-        $action = if ($Item.kind -eq "package") { if ($Undo) { "Unblock agent" } else { "Block agent" } }
+        $action = if ($Item.kind -eq "package") { if ($Undo) { "Unblock package" } else { "Block package" } }
                   else { if ($Undo) { "Enable" } else { "Disable" } }
 
         if ($PSCmdlet.ShouldProcess("$($Item.kind) '$($Item.displayName)' ($($Item.id))", $action)) {

@@ -1,8 +1,15 @@
-# Run the stale agent review in Copilot Cowork
+# Run the agent and tools review in Copilot Cowork
 
-Ask **Microsoft Copilot Cowork** which agents, agent identities and blueprints nobody uses, and get tables with a recommendation for each. You don't need PowerShell after setup. Cowork reads Entra live through the **Microsoft MCP Server for Enterprise**.
+Ask **Microsoft Copilot Cowork** which agents, tools (plugins, skills, MCP servers), agent identities and blueprints nobody uses, and get tables with a recommendation for each. You don't need PowerShell after setup.
 
-**Read-only.** The Enterprise MCP server can only read. To block or disable anything, use `Invoke-StaleAgentCleanup.ps1` (see the [main README](../README.md)).
+The plugin has two skills:
+
+| Skill | Reads | How |
+| --- | --- | --- |
+| **agent-tools-review** | Agent identities, sponsors, blueprints, sign-ins, plus an attached `Packages.csv` | **Microsoft MCP Server for Enterprise**, live |
+| **admin-center-tools-review** | Admin center pages with no API: standalone MCP servers and skills, plugin status and availability, pending requests, the agent usage report | Cowork's **browser** (Microsoft Edge), as you |
+
+**Read-only.** The Enterprise MCP server can only read, and the browser skill is told never to select Block, Delete or any button that changes a setting. To block or disable anything, use `Invoke-AgentToolsCleanup.ps1` (see the [main README](../README.md)).
 
 > Microsoft changes Cowork, plugins and the Enterprise MCP server often, and parts are in preview. Test this in your own tenant first.
 
@@ -16,42 +23,52 @@ Tested against a live tenant on Oct 31, 2026:
 | Blueprint principals | `/beta/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal` | Yes |
 | Blueprints registered in your tenant | `/beta/applications/microsoft.graph.agentIdentityBlueprint` | Yes |
 | Last sign-in per identity or blueprint | `/beta/reports/servicePrincipalSignInActivities?$filter=appId eq '...'` | Yes |
-| Agents in the Agent 365 registry | `/beta/copilot/admin/catalog/packages` | **No: 403.** No MCP scope covers it |
+| Agents and tools in the Agent 365 catalog | `/beta/copilot/admin/catalog/packages` | **No: 403.** No MCP scope covers it |
+| Copilot audit records | `/beta/security/auditLog/queries` | No. No MCP scope covers it |
 
-So for agents, attach one of these to the Cowork task:
-- **AgentPackages.csv** from `Get-StaleAgentReport.ps1` (the full list with status and recommendation), or
-- the **Agent usage report** export: Microsoft 365 admin center > **Reports > Usage > Microsoft Copilot > Agents > Export**. It only lists agents used in the last 7 or 30 days.
-
-Without a file, Cowork reviews agent identities and blueprints only.
+So for agents and plugins, either attach **Packages.csv** from `Get-AgentToolsReport.ps1` (the full catalog with usage, status and recommendation), or let the browser skill read the admin center pages. Standalone MCP servers and skills have no API at all, so only the browser skill covers them.
 
 ## Pick a way
 
 | Way | Setup | What Cowork can do |
 | --- | --- | --- |
-| **A. Plugin with the Enterprise MCP** (recommended) | An admin, once per tenant (below) | Reads identities, blueprints and sign-ins live, and combines them with any CSV you attach |
-| **B. Skill only** | Each person, about 2 minutes | Explains and prioritizes the CSVs from `Get-StaleAgentReport.ps1` |
+| **A. Plugin with the Enterprise MCP** (recommended) | An admin, once per tenant (below) | Both skills: reads identities, blueprints and sign-ins live, reads the admin center in the browser, and combines them with any CSV you attach |
+| **B. Skills only** | Each person, about 2 minutes | Explains the CSVs from `Get-AgentToolsReport.ps1`, and reads the admin center in the browser |
 
 ## The prompt
 
 ```text
-Run the stale agent review. Count anything unused for 90 days as stale.
+Run the agent and tools review. Count anything unused for 90 days as stale.
 
-Use the Microsoft MCP Server for Enterprise to read every agent identity (with sponsors), every agent identity blueprint principal, the blueprints registered in this tenant, and the last sign-in of each identity and blueprint principal. Use the attached AgentPackages.csv (or Agent usage export) for the agents.
+Use the Microsoft MCP Server for Enterprise to read every agent identity (with sponsors), every agent identity blueprint principal, the blueprints registered in this tenant, and the last sign-in of each identity and blueprint principal. Use the attached Packages.csv for agents and plugins. Then use the browser to read the Microsoft 365 admin center Agents > Tools pages (Registry, Plugins, Requests) for standalone MCP servers and skills.
 
-This is read-only. Don't change anything in the tenant, and don't send any email or Teams message.
+This is read-only. Don't change anything in the tenant, don't select any button that changes a setting, and don't send any email or Teams message.
 
 Give me:
-1. A table of agents, a table of agent identities and a table of blueprints, each with name, status, days since last use and recommendation.
+1. Tables of agents, tools (plugins, skills, MCP servers), agent identities and blueprints, each with name, status, days since last use and recommendation.
 2. Counts per recommendation.
 3. The identities with no sponsor.
-4. The Graph calls you ran.
+4. The manual admin center steps for anything to block, and the Graph calls and pages you used.
 ```
 
-For **way B**, attach `AgentIdentities.csv`, `Blueprints.csv` and `AgentPackages.csv` and ask: *"Explain these stale agent results and tell me what to clean up first."*
+For **way B**, attach `Packages.csv`, `AgentIdentities.csv` and `Blueprints.csv` and ask: *"Explain these agent and tools results and tell me what to clean up first."*
+
+Browser only (either way): *"Check the admin center Tools registry and tell me which MCP servers, skills and plugins look unused."*
 
 Good follow-ups:
 - *"Draft a note to the sponsor of each stale agent identity asking if it's still needed."* Cowork drafts it and asks before sending.
 - *"Run this review on the first Monday of every month."* Cowork can run prompts on a schedule.
+
+## Turn on browser access (for admin-center-tools-review)
+
+The browser skill drives the person's own Microsoft Edge, with their sign-in and your Conditional Access and DLP policies. It can't reach anything they can't.
+
+1. Microsoft 365 admin center > **Copilot > Settings > View all > Cowork settings > Allow browser access**: select **Allow Cowork to use the Microsoft Edge browser to perform tasks on behalf of users**, and limit it to the admins who run this review (for example the *Copilot + Cowork Browser Access* group from the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md)). It's off by default.
+2. The person runs Cowork **in a browser** (not the desktop app or mobile), has **Edge 152 or later**, and is signed in to Edge with the same work account. InPrivate and guest profiles don't work.
+3. They need an admin role that can see **Agents > Tools** and the Copilot reports, such as **AI Administrator** or **Global Reader**, activated in PIM before they start. Cowork stops and asks if a sign-in, MFA or PIM prompt appears.
+4. The first browser task shows a consent notice. Select **I understand**.
+
+Optional: the Edge policy `CopilotCoworkToolActionsEnabled` controls which Edge installs Cowork may drive.
 
 ## Way A: admin setup (once per tenant)
 
@@ -73,7 +90,7 @@ Grant-EntraBetaMCPServerPermission -ApplicationName VisualStudioCode
 
 In the **Microsoft Entra admin center > App registrations > New registration**:
 
-1. Name: **Stale Agent Review - Cowork**. Account type: **Single tenant**.
+1. Name: **Agent and Tools Review - Cowork**. Account type: **Single tenant**.
 2. Redirect URI: platform **Web**, value `https://teams.microsoft.com/api/platform/v1.0/oAuthRedirect`.
 3. Copy the **Application (client) ID** and **Directory (tenant) ID**.
 4. **Certificates & secrets > New client secret**. Copy the secret value, and note when it expires.
@@ -98,7 +115,7 @@ Open [Teams Developer Portal](https://dev.teams.microsoft.com/tools) > **Tools >
 
 | Field | Value |
 | --- | --- |
-| Registration name | Stale Agent Review - Enterprise MCP |
+| Registration name | Agent and Tools Review - Enterprise MCP |
 | Base URL | `https://mcp.svc.cloud.microsoft/enterprise` |
 | Restrict usage by org | Your organization |
 | Restrict usage by app | **Any Teams app** (a specific app makes every tool call fail with 404) |
@@ -118,23 +135,23 @@ Save, then copy the **OAuth client registration ID**. (`e8c77dc2-...` is the Mic
 .\New-CoworkPluginPackage.ps1 -ReferenceId "<OAuth client registration ID>"
 ```
 
-This writes **StaleAgentReview-Cowork.zip**. If the `plugin` folder isn't next to the script, it downloads the plugin files from this repo on GitHub.
+This writes **AgentToolsReview-Cowork.zip**. If the `plugin` folder isn't next to the script, it downloads the plugin files from this repo on GitHub.
 
 In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose the admins who should run the review (for example your Agent ID or AI admin group). Don't pick all users.
 
 ### 6. Test it
 
-1. In Copilot Cowork, select **+ > Customize > Plugins** and add **Stale Agent Review**.
+1. In Copilot Cowork, select **+ > Customize > Plugins** and add **Agent and Tools Review**.
 2. Start a task and ask: *"How many agent identities are in my tenant?"* Sign in when asked.
-3. If that works, attach AgentPackages.csv (optional) and paste the prompt above.
+3. If that works, attach Packages.csv (optional) and paste the prompt above.
 
 If tool calls fail, check that the base URL, the "Any Teams app" setting and the registration ID all match. Microsoft's [plugin authentication troubleshooting](https://learn.microsoft.com/microsoft-365/copilot/extensibility/plugin-authentication-troubleshooting) lists the common causes.
 
-## Way B: skill only
+## Way B: skills only
 
-1. Build the skill zip: `.\New-CoworkPluginPackage.ps1 -SkillOnly`. It writes **stale-agent-review.zip**.
-2. In Copilot Cowork, open **Customize > Skills**, select the arrow next to **Add**, then **Upload skill**, and choose the zip.
-3. Start a new Cowork task and attach the CSVs. The skill loads on its own when you ask about stale agents.
+1. Build the skill zips: `.\New-CoworkPluginPackage.ps1 -SkillOnly` writes **agent-tools-review.zip**, and `.\New-CoworkPluginPackage.ps1 -SkillOnly -Skill admin-center-tools-review` writes **admin-center-tools-review.zip**.
+2. In Copilot Cowork, open **Customize > Skills**, select the arrow next to **Add**, then **Upload skill**, and choose each zip.
+3. Start a new Cowork task. Attach the CSVs, or ask for the admin center check. The skills load on their own.
 
 > **"That archive has files outside the folder containing SKILL.md"** means you uploaded the plugin zip under Skills. The plugin zip goes under **Customize > Plugins > Upload plugin**. The skills box only takes the `-SkillOnly` zip.
 
@@ -143,12 +160,13 @@ If tool calls fail, check that the base URL, the "Any Teams app" setting and the
 | File | What it is |
 | --- | --- |
 | [plugin/manifest.json](plugin/manifest.json) | Plugin manifest: the skill plus the Enterprise MCP connector |
-| [plugin/skills/stale-agent-review/SKILL.md](plugin/skills/stale-agent-review/SKILL.md) | The steps Cowork follows, with the exact Graph calls |
-| [New-CoworkPluginPackage.ps1](New-CoworkPluginPackage.ps1) | Builds the plugin zip with your registration ID, or the skill-only zip |
+| [plugin/skills/agent-tools-review/SKILL.md](plugin/skills/agent-tools-review/SKILL.md) | MCP skill: the steps Cowork follows, with the exact Graph calls |
+| [plugin/skills/admin-center-tools-review/SKILL.md](plugin/skills/admin-center-tools-review/SKILL.md) | Browser skill: the admin center pages to read, and the read-only rules |
+| [New-CoworkPluginPackage.ps1](New-CoworkPluginPackage.ps1) | Builds the plugin zip with your registration ID, or a skill-only zip |
 
 ## Privacy
 
-The plugin collects nothing. Cowork calls Microsoft Graph as the signed-in person, and results stay in that person's Cowork session and OneDrive. Results name agents and their sponsors, so share them only with the people who need them.
+The plugin collects nothing. Cowork calls Microsoft Graph as the signed-in person, and results stay in that person's Cowork session and OneDrive. The browser skill runs in the person's own Edge with their own sign-in, and the browser tasks are recorded in the unified audit log. Results name agents and their sponsors, so share them only with the people who need them.
 
 ## Terms
 
@@ -161,4 +179,6 @@ Provided as is, with no warranty. Test in your own tenant before relying on it.
 - [Build plugins for Copilot Cowork](https://learn.microsoft.com/copilot/cowork/cowork-plugin-development)
 - [Manage plugins for Copilot Cowork](https://learn.microsoft.com/copilot/cowork/cowork-manage-plugins)
 - [Manage plugins, skills, and MCP servers](https://learn.microsoft.com/microsoft-agent-365/admin/manage-plugins-skills-mcp-servers)
+- [Use the local browser with Copilot Cowork](https://learn.microsoft.com/copilot/cowork/cowork-local-browser)
+- [Overview of the Tools page](https://learn.microsoft.com/microsoft-agent-365/admin/agent-tools-overview)
 - [Microsoft Copilot Agents usage report](https://learn.microsoft.com/microsoft-365/admin/activity-reports/microsoft-365-copilot-agents-new)

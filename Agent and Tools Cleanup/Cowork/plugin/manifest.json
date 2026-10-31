@@ -1,0 +1,49 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.29",
+  "version": "1.1.0",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "developer": {
+    "name": "Copilot Agent and Tools Cleanup",
+    "websiteUrl": "https://github.com/chadmcox/Copilot/tree/main/Agent%20and%20Tools%20Cleanup",
+    "privacyUrl": "https://github.com/chadmcox/Copilot/blob/main/Agent%20and%20Tools%20Cleanup/Cowork/readme.md#privacy",
+    "termsOfUseUrl": "https://github.com/chadmcox/Copilot/blob/main/Agent%20and%20Tools%20Cleanup/Cowork/readme.md#terms"
+  },
+  "name": {
+    "short": "Agent and Tools Review",
+    "full": "Agent and Tools Review for Copilot Cowork"
+  },
+  "description": {
+    "short": "Read-only review of unused agents, tools, agent identities and blueprints",
+    "full": "Finds Copilot agents and tools (plugins, skills, MCP servers) nobody uses, Entra agent identities that haven't signed in and agent identity blueprints with nothing active under them, and says what to block or disable. Reads Entra through the Microsoft MCP Server for Enterprise and the admin center Tools pages through the browser. Read-only."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#2B579A",
+  "agentSkills": [
+    {
+      "folder": "./skills/agent-tools-review"
+    },
+    {
+      "folder": "./skills/admin-center-tools-review"
+    }
+  ],
+  "agentConnectors": [
+    {
+      "id": "enterprise-mcp",
+      "displayName": "Microsoft MCP Server for Enterprise",
+      "description": "Read-only Microsoft Graph calls for Microsoft Entra agent identities, blueprints and service principal sign-in activity, as the signed-in admin.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "https://mcp.svc.cloud.microsoft/enterprise",
+          "authorization": {
+            "type": "OAuthPluginVault",
+            "referenceId": "REPLACE-WITH-OAUTH-CLIENT-REGISTRATION-ID"
+          }
+        }
+      }
+    }
+  ]
+}

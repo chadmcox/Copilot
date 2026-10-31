@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds the Stale Agent Review plugin .zip, or the skill-only .zip, for Copilot Cowork.
+    Builds the Agent and Tools Review plugin .zip, or a skill-only .zip, for Copilot Cowork.
 
 .DESCRIPTION
     Copies the plugin folder, puts your OAuth client registration ID (from the Teams Developer
@@ -13,20 +13,23 @@
     Two kinds of zip:
       - Plugin (default): the skill plus the Enterprise MCP connector. Upload it in Cowork under
         Customize > Plugins > Upload plugin, or in the admin center under Agents > Tools > Registry.
-      - Skill only (-SkillOnly): just the skill, in one folder. Upload it in Cowork under
-        Customize > Skills > Add > Upload skill. No connector, so Cowork works from the files you attach.
+      - Skill only (-SkillOnly): one skill, in one folder. Upload it in Cowork under
+        Customize > Skills > Add > Upload skill. No connector, so Cowork works from the files you
+        attach (agent-tools-review) or the browser (admin-center-tools-review). Pick it with -Skill.
 
 .EXAMPLE
     .\New-CoworkPluginPackage.ps1 -ReferenceId "<OAuth client registration ID>"
     .\New-CoworkPluginPackage.ps1 -SkillOnly
+    .\New-CoworkPluginPackage.ps1 -SkillOnly -Skill admin-center-tools-review
 #>
 [CmdletBinding(DefaultParameterSetName = "Plugin")]
 param(
     [Parameter(Mandatory, ParameterSetName = "Plugin")][string]$ReferenceId,
     [Parameter(Mandatory, ParameterSetName = "Skill")][switch]$SkillOnly,
+    [Parameter(ParameterSetName = "Skill")][ValidateSet("agent-tools-review", "admin-center-tools-review")][string]$Skill = "agent-tools-review",
     [string]$AppId = [guid]::NewGuid().ToString(),
-    [string]$OutputFile = $(if ($SkillOnly) { ".\stale-agent-review.zip" } else { ".\StaleAgentReview-Cowork.zip" }),
-    [string]$GitHubBaseUrl = "https://raw.githubusercontent.com/chadmcox/Copilot/main/Tools%20Cleanup/Cowork/plugin"
+    [string]$OutputFile = $(if ($SkillOnly) { ".\$Skill.zip" } else { ".\AgentToolsReview-Cowork.zip" }),
+    [string]$GitHubBaseUrl = "https://raw.githubusercontent.com/chadmcox/Copilot/main/Agent%20and%20Tools%20Cleanup/Cowork/plugin"
 )
 
 # Stop at the first error, so a failed download never produces a broken zip.
@@ -37,7 +40,8 @@ $pluginFiles = @(
     "manifest.json",
     "color.png",
     "outline.png",
-    "skills/stale-agent-review/SKILL.md"
+    "skills/agent-tools-review/SKILL.md",
+    "skills/admin-center-tools-review/SKILL.md"
 )
 
 function Copy-PluginFolder([string]$Destination) {
@@ -87,7 +91,7 @@ function New-ZipFile([string]$Source, [string]$Destination, [string]$Prefix = ""
     finally { $zip.Dispose() }
 }
 
-$work = Join-Path ([System.IO.Path]::GetTempPath()) "StaleAgentReview-Cowork"
+$work = Join-Path ([System.IO.Path]::GetTempPath()) "AgentToolsReview-Cowork"
 Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
 
 if (Test-PluginFolder) {
@@ -100,7 +104,7 @@ else {
 
 if ($SkillOnly) {
     # The skill upload wants one folder holding SKILL.md, and nothing else.
-    New-ZipFile (Join-Path $work "skills/stale-agent-review") $OutputFile "stale-agent-review/"
+    New-ZipFile (Join-Path $work "skills/$Skill") $OutputFile "$Skill/"
     Write-Host "Saved $OutputFile. In Copilot Cowork, open Customize > Skills > Add > Upload skill and choose it."
 }
 else {
