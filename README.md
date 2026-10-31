@@ -1,21 +1,43 @@
 # Copilot
 
-Guides and scripts for Microsoft 365 Copilot administration.
+Guides, scripts and Copilot Cowork prompts for running Microsoft 365 Copilot. Each folder below is one thing, with a one-line explanation of what it is and what you get from it. Open a folder's readme for the full steps.
 
-## Start here: setting up Copilot access
+## Set up Copilot access
 
-Follow these guides in order:
+Do these in order.
 
-1. **[Copilot Group Assignment Guide](Group%20Assignment%20Guide/readme.md):** create the Copilot groups, access packages and PIM admin groups, and add each group to its admin center setting.
-2. **[Copilot Agent Delegation Guide](Agents/readme.md):** control who can build, share, publish and receive agents, using the groups from step 1.
-3. **[Copilot Billing Health Check](Billing%20Health%20Check/README.md):** once spending policies are in place, check them, their groups and their members, and get a scored HTML report. Run it from PowerShell or in Copilot Cowork.
-4. **[Agent and Tools Health Check](Agent%20and%20Tools%20Health%20Check/README.md):** check agents, tools, agent identities and blueprints against best practices (groups, sponsors, least privilege, clear names, stale items), and get a scored HTML report. Run it in Copilot Cowork or from PowerShell.
+| # | Folder | What it is | What you get |
+| --- | --- | --- | --- |
+| 1 | [Group Assignment Guide](Group%20Assignment%20Guide/readme.md) | Scripts and steps that create the Copilot groups, access packages and PIM admin groups, and say which admin center setting each group goes in | Copilot access managed through groups, so you add or remove people in one place |
+| 2 | [Agents](Agents/readme.md) | The Agent Delegation Guide: who can build, share, publish and receive agents, using the groups from step 1 | Agent creation and sharing limited to the right people |
 
-## Ongoing cleanup
+## Check that it's set up right
 
-- **[Agent and Tools Cleanup](Agent%20and%20Tools%20Cleanup/README.md):** find Copilot agents and tools (plugins, skills, MCP servers) nobody uses, stale Entra agent identities and stale agent identity blueprints, then block or disable them with an undo file. Also runs read-only in Copilot Cowork.
+| Folder | What it is | What you get |
+| --- | --- | --- |
+| [Billing Health Check](Billing%20Health%20Check/README.md) | A read-only check of your Copilot spending policies, their groups and their members. Run it in PowerShell or Copilot Cowork | A scored HTML report with a fix for every finding |
+| [Agent and Tools Health Check](Agent%20and%20Tools%20Health%20Check/README.md) | A read-only check of agents, tools, Entra agent identities and blueprints against best practices: groups, sponsors, least privilege, clear names, stale items | A scored HTML report with a fix for every finding, mapped to CIS and CISA guidance |
+
+## Clean up what isn't used
+
+| Folder | What it is | What you get |
+| --- | --- | --- |
+| [Agent and Tools Cleanup](Agent%20and%20Tools%20Cleanup/README.md) | Finds agents, plugins, skills and MCP servers nobody uses, plus stale agent identities and blueprints. Can block or disable them | A list of what to remove, and an undo file for anything it changes |
 
 ## Copilot Cowork prompts
 
-- **[Daily Summary](Daily%20Summary/readme.md):** separate Cowork prompts scheduled to run daily and email you the results, a few minutes apart so they arrive in order.
-- **[Second Brain Project](Second%20Brain%20Project/readme.md):** scheduled Cowork prompts that build a personal work "second brain" in OneDrive from your Microsoft 365 data and public sources.
+| Folder | What it is | What you get |
+| --- | --- | --- |
+| [Daily Summary](Daily%20Summary/readme.md) | Cowork prompts you schedule to run every day, a few minutes apart, each emailing you its result | Daily summary emails that arrive in a predictable order |
+| [Second Brain Project](Second%20Brain%20Project/readme.md) | Scheduled Cowork prompts that read your meetings, Teams, email and public sources | A personal "second brain" of Markdown notes in OneDrive that Copilot can search |
+
+## Make Copilot work your way
+
+| Folder | What it is | What you get |
+| --- | --- | --- |
+| [Personalization](Personalization/readme.md) | How to set Copilot custom instructions, with examples for different roles (Copilot admin, identity admin, students, HOA board member) | Better answers without repeating your role and preferences in every prompt |
+| [MCP](MCP/readme.md) | A link to Microsoft's guide for the Microsoft Learn MCP server | Copilot or another AI tool that can look up official Microsoft docs |
+
+## About this repo
+
+Scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` against Microsoft Graph beta. The coding rules are in [CLAUDE.md](CLAUDE.md). Reports the scripts write can name people and groups, so keep them out of source control.
