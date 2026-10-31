@@ -33,7 +33,7 @@ All the scripts use only Microsoft Graph (the Microsoft.Graph.Authentication mod
 | 7 | `Get-CopilotSpendingReport.ps1` | **Preview, read-only.** Shows the credit balance and every spending policy with its groups, services, limits and alerts, and flags problems. Add `-UserPrincipalName` to see which policy covers a person and how much they have left |
 | 8 | (by hand) | Point each admin center setting at its group, using the steps below |
 
-Each script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High), **USGovDoD** or **China**. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High, DoD and China use the scripts.
+Each script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High) or **USGovDoD**. China isn't offered: the Copilot and agent APIs these scripts use aren't expected to work there. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High and DoD use the scripts.
 
 ```powershell
 .\New-CopilotGroups.ps1 -WhatIf

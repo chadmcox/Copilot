@@ -68,7 +68,7 @@ param(
     # 3f30311c-... is M365_COPILOT_BUSINESS_CHAT ("Microsoft Copilot with Graph-grounded chat"),
     # which is in every Microsoft 365 Copilot SKU.
     [string[]]$CopilotServicePlanIds = @("3f30311c-6b1e-48a4-ab79-725b469da960"),
-    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
+    [ValidateSet("Global", "USGov", "USGovDoD")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
@@ -76,9 +76,9 @@ param(
 # Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
 # Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
 if (-not $Environment) {
-    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
-    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
-    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+    Get-MgEnvironment | Where-Object Name -in "Global", "USGov", "USGovDoD" | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov or USGovDoD). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD") { $choice } else { "Global" }
 }
 $graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
 

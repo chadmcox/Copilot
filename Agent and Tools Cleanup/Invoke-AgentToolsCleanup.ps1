@@ -40,7 +40,7 @@ param(
     [switch]$BlockPackages,
     [switch]$Restore,
     [string]$UndoFile,
-    [ValidateSet("Global", "USGov", "USGovDoD", "China")][string]$Environment
+    [ValidateSet("Global", "USGov", "USGovDoD")][string]$Environment
 )
 
 #Requires -Modules Microsoft.Graph.Authentication
@@ -48,9 +48,9 @@ param(
 # Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
 # Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
 if (-not $Environment) {
-    Get-MgEnvironment | Select-Object Name, GraphEndpoint | Out-Host
-    $choice = Read-Host "Type the cloud to connect to (Global, USGov, USGovDoD or China). Press Enter for Global"
-    $Environment = if ($choice -in "Global", "USGov", "USGovDoD", "China") { $choice } else { "Global" }
+    Get-MgEnvironment | Where-Object Name -in "Global", "USGov", "USGovDoD" | Select-Object Name, GraphEndpoint | Out-Host
+    $choice = Read-Host "Type the cloud to connect to (Global, USGov or USGovDoD). Press Enter for Global"
+    $Environment = if ($choice -in "Global", "USGov", "USGovDoD") { $choice } else { "Global" }
 }
 $graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
 
