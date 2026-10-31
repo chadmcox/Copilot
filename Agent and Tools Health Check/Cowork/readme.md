@@ -18,7 +18,7 @@ The Enterprise MCP server **can't read the Agent 365 catalog**: no MCP scope cov
 | Groups the agents are assigned to: owners, description | Enterprise MCP, live (group IDs come from Packages.csv) |
 | Conditional Access policies for agents | Enterprise MCP, live |
 | Agents without Agent ID (older agents running as classic service principals, found by tag) | Enterprise MCP, live |
-| Agents Microsoft Defender found (AgentsInfo), to compare with the registry | **DefenderAgents.csv**, which you attach. The MCP can't run hunting queries (403) |
+| Agents Microsoft Defender found (AgentsInfo), their MCP servers, skills and tools, and their Agent 365 activity (CloudAppEvents) | **DefenderAgents.csv**, which you attach. The script runs the KQL through Graph advanced hunting; the MCP can't (403) |
 | Attestation date, admin center settings (blueprint creation, inactivity policy, external publishers, sharing) | Not readable through the MCP. Manual checklist, or Cowork reads them in the browser if you turn that on |
 
 ## Pick a way

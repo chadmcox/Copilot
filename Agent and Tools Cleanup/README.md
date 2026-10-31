@@ -21,7 +21,8 @@ Both scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Micr
 | Object | Inventory | Last used |
 | --- | --- | --- |
 | Agents and tools (plugins) | `GET /copilot/admin/catalog/packages` (preview) | `GET /copilot/admin/catalog/packages/{id}` returns `lastUsedDateTime`, `activeUsers` and `totalSessions` (last 30 days). Also: the package's agent identity sign-in, the admin center Agent usage export, and Copilot audit records with `-AuditDays` |
-| Agent identities | `GET /servicePrincipals/microsoft.graph.agentIdentity` | `GET /reports/servicePrincipalSignInActivities` (preview), matched on `appId` |
+| Agent identities | `GET /servicePrincipals/microsoft.graph.agentIdentity` | `GET /reports/servicePrincipalSignInActivities` (preview), matched on `appId`, plus Agent 365 activity in Defender (below) |
+| Agent 365 activity (Defender) | KQL through `POST /beta/security/runHuntingQuery` | `CloudAppEvents` (`InvokeAgent` and tool calls, last 30 days), joined to `AgentsInfo` for each agent's Entra Agent ID. Counts as use for agents and identities. Many Copilot Studio agents run without a sign-in of their own, so this catches use the sign-in report misses |
 | Blueprint principals | `GET /servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal` | Same sign-in report, plus how many child identities are still active |
 | Blueprints registered here | `GET /applications/microsoft.graph.agentIdentityBlueprint` | Used only to tell your own blueprints from Microsoft's and other publishers' |
 | Standalone MCP servers and skills | **No Graph API yet** | Admin center only. Use the Cowork browser skill, or check by hand |
@@ -45,7 +46,7 @@ Notes:
 
 | Script | Delegated scopes | Role |
 | --- | --- | --- |
-| Get-AgentToolsReport.ps1 | Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All, CopilotPackages.Read.All. Plus AuditLogsQuery.Read.All with `-AuditDays` | Reports Reader (sign-ins), AI Administrator (catalog), a Purview audit role (audit search) |
+| Get-AgentToolsReport.ps1 | Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All, CopilotPackages.Read.All, ThreatHunting.Read.All (skip with `-SkipDefender`). Plus AuditLogsQuery.Read.All with `-AuditDays` | Reports Reader (sign-ins), AI Administrator (catalog), Security Reader (Defender), a Purview audit role (audit search) |
 | Invoke-AgentToolsCleanup.ps1 | AgentIdentity.EnableDisable.All, AgentIdentityBlueprintPrincipal.EnableDisable.All, CopilotPackages.ReadWrite.All (only the ones you pick) | Agent ID Administrator, AI Administrator |
 
 Use PIM for the admin roles and activate them only for the run.
