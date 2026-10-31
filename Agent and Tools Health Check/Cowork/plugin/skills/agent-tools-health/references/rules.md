@@ -8,6 +8,8 @@ Thresholds: stale after 90 days, credential warning 30 days before expiry, pendi
 
 **High-privilege Microsoft Graph permissions**: `Directory.*`, `RoleManagement.*`, `Application.*`, `AppRoleAssignment.*`, `Policy.*`, `User.*`, `Group.*`, `GroupMember.*`, `Domain.*`, `Organization.*` when they're ReadWrite, plus `Mail.Send`, `Mail.ReadWrite`, `Sites.FullControl.All`, `Sites.ReadWrite.All`, `Files.ReadWrite.All`, `Directory.AccessAsUser.All`, `full_access_as_app`. Any other `*.ReadWrite.All` is **tenant-wide write**.
 
+Every check also carries a **Reference** (CIS Controls v8.1 safeguards and the CISA risk category); see **guidance.md**.
+
 Each finding has an **Area** (Agents, Tools, Agent identities, Blueprints, Tenant, Discovered agents, Agents without Agent ID), an **Item** (the agent, tool, identity, blueprint or setting), a **Category** (Access, Ownership, Permissions, Naming, Usage, Security, Identity, Inventory), a **Severity**, a **Check** and a **Fix**.
 
 Microsoft-published agents and tools, and blueprints from other publishers (a blueprint principal with no blueprint registered in this tenant), aren't checked for names, descriptions or use. Packages of kind **App** (Office add-ins, tabs) aren't checked.

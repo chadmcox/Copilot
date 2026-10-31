@@ -132,7 +132,8 @@ function New-Finding([string]$Area, [string]$Item, [string]$Severity, [string]$C
         @{ n = "Category"; e = { Get-Category $Check } },
         @{ n = "Severity"; e = { $Severity } },
         @{ n = "Check";    e = { $Check } },
-        @{ n = "Fix";      e = { $Fix } }
+        @{ n = "Fix";      e = { $Fix } },
+        @{ n = "Reference"; e = { Get-Reference $Check } }
 }
 
 # Category for the report's filters, from the check text.
@@ -146,6 +147,30 @@ function Get-Category([string]$Check) {
         "^Group '|Available|Installed|Assigned"           { "Access"; break }
         'name|description'                                 { "Naming"; break }
         default                                            { "Usage" }
+    }
+}
+
+# CIS Controls v8.1 safeguards and CISA "Careful Adoption of Agentic AI Services" risk categories
+# behind each check. See Cowork/plugin/skills/agent-tools-health/references/guidance.md.
+function Get-Reference([string]$Check) {
+    switch -Regex ($Check) {
+        'not in the Agent 365 registry|Not in the registry'      { "CIS 1.1, 2.1, 2.3 | CISA: accountability"; break }
+        'Local AI agent'                                         { "CIS 2.1, 2.3, 2.5 | CISA: design and configuration"; break }
+        '\(Agent ID\)|not an Agent ID'                        { "CIS 5.5, 5.6 | CISA: strong agent identity"; break }
+        'No sponsor|no longer exists|is disabled|One sponsor|No owner|no owner' { "CIS 5.1, 5.5 | CISA: accountability"; break }
+        "^Group '.*owner"                                        { "CIS 5.1, 6.1 | CISA: accountability"; break }
+        'High-privilege|Tenant-wide write'                       { "CIS 3.3, 5.4 | CISA: privilege"; break }
+        'Inheritable permissions'                                { "CIS 3.3, 6.8 | CISA: privilege, structural"; break }
+        'client secret|credential'                               { "CIS 4.1 | CISA: design and configuration"; break }
+        'agent user account'                                     { "CIS 5.5 | CISA: privilege"; break }
+        'high-risk agents'                                       { "CIS 6.7 | CISA: behavioral"; break }
+        'Conditional Access'                                     { "CIS 4.1, 6.7 | CISA: design and configuration"; break }
+        'Available to all|Installed for the entire|directly, not through a group|available to all users|no longer exists' { "CIS 6.1, 6.8 | CISA: privilege"; break }
+        "^Group '"                                               { "CIS 6.1 | CISA: accountability"; break }
+        'Unclear name|description'                               { "CIS 2.1, 5.5 | CISA: accountability"; break }
+        'Not used|No sign-in|No active agents'                   { "CIS 5.3, 6.2 | CISA: accountability"; break }
+        'pending'                                                { "CIS 6.1"; break }
+        default                                                  { "" }
     }
 }
 
@@ -535,7 +560,8 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           @{ n = "detail"; e = { "$($_.Items) item$(if ($_.Items -ne 1) { 's' }) checked" } })
         findings     = @($findings | Select-Object @{ n = "subject"; e = { $_.Area } },
                           @{ n = "area"; e = { $_.Category } }, @{ n = "severity"; e = { $_.Severity } },
-                          @{ n = "target"; e = { $_.Item } }, @{ n = "check"; e = { $_.Check } }, @{ n = "fix"; e = { $_.Fix } })
+                          @{ n = "target"; e = { $_.Item } }, @{ n = "check"; e = { $_.Check } },
+                          @{ n = "fix"; e = { if ($_.Reference) { "$($_.Fix) [$($_.Reference)]" } else { $_.Fix } } })
         fixFirst     = @($findings | Where-Object Severity -in "High", "Medium" | Group-Object Fix |
                           Sort-Object @{ e = { @("High", "Medium").IndexOf($_.Group[0].Severity) } }, @{ e = { $_.Count }; Descending = $true } |
                           Select-Object -First 3 | ForEach-Object { "$($_.Name): $($_.Count) $(if ($_.Count -eq 1) { 'item' } else { 'items' }) ($(($_.Group | ForEach-Object Item | Select-Object -Unique -First 3) -join ', ')$(if ($_.Count -gt 3) { ', …' }))." })
@@ -559,6 +585,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "GET /beta/servicePrincipals?`$filter=tags/any(t:t eq 'AgentCreatedBy:CopilotStudio') (and AgenticApp, AIAgentBuilder, AgenticInstance, power-virtual-agents-*)"
                           "POST /beta/security/runHuntingQuery: AgentsInfo | summarize arg_max(Timestamp, *) by AgentId")
         notes        = @(
+                          "References in brackets: CIS Controls v8.1 safeguards (AI Agent and MCP Companion Guides, April 2026) and the CISA risk category from 'Careful Adoption of Agentic AI Services' (CISA, NSA and Five Eyes partners, May 2026). CIS 5.3 disables dormant accounts after 45 days; run with -StaleDays 45 to match it."
                           "Scores: each item starts at 100 (High -25, Medium -10, Low -3); an area's score is the average of its items."
                           "Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names or descriptions."
                           if ($SkipPackages -or -not $packages) { "Agents and tools weren't checked: the Agent 365 catalog wasn't read." }

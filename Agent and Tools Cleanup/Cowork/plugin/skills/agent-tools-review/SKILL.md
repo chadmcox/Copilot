@@ -53,6 +53,7 @@ If a call fails with 403, say which scope or role is missing and carry on with t
 Give four short tables (agents, tools, agent identities, blueprints) with name, status, days since last use and recommendation. Then the counts per recommendation, and the Graph calls you ran. Don't list sponsor or owner names or object IDs unless the user asks.
 
 End with:
+- Guidance: CIS Controls v8.1 safeguard 5.3 disables dormant accounts after 45 days (this review defaults to 90; offer 45 to match CIS), 6.2 asks for an access revoking process, and 5.5 for a reviewed inventory of non-human accounts. CISA's Careful Adoption of Agentic AI Services (May 2026) puts unused agents with standing access under its privilege and accountability risks.
 - Disable or block first; don't delete. Deleting a blueprint deletes all its agent identities.
 - Turn on the Entra Agent ID default inactivity policy (Entra admin center > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID). It notifies at 60 days inactive, disables at 90 and deletes at 455.
 - To make the changes, run `Get-AgentToolsReport.ps1`, review the CSVs, then `Invoke-AgentToolsCleanup.ps1 -WhatIf`.
