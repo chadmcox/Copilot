@@ -1,3 +1,28 @@
+<#PSScriptInfo
+.VERSION 2026.10
+.GUID e67ca9ab-061f-4c62-b8ea-59d9c024d1b6
+.AUTHOR Chad Cox
+    https://blogs.technet.microsoft.com/chadcox/
+    https://github.com/chadmcox
+.COMPANYNAME
+.COPYRIGHT This Sample Code is provided for the purpose of illustration only and is not
+intended to be used in a production environment.  THIS SAMPLE CODE AND ANY
+RELATED INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.  We grant You a
+nonexclusive, royalty-free right to use and modify the Sample Code and to
+reproduce and distribute the object code form of the Sample Code, provided
+that You agree: (i) to not use Our name, logo, or trademarks to market Your
+software product in which the Sample Code is embedded; (ii) to include a valid
+copyright notice on Your software product in which the Sample Code is embedded;
+and (iii) to indemnify, hold harmless, and defend Us and Our suppliers from and
+against any claims or lawsuits, including attorneys` fees, that arise or result
+from the use or distribution of the Sample Code..
+.description
+Read-only health check of Copilot agents and tools, Entra agent identities and blueprints, with a scored HTML report.
+url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/entra/agent-id/best-practices-agent-id
+#>
+
 <#
 .SYNOPSIS
     Read-only health check for Copilot agents and tools (plugins, skills, MCP servers), Entra agent
