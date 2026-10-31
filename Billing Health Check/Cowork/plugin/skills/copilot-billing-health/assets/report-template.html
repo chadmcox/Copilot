@@ -15,7 +15,9 @@
     "sample": false,                               // true shows a "sample data" banner
     "scorecard": [ { "name": "", "score": 0, "rating": "Green|Amber|Red", "high": 0, "medium": 0, "low": 0, "info": 0, "detail": "" } ],
     "findings":  [ { "subject": "", "area": "", "severity": "High|Medium|Low|Info", "target": "", "check": "", "fix": "" } ],
-    "fixFirst": [ "" ], "manualChecks": [ "" ], "graphCalls": [ "" ], "notes": [ "" ], "prompt": ""
+    "fixFirst": [ "" ], "manualChecks": [ "" ], "graphCalls": [ "" ], "notes": [ "" ], "prompt": "",
+    "dial":   { "value": 0, "label": "" },        // optional: replaces the average score in the big dial
+    "funnel": [ { "label": "", "count": 0, "note": "" } ]   // optional: shows a funnel chart
   }
 -->
 <style>
@@ -53,7 +55,7 @@ header.top { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; mar
 .dial svg { transform: rotate(-90deg); }
 .dial .num { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
 .dial .num b { font-size: 40px; line-height: 1; display: block; }
-.dial .num span { display: block; font-size: 12px; color: var(--muted); }
+.dial .num span { display: block; font-size: 12px; line-height: 1.25; color: var(--muted); max-width: 96px; margin: 2px auto 0; }
 .dial .num i { display: block; font-style: normal; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
 .headline { flex: 1; min-width: 240px; }
 .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: 12px; color: var(--muted); font-weight: 600; }
@@ -79,6 +81,13 @@ h2 .count { font-size: 12px; background: var(--accent-soft); color: var(--accent
 .pill { font-size: 12px; border-radius: 999px; padding: 1px 8px; font-weight: 600; background: var(--b); color: var(--f); }
 .pill.High { --b: var(--high-soft); --f: var(--high); } .pill.Medium { --b: var(--medium-soft); --f: var(--medium); }
 .pill.Low { --b: var(--low-soft); --f: var(--low); } .pill.Info { --b: var(--info-soft); --f: var(--info); }
+.funnel { display: grid; gap: 8px; background: var(--panel); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+.frow { display: grid; grid-template-columns: minmax(140px, 260px) 1fr 64px; gap: 12px; align-items: center; }
+.frow .lbl { font-weight: 600; font-size: 14px; } .frow .lbl small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.frow .bar { height: 14px; background: var(--track); border-radius: 999px; overflow: hidden; }
+.frow .bar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.frow .n { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .frow { grid-template-columns: 1fr 56px; } .frow .bar { grid-column: 1 / -1; grid-row: 2; } }
 .fixfirst { counter-reset: n; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
 .fixfirst li { background: var(--panel); border-radius: 12px; padding: 12px 14px 12px 52px; position: relative; box-shadow: var(--shadow); }
 .fixfirst li::before { counter-increment: n; content: counter(n); position: absolute; left: 14px; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 700; font-size: 13px; }
@@ -198,13 +207,15 @@ footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
   function countBy(sev) { return findings.filter(function (f) { return f.severity === sev; }).length; }
 
   var app = document.getElementById("app");
-  var overall = cards.length ? Math.round(cards.reduce(function (s, c) { return s + c.score; }, 0) / cards.length) : 100;
+  var overall = data.dial && typeof data.dial.value === "number" ? Math.round(data.dial.value)
+    : cards.length ? Math.round(cards.reduce(function (s, c) { return s + c.score; }, 0) / cards.length) : 100;
+  var dialLabel = data.dial && data.dial.label ? data.dial.label : "average of 100";
   var overallRating = rating(overall);
 
   if (data.sample) app.appendChild(el("div", { class: "sample", text: "Sample data: this is the template preview, not a real run." }));
 
   var dial = el("div", { class: "dial" }, [ring(148, 14, overall, ratingColor(overallRating)),
-    el("div", { class: "num" }, [el("div", {}, [el("b", { text: String(overall) }), el("span", { text: "average of 100" }), el("i", { style: "color:" + ratingColor(overallRating), text: overallRating })])])]);
+    el("div", { class: "num" }, [el("div", {}, [el("b", { text: String(overall) }), el("span", { text: dialLabel }), el("i", { style: "color:" + ratingColor(overallRating), text: overallRating })])])]);
   app.appendChild(el("header", { class: "top" }, [dial, el("div", { class: "headline" }, [
     el("div", { class: "eyebrow", text: "Microsoft 365 Copilot" }),
     el("h1", { text: data.title || "Copilot Billing Health" }),
@@ -215,6 +226,16 @@ footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
     tile(cards.length, subject === "Group" ? "Groups checked" : "Policies checked"),
     tile(countBy("High"), "High", "var(--high)"), tile(countBy("Medium"), "Medium", "var(--medium)"),
     tile(countBy("Low"), "Low", "var(--low)"), tile(countBy("Info"), "Info", "var(--info)")]));
+
+  if ((data.funnel || []).length) {
+    app.appendChild(el("h2", { text: "Funnel" }));
+    var top = Math.max.apply(null, data.funnel.map(function (f) { return f.count || 0; }).concat([1]));
+    app.appendChild(el("div", { class: "funnel" }, data.funnel.map(function (f) {
+      return el("div", { class: "frow" }, [el("div", { class: "lbl" }, [f.label, f.note ? el("small", { text: f.note }) : null]),
+        el("div", { class: "bar" }, [el("i", { style: "width:" + Math.round(100 * (f.count || 0) / top) + "%" })]),
+        el("div", { class: "n", text: String(f.count == null ? "–" : f.count) })]);
+    })));
+  }
 
   if ((data.fixFirst || []).length) {
     app.appendChild(el("h2", { text: "Fix these first" }));

@@ -21,6 +21,35 @@ The script uses only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Micro
 .\Get-CopilotBillingHealth.ps1 -PoliciesOnly   # only Policies.csv, for Copilot Cowork
 ```
 
+## How many active Copilot users are ready for Cowork?
+
+`Get-CopilotCoworkReadiness.ps1` answers that with a funnel, and lists who drops out at each step. It's read-only.
+
+| Step | Counts people who… |
+| --- | --- |
+| Copilot license assigned | have a license that includes the Copilot service plan |
+| Copilot turned on | have that plan enabled, no license assignment error, and an enabled account |
+| Active in Copilot | used Copilot in the period (`-Period`, 28 days by default) |
+| Covered by a Cowork policy | are in an enabled spending policy that selects Cowork |
+| Billing set | are in such a policy with a billing method (not "not specified") |
+| Can use Cowork now | Microsoft says can use Cowork right now (only with `-CheckBalances`) |
+
+The report shows "% of active Copilot users ready for Cowork", a card per Cowork policy with the share of its people who are ready, and these gaps:
+
+- **High:** covered for Cowork but the Copilot license is missing, turned off or in error, so they can't use it.
+- **Medium:** covered for Cowork but the policy has no billing method.
+- **Low:** covered for Cowork but no Copilot activity in the period.
+- **Info:** active Copilot users without Cowork, as candidates.
+
+```powershell
+.\Get-CopilotCoworkReadiness.ps1                       # 28 days
+.\Get-CopilotCoworkReadiness.ps1 -Period D90 -CheckBalances
+```
+
+It writes CoworkReadiness.csv (one row per person), CoworkGaps.csv and CoworkReadiness.html.
+
+> If the usage report hides names (Microsoft 365 admin center > **Settings > Org settings > Reports** > *Display concealed user, group, and site names in all reports*), "Active in Copilot" is a count only and can't be matched to people. The script tells you; it doesn't change the setting.
+
 > **Start here:** this builds on the [Copilot Group Assignment Guide](../Group%20Assignment%20Guide/readme.md), which creates the groups and spending policies this checks.
 
 Microsoft changes these features often, and some APIs here are in preview (beta). Check each path in your own tenant.
@@ -112,7 +141,7 @@ Each finding has a severity, a reason and a fix. Thresholds (2,000 credits, 80%,
 | In both **Cowork Limited** and **Cowork Unlimited** | Spending | High | The higher limit always wins, so Limited does nothing. Remove one. (Being in Temp and Limited together is expected) |
 | In the Temp group but not in Limited | Spending | Medium | Find out how they were added |
 | **Has** a Copilot license | Billing | Medium | They don't need this policy. Remove them |
-| **No** Copilot license, in a Cowork or Code policy | Spending | Medium | They can't use it. License them or remove them |
+| **No** working Copilot license (none, Copilot turned off in the license, or a license assignment error), in a Cowork or Code policy | Spending | Medium | They can't use it. Assign a working license or remove them |
 | People in a Teams Phone Agent group | Spending | Medium | Keep resource accounts only |
 | No metered usage for 30 to 60 days | Both | Info | Candidate to remove |
 | Heavy metered usage | Billing | Info | Candidate for a Copilot license. Show the break-even cost |

@@ -143,7 +143,7 @@ function Get-Group([string]$Id) {
 # without it, so the other checks still run (the inactive check is then skipped).
 function Get-User([string]$Id) {
     if (-not $userCache.ContainsKey($Id)) {
-        $select = "id,userPrincipalName,accountEnabled,userType,assignedLicenses"
+        $select = "id,userPrincipalName,accountEnabled,userType,assignedLicenses,licenseAssignmentStates"
         $user = Get-GraphOptional "$graph/users/$Id`?`$select=$select,signInActivity"
         if (-not $user) { $user = Get-GraphOptional "$graph/users/$Id`?`$select=$select" }
         $userCache[$Id] = $user
@@ -227,6 +227,16 @@ function Test-Group($P, $G) {
     if (-not $G.Description) { New-Finding $P.Name "Group" "Low" $G.Name "No description" "Describe the group and name its policy" }
 }
 
+# Working, Turned off (service plan disabled), Error (assignment failed) or None.
+function Get-LicenseState($User, [string[]]$SkuIds) {
+    $copilot = @($User.assignedLicenses | Where-Object { $_.skuId -in $SkuIds })
+    if (-not $copilot) { return "None" }
+    $states = @($User.licenseAssignmentStates | Where-Object { $_.skuId -in $SkuIds })
+    if ($states -and -not ($states | Where-Object { $_.state -in "Active", "ActiveWithError" })) { return "Error" }
+    if (-not ($copilot | Where-Object { $disabled = $_.disabledPlans; $CopilotServicePlanIds | Where-Object { $_ -notin $disabled } })) { return "Turned off" }
+    "Working"
+}
+
 function Test-Member($P, $G, $User, [string[]]$CopilotSkus) {
     $upn = $User.userPrincipalName
     $lastSignIn = $User.signInActivity.lastSuccessfulSignInDateTime
@@ -237,8 +247,10 @@ function Test-Member($P, $G, $User, [string[]]$CopilotSkus) {
     if ($User.signInActivity -and (-not $lastSignIn -or [datetime]$lastSignIn -lt (Get-Date).AddDays(-$InactiveDays))) {
         New-Finding $P.Name "Member" "Medium" $upn "No sign-in for $InactiveDays days" "Remove them from $($G.Name)"
     }
-    if ($needsLicense -and -not ($User.assignedLicenses.skuId | Where-Object { $_ -in $CopilotSkus })) {
-        New-Finding $P.Name "Member" "Medium" $upn "No Copilot license, but $($P.Services -join ', ') needs one" "License them, or remove them"
+    $license = Get-LicenseState $User $CopilotSkus
+    if ($needsLicense -and $license -ne "Working") {
+        $why = @{ None = "No Copilot license"; "Turned off" = "Copilot is turned off in their license"; Error = "Their Copilot license assignment has an error" }[$license]
+        New-Finding $P.Name "Member" "Medium" $upn "$why, but $($P.Services -join ', ') needs one" "Assign a working Copilot license, or remove them"
     }
 
     if ($SkipBalances) { return }
@@ -375,7 +387,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "GET /beta/copilot/costManagement/spendingPolicies (+ serviceSettings, assignedGroups, emailThresholdSettings)"
                           "GET /beta/subscribedSkus?`$select=skuId,servicePlans"
                           "GET /beta/groups/{id} (+ owners, members/microsoft.graph.group, transitiveMembers/microsoft.graph.user)"
-                          "GET /beta/users/{id}?`$select=accountEnabled,userType,assignedLicenses,signInActivity"
+                          "GET /beta/users/{id}?`$select=accountEnabled,userType,assignedLicenses,licenseAssignmentStates,signInActivity"
                           "GET /beta/copilot/costManagement/userBalances/{id}/serviceBalances")
         notes        = @("Scores start at 100: High -25, Medium -10, Low -3.")
         prompt       = $coworkPrompt
