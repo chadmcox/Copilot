@@ -10,14 +10,15 @@ A read-only check of how well your Copilot agents and tools, Entra agent identit
 
 | Way | How |
 | --- | --- |
-| **Copilot Cowork** (recommended) | Set up the plugin once, attach `Packages.csv`, paste the prompt. See **[Cowork/readme.md](Cowork/readme.md)** |
-| **PowerShell** | `.\Get-AgentToolsHealth.ps1`. Writes Findings.csv, Scorecard.csv, Packages.csv and Report.html |
+| **Copilot Cowork** (recommended) | Set up the plugin once, attach `Packages.csv` and `DefenderAgents.csv`, paste the prompt. See **[Cowork/readme.md](Cowork/readme.md)** |
+| **PowerShell** | `.\Get-AgentToolsHealth.ps1`. Writes Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv and Report.html |
 
 ```powershell
 .\Get-AgentToolsHealth.ps1                  # full check
 .\Get-AgentToolsHealth.ps1 -StaleDays 60    # stale after 60 days instead of 90
-.\Get-AgentToolsHealth.ps1 -PackagesOnly    # just Packages.csv, to attach in Cowork
-.\Get-AgentToolsHealth.ps1 -SkipPackages    # no Agent 365 license: identities, blueprints, tenant only
+.\Get-AgentToolsHealth.ps1 -PackagesOnly    # just Packages.csv and DefenderAgents.csv, to attach in Cowork
+.\Get-AgentToolsHealth.ps1 -SkipPackages    # no Agent 365 license
+.\Get-AgentToolsHealth.ps1 -SkipDefender    # no Defender (or no Security Reader)
 ```
 
 Both give the same HTML report from the same template: a score dial, a card per area, the well-governed funnel for agent identities, filterable findings, CSV export, print, and a manual checklist.
@@ -32,6 +33,8 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 | **Agent identities** | No sponsor, or a sponsor or owner disabled or gone (High). High-privilege Graph permissions such as Mail.Send or Directory.ReadWrite.All (High). One sponsor and no owner. Unclear name. No sign-in for 90 days, or never. Agent user accounts |
 | **Blueprints** | Inheritable permissions set to All allowed (High). No sponsor (High). Client secrets instead of certificates or federated credentials, expiring credentials. Unclear name, no description. Nothing active under it |
 | **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents |
+| **Discovered agents** (Microsoft Defender) | Agents Defender found (`AgentsInfo`: Copilot Studio, Foundry, third-party) that aren't in the Agent 365 registry, especially ones available to everyone (High) or with no owner. Cloud agents with no Entra Agent ID. Local AI agents seen on devices |
+| **Agents without Agent ID** | Older Copilot Studio and Foundry agents still running as classic service principals (found by their `AgentCreatedBy:CopilotStudio`, `AgenticApp` and similar tags), with no blueprint, sponsor or agent-specific controls. Recreate them with Agent ID; there's no in-place migration |
 
 **Unclear names** are flagged when a name has *test*, *demo*, *temp*, *copy*, *draft*, *sample*, *POC*, *sandbox*, *untitled*, *dummy*, *do not use*, starts with *new agent* or *my agent*, ends in *Agent 2* or *(1)*, or is under four characters. Change the list with `-UnclearNamePattern`.
 
@@ -51,7 +54,7 @@ With browser access on, Cowork can read these pages and report what they're set 
 
 ## Permissions (PowerShell)
 
-Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All. Roles: **AI Administrator** (catalog; needs a Microsoft Agent 365 license or Microsoft 365 E7) and **Global Reader**. Activate them in PIM for the run.
+Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All. Roles: **AI Administrator** (catalog; needs a Microsoft Agent 365 license or Microsoft 365 E7), **Security Reader** (Defender hunting) and **Global Reader**. Activate them in PIM for the run.
 
 Only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Microsoft.Graph.Authentication), Graph beta, Windows PowerShell 5.1 and PowerShell 7.
 
@@ -73,3 +76,6 @@ The output files name agents, groups and permissions. Keep them private; the `.g
 - [Understand agent details: availability and installation](https://learn.microsoft.com/microsoft-agent-365/admin/agent-details)
 - [Agent 365 Package Management API](https://learn.microsoft.com/microsoft-365-copilot/extensibility/api/admin-settings/package/overview)
 - [Agent ID default inactivity policy](https://learn.microsoft.com/entra/id-governance/agent-default-inactivity-policy)
+- [Discover AI agents with Microsoft Defender](https://learn.microsoft.com/defender-xdr/security-for-ai/ai-agent-inventory) and the [AgentsInfo table](https://learn.microsoft.com/defender-xdr/advanced-hunting-agentsinfo-table)
+- [Recreate Copilot Studio agents in Microsoft Entra Agent ID](https://learn.microsoft.com/entra/agent-id/migrate-copilot-studio-agents-to-agent-id) (tags that mark older agents)
+- [runHuntingQuery](https://learn.microsoft.com/graph/api/security-security-runhuntingquery)

@@ -16,25 +16,33 @@
       - Blueprints: All allowed inheritable permissions, no sponsor or owner, client secrets,
         expiring secrets, unclear names, no description, nothing active under them.
       - Tenant: Conditional Access for agent identities and for risky agents.
+      - Discovered agents (Microsoft Defender): agents in Defender's AgentsInfo inventory that
+        aren't in the Agent 365 registry, cloud agents with no Entra agent identity, and local AI
+        agents seen on devices.
+      - Agents without Agent ID: older Copilot Studio and Foundry agents that run as classic
+        service principals (tags AgentCreatedBy:CopilotStudio, AgenticApp, AIAgentBuilder,
+        AgenticInstance, power-virtual-agents-*), not as Entra agent identities.
 
     Scores: every item starts at 100 (High -25, Medium -10, Low -3). Each area's score is the
     average of its items. Green 80+, Amber 50-79, Red under 50.
 
-    Output (in -OutputFolder): Findings.csv, Scorecard.csv, Packages.csv and Report.html.
-    Packages.csv is the file you attach in Copilot Cowork: the Enterprise MCP server can't read
-    the Agent 365 catalog, so Cowork reads agents and tools from this file and reads everything
-    else live. Use -PackagesOnly to write just Packages.csv.
+    Output (in -OutputFolder): Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv and
+    Report.html. Packages.csv and DefenderAgents.csv are the files you attach in Copilot Cowork:
+    the Enterprise MCP server can't read the Agent 365 catalog or run Defender hunting queries,
+    so Cowork reads them from these files and reads everything else live. Use -PackagesOnly to
+    write just those two files.
     The files name agents, groups and sponsors. Keep them private and out of source control.
 
     Permissions (delegated): CopilotPackages.Read.All (Agent 365 license, AI Administrator),
     Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All (sign-ins),
-    User.Read.All, Group.Read.All, Policy.Read.All (Conditional Access).
+    User.Read.All, Group.Read.All, Policy.Read.All (Conditional Access), ThreatHunting.Read.All
+    (Defender advanced hunting; Security Reader role). Use -SkipDefender without Defender.
 
 .EXAMPLE
     .\Get-AgentToolsHealth.ps1
     .\Get-AgentToolsHealth.ps1 -StaleDays 60
     .\Get-AgentToolsHealth.ps1 -PackagesOnly
-    .\Get-AgentToolsHealth.ps1 -SkipPackages
+    .\Get-AgentToolsHealth.ps1 -SkipPackages -SkipDefender
 #>
 [CmdletBinding()]
 param(
@@ -43,6 +51,7 @@ param(
     [int]$PendingRequestDays = 14,
     [switch]$PackagesOnly,
     [switch]$SkipPackages,
+    [switch]$SkipDefender,
     [string]$OutputFolder = ".\AgentToolsHealth-$(Get-Date -Format yyyyMMdd-HHmm)",
 
     # Words that make a name unclear. Matched at the start of a word, so "demo" also catches "demoe".
@@ -58,6 +67,7 @@ $scopes = @(
     if (-not $SkipPackages) { "CopilotPackages.Read.All" }
     if (-not $PackagesOnly) { "Application.Read.All", "AgentIdentityBlueprint.Read.All", "AuditLog.Read.All", "User.Read.All", "Group.Read.All", "Policy.Read.All" }
     if ($PackagesOnly)      { "Group.Read.All" }
+    if (-not $SkipDefender) { "ThreatHunting.Read.All" }
 )
 Connect-MgGraph -NoWelcome -Scopes $scopes
 
@@ -130,6 +140,8 @@ function Get-Category([string]$Check) {
     switch -Regex ($Check) {
         'Conditional Access|high-risk'                     { "Security"; break }
         'sponsor|owner'                                    { "Ownership"; break }
+        'Agent ID|classic service principal'               { "Identity"; break }
+        'Defender|registry|Local AI agent'                 { "Inventory"; break }
         'permission|secret|credential|agent user'          { "Permissions"; break }
         "^Group '|Available|Installed|Assigned"           { "Access"; break }
         'name|description'                                 { "Naming"; break }
@@ -181,7 +193,7 @@ function Get-PackageRow {
         $d | Select-Object id, displayName,
             @{ n = "kind";             e = { Get-PackageKind $_.elementTypes } },
             @{ n = "elementTypes";     e = { @($_.elementTypes) -join ";" } },
-            type, publisher, shortDescription, isBlocked, availableTo, deployedTo, requestStatus, requestType,
+            type, publisher, shortDescription, appId, manifestId, assetId, agentIdentityId, isBlocked, availableTo, deployedTo, requestStatus, requestType,
             @{ n = "groupIds";         e = { @($allowed | Where-Object resourceType -eq "group" | ForEach-Object resourceId | Sort-Object -Unique) -join ";" } },
             @{ n = "groups";           e = { @($allowed | Where-Object resourceType -eq "group" | ForEach-Object resourceId | Sort-Object -Unique | ForEach-Object { (Get-Group $_).displayName }) -join "; " } },
             @{ n = "directUsers";      e = { @($allowed | Where-Object resourceType -eq "user" | ForEach-Object resourceId | Sort-Object -Unique).Count } },
@@ -206,6 +218,9 @@ function Test-Package($P) {
         if (-not $g) { New-Finding $area $name "Medium" "Assigned to a group that no longer exists" "Assign it to the right group" }
         elseif ($g.ownerCount -lt 2) { New-Finding $area $name "Medium" "Group '$($g.displayName)' has $($g.ownerCount) owner(s)" "Add owners so there are at least two" }
         elseif (-not $g.description) { New-Finding $area $name "Low" "Group '$($g.displayName)' has no description" "Describe the group and name the agent or tool it's for" }
+    }
+    if ($custom -and $P.kind -eq "Agent" -and $P.elementTypes -match 'customEngine|bot' -and -not $P.agentIdentityId) {
+        New-Finding $area $name "Low" "No Entra agent identity (Agent ID)" "Recreate it with Agent ID so it gets a sponsor, Conditional Access and lifecycle controls"
     }
     if ($custom -and (Test-UnclearName $name)) { New-Finding $area $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
     if ($custom -and (Test-PoorDescription $P.shortDescription $name)) { New-Finding $area $name "Medium" "Missing or too-short description" "Describe what it does, for whom, and what data it uses" }
@@ -307,6 +322,80 @@ function Test-Tenant {
 }
 
 # ---------------------------------------------------------------------------
+# Discovered agents (Microsoft Defender AgentsInfo)
+# ---------------------------------------------------------------------------
+
+# Latest record of every agent Defender knows about. One row per agent. This is DefenderAgents.csv.
+function Get-DefenderAgent {
+    $kql = @'
+AgentsInfo
+| summarize arg_max(Timestamp, *) by AgentId
+| where LifecycleStatus != "Deleted"
+| project AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
+    PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount = array_length(Owners)
+'@
+    $body = @{ Query = $kql; Timespan = "P30D" } | ConvertTo-Json
+    $result = Invoke-MgGraphRequest -Method POST -Uri "$graph/security/runHuntingQuery" -Body $body -ContentType "application/json" -OutputType PSObject
+    $result.results | Select-Object AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
+        PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount
+}
+
+# Every ID a registry package can be known by, so Defender's agents can be matched to it.
+function Get-RegistryKey($Packages) {
+    $keys = @{}
+    $Packages | ForEach-Object { @($_.id, $_.appId, $_.manifestId, $_.assetId, $_.agentIdentityId) } | Where-Object { $_ } | ForEach-Object { $keys["$_"] = $true }
+    $keys
+}
+
+function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry) {
+    $cloud = @($Agents | Where-Object { $_.Platform -ne "LocalAgents" -and $_.LifecycleStatus -ne "Uninstalled" })
+    $cloud | ForEach-Object {
+        $name = if ($_.AgentName) { "$($_.AgentName) ($($_.Platform))" } else { "$($_.AgentId) ($($_.Platform))" }
+        $inRegistry = [bool](@($_.AgentId, $_.SourceAgentId, $_.EntraAgentId) | Where-Object { $_ -and $RegistryKeys["$_"] })
+        if ($HaveRegistry -and -not $inRegistry) {
+            New-Finding "Discovered agents" $name "Medium" "Found by Defender, but not in the Agent 365 registry" "Add it to the registry (registry sync) with an owner, or remove it"
+            if ("$($_.Availability)" -match "all") { New-Finding "Discovered agents" $name "High" "Not in the registry, and available to all users" "Limit it to a group, then register it" }
+            if (-not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "Not in the registry, and no owner" "Find who built it and make them the owner, or remove it" }
+        }
+        if (-not $_.EntraAgentId) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Recreate or register it with an Agent ID so it gets a sponsor, Conditional Access and lifecycle controls" }
+    }
+    # Local AI agents (coding assistants and the like) seen on devices: one finding per agent name.
+    $Agents | Where-Object Platform -eq "LocalAgents" | Group-Object AgentName | ForEach-Object {
+        New-Finding "Discovered agents" "$($_.Name) (local)" "Low" "Local AI agent seen on $($_.Count) device$(if ($_.Count -ne 1) { 's' })" "Check it's an approved tool; govern it with Defender for Endpoint and Intune"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Agents without Agent ID (classic service principals)
+# ---------------------------------------------------------------------------
+
+function Get-ClassicAgent($AgentObjectIds) {
+    $select = "`$select=id,appId,displayName,accountEnabled,tags,createdDateTime"
+    $byId = @{}
+    @(
+        "tags/any(t:t eq 'AgentCreatedBy:CopilotStudio')"
+        "tags/any(t:t eq 'AgenticApp')"
+        "tags/any(t:t eq 'AIAgentBuilder')"
+        "tags/any(t:t eq 'AgenticInstance')"
+        "tags/any(t:startswith(t,'power-virtual-agents-'))"
+    ) | ForEach-Object { Get-GraphAllOptional "$graph/servicePrincipals?`$filter=$([uri]::EscapeDataString($_))&$select" } |
+        Where-Object { $_ -and -not $AgentObjectIds[$_.id] -and "$($_.'@odata.type')" -notmatch 'agentIdentity' } |
+        ForEach-Object { $byId[$_.id] = $_ }
+    $byId.Values
+}
+
+function Test-ClassicAgent($S, $SignIns) {
+    $name = $S.displayName
+    $last = ConvertTo-Utc $SignIns[$S.appId]
+    $made = if ($S.tags -contains "AgentCreatedBy:CopilotStudio" -or ($S.tags -match '^power-virtual-agents-')) { "Copilot Studio" } else { "an older platform" }
+    New-Finding "Agents without Agent ID" $name "Medium" "Agent from $made runs as a classic service principal, not an Agent ID" "Recreate it with Agent ID (there's no in-place migration), then retire this service principal"
+    if (-not @(Get-GraphAllOptional "$graph/servicePrincipals/$($S.id)/owners?`$select=id").Count) { New-Finding "Agents without Agent ID" $name "Medium" "No owner" "Find who built it and make them the owner" }
+    if ($S.accountEnabled -and (-not $last -or $last -lt $cutoff) -and (ConvertTo-Utc $S.createdDateTime) -lt $cutoff) {
+        New-Finding "Agents without Agent ID" $name "Low" "No sign-in for $StaleDays days" "Check with the owner, then retire it instead of recreating it"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Run
 # ---------------------------------------------------------------------------
 
@@ -319,8 +408,19 @@ if (-not $SkipPackages) {
     catch { Write-Warning "Couldn't read the Agent 365 catalog. It needs an Agent 365 license and the AI Administrator role. Run with -SkipPackages to skip it. $($_.Exception.Message)" }
     $packages | Export-Csv (Join-Path $OutputFolder "Packages.csv") -NoTypeInformation -Encoding UTF8
 }
+$defenderAgents = @()
+$haveDefender = $false
+if (-not $SkipDefender) {
+    Write-Host "Reading Microsoft Defender's agent inventory (AgentsInfo)..."
+    try {
+        $defenderAgents = @(Get-DefenderAgent)
+        $haveDefender = $true
+        $defenderAgents | Export-Csv (Join-Path $OutputFolder "DefenderAgents.csv") -NoTypeInformation -Encoding UTF8
+    }
+    catch { Write-Warning "Couldn't run the Defender hunting query. It needs ThreatHunting.Read.All and the Security Reader role. Run with -SkipDefender to skip it. $($_.Exception.Message)" }
+}
 if ($PackagesOnly) {
-    Write-Host "Saved Packages.csv to $OutputFolder. Attach it in Copilot Cowork with the prompt in the Cowork folder of this repo."
+    Write-Host "Saved Packages.csv and DefenderAgents.csv to $OutputFolder. Attach them in Copilot Cowork with the prompt in the Cowork folder of this repo."
     return
 }
 
@@ -333,6 +433,10 @@ $blueprints = @(Get-GraphAllOptional "$graph/applications/microsoft.graph.agentI
 $principals = @{}
 Get-GraphAllOptional "$graph/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal?`$select=id,appId,displayName" | ForEach-Object { $principals[$_.appId] = $_ }
 $agentUsers = @(Get-GraphAllOptional "$graph/users/microsoft.graph.agentUser?`$select=id,displayName,identityParentId")
+$agentObjectIds = @{}
+@($identities.id) + @($principals.Values | ForEach-Object id) | Where-Object { $_ } | ForEach-Object { $agentObjectIds[$_] = $true }
+Write-Host "Looking for agents without Agent ID..."
+$classicAgents = @(Get-ClassicAgent $agentObjectIds)
 $children = $identities | Where-Object agentIdentityBlueprintId | Group-Object agentIdentityBlueprintId -AsHashTable -AsString
 if (-not $children) { $children = @{} }
 
@@ -346,6 +450,8 @@ $findings = @(
     # Blueprints registered in this tenant only; Microsoft's and other publishers' blueprints are theirs to fix.
     $blueprints | ForEach-Object { Test-Blueprint $_ $principals[$_.appId] @($children[$_.appId]) $signIns $roleNames }
     Test-Tenant
+    if ($haveDefender) { Test-DefenderAgent $defenderAgents (Get-RegistryKey $packages) ([bool]$packages) }
+    $classicAgents | ForEach-Object { Test-ClassicAgent $_ $signIns }
 )
 
 # Well-governed funnel for agent identities.
@@ -375,6 +481,12 @@ $areas = @(
     "Agent identities" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($identities | ForEach-Object displayName) } }
     "Blueprints"       | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($blueprints | ForEach-Object displayName) } }
     "Tenant"           | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @("Conditional Access") } }
+    if ($haveDefender) {
+        "Discovered agents" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @(
+            $defenderAgents | Where-Object { $_.Platform -ne "LocalAgents" -and $_.LifecycleStatus -ne "Uninstalled" } | ForEach-Object { if ($_.AgentName) { "$($_.AgentName) ($($_.Platform))" } else { "$($_.AgentId) ($($_.Platform))" } }
+            $defenderAgents | Where-Object Platform -eq "LocalAgents" | ForEach-Object AgentName | Sort-Object -Unique | ForEach-Object { "$_ (local)" }) } }
+    }
+    "Agents without Agent ID" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($classicAgents | ForEach-Object displayName) } }
 )
 $scorecard = @($areas | Get-AreaScore -Findings $findings | Sort-Object Score)
 
@@ -386,12 +498,12 @@ $scorecard | Export-Csv (Join-Path $OutputFolder "Scorecard.csv") -NoTypeInforma
 $coworkPrompt = @"
 Run the agent and tools health check. Count anything unused for $StaleDays days as stale.
 
-Use the attached Packages.csv for agents and tools. Use the Microsoft MCP Server for Enterprise to read: every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); and the Conditional Access policies.
+Use the attached Packages.csv for agents and tools, and the attached DefenderAgents.csv for agents Microsoft Defender found. Use the Microsoft MCP Server for Enterprise to read: service principals tagged as agents that aren't agent identities (agents without Agent ID); every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); and the Conditional Access policies.
 
 This is read-only. Don't change anything in the tenant, and don't send any email or Teams message.
 
 Apply the agent-tools-health rules and give me:
-1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
+1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Discovered agents, Agents without Agent ID) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
 2. A findings table sorted High, Medium, Low, with the item, what's wrong and the fix.
 3. The top 3 fixes to do first.
 4. The well-governed funnel for agent identities: with an active sponsor, a clear name, least privilege, in use.
@@ -443,11 +555,15 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "GET /beta/users/microsoft.graph.agentUser"
                           "GET /beta/reports/servicePrincipalSignInActivities"
                           "GET /beta/groups/{id} (+ owners), GET /beta/users/{id}"
-                          "GET /beta/identity/conditionalAccess/policies")
+                          "GET /beta/identity/conditionalAccess/policies"
+                          "GET /beta/servicePrincipals?`$filter=tags/any(t:t eq 'AgentCreatedBy:CopilotStudio') (and AgenticApp, AIAgentBuilder, AgenticInstance, power-virtual-agents-*)"
+                          "POST /beta/security/runHuntingQuery: AgentsInfo | summarize arg_max(Timestamp, *) by AgentId")
         notes        = @(
                           "Scores: each item starts at 100 (High -25, Medium -10, Low -3); an area's score is the average of its items."
                           "Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names or descriptions."
                           if ($SkipPackages -or -not $packages) { "Agents and tools weren't checked: the Agent 365 catalog wasn't read." }
+                          if (-not $haveDefender) { "Discovered agents weren't checked: the Defender hunting query didn't run (needs ThreatHunting.Read.All and Security Reader)." }
+                          if ($haveDefender -and -not $packages) { "Defender agents couldn't be compared with the Agent 365 registry, because the registry wasn't read." }
                           if (-not $signIns.Count) { "Sign-in activity wasn't available, so stale checks on identities and blueprints are incomplete." })
         prompt       = $coworkPrompt
     }
@@ -461,4 +577,4 @@ if ($template) { New-HtmlReport $template (Join-Path ((Resolve-Path $OutputFolde
 
 $scorecard | Format-Table -AutoSize
 Write-Host "$governedPercent% of agent identities are well governed."
-Write-Host "Saved Findings.csv, Scorecard.csv, Packages.csv and Report.html to $OutputFolder. Keep these files private."
+Write-Host "Saved Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv and Report.html to $OutputFolder. Keep these files private."

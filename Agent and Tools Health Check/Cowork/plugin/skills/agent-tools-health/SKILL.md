@@ -30,6 +30,15 @@ the call returns 403). Get it from a file the user attaches:
   availableTo, deployedTo, requestStatus, requestType, groupIds, groups, directUsers,
   lastModifiedDateTime, lastUsedDateTime, activeUsers30d, sessions30d.
 
+Also attach **DefenderAgents.csv** (written by the same script) for agents Microsoft Defender found:
+the Enterprise MCP server can't run Defender advanced hunting queries. Columns: AgentId, AgentName,
+Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability, PublishedStatus,
+LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount. If it isn't attached and the
+browser is available, you may open **Microsoft Defender portal > Investigation & response > Hunting >
+Advanced hunting**, run this read-only query and read the results:
+`AgentsInfo | summarize arg_max(Timestamp, *) by AgentId | where LifecycleStatus != "Deleted" | project AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, Availability, LifecycleStatus, OwnerCount = array_length(Owners)`.
+Otherwise say the Discovered agents area was skipped.
+
 If no file is attached, say that agents and tools need Packages.csv, and carry on with Steps 2 to 4
 (identities, blueprints, tenant). If the browser is available, you may read **Microsoft 365 admin
 center > Agents > All agents > Registry** and **Agents > Tools** for names, descriptions and
@@ -68,9 +77,11 @@ fails, stop and tell the user the connector can't read the tenant, with the erro
 | Sponsors and owners (are they active?) | `GET /beta/users/{id}?$select=id,displayName,accountEnabled`. A 404 means the person is gone |
 | Groups from Packages.csv `groupIds` | `GET /beta/groups/{id}?$select=id,displayName,description` and `GET /beta/groups/{id}/owners?$select=id` |
 | Conditional Access | `GET /beta/identity/conditionalAccess/policies?$select=displayName,state,conditions,grantControls` |
+| Agents without Agent ID | `GET /beta/servicePrincipals?$filter=tags/any(t:t eq 'AgentCreatedBy:CopilotStudio')&$select=id,appId,displayName,accountEnabled,tags,createdDateTime`, then the same for `AgenticApp`, `AIAgentBuilder` and `AgenticInstance`, and `tags/any(t:startswith(t,'power-virtual-agents-'))`. Leave out IDs that are agent identities or blueprint principals. Then owners and last sign-in as above |
 
 Not readable through the Enterprise MCP: the agent attestation date (`.../lifecycle` returns 403),
-the Agent 365 catalog, and admin center settings. They go on the manual checklist.
+the Agent 365 catalog, Defender advanced hunting (`getRunHuntingQuery` returns 403), and admin
+center settings. They go on the manual checklist.
 
 If a call returns 403, say which permission is missing and carry on with the rest. Don't list
 sponsor or owner names in the results unless the user asks; "a sponsor is disabled" is enough.
@@ -106,7 +117,8 @@ document instead**, even a short one. If you can't read the template, say so and
      `subjectLabel`: "Area"; `areaLabel`: "Category"; `sample`: false.
    - `funnelTitle`: "Well-governed agent identities: {percent}%", and `funnel`: the five steps,
      each `{ "label", "count", "note" }`.
-   - `scorecard`: one entry per area (Agents, Tools, Agent identities, Blueprints, Tenant): `name`,
+   - `scorecard`: one entry per area (Agents, Tools, Agent identities, Blueprints, Tenant, and
+     Discovered agents and Agents without Agent ID when you have data for them): `name`,
      `score`, `rating`, `high`, `medium`, `low`, `info`, and `detail` ("12 items checked").
    - `findings`: one entry per finding: `subject` (the area), `area` (the category), `severity`,
      `target` (the item), `check`, `fix`.
@@ -125,6 +137,7 @@ permissions. Keep them in the user's session and OneDrive output folder only.
 ## Follow-ups the user may ask for
 
 - "Draft a note to each sponsor listing what to fix on their agents." Draft it; don't send it until the user approves.
+- "Which agents aren't in the registry?" or "Which agents have no Agent ID?" List the Discovered agents and Agents without Agent ID findings.
 - "Which agents are stale?" List the Usage findings, and point to Agent and Tools Cleanup to block or disable them with an undo file.
 - "Show only High findings" or "only blueprints." The report's filters already do this; say so.
 - "Make me a spreadsheet." Build an Excel workbook with Scorecard and Findings sheets from the same data.

@@ -8,7 +8,7 @@ Ask **Microsoft Copilot Cowork** to check your agents, tools, agent identities a
 
 ## What you need to know first
 
-The Enterprise MCP server **can't read the Agent 365 catalog**: no MCP scope covers it, so a request to `/copilot/admin/catalog/packages` returns 403. So you give Cowork the agents and tools as a file, **Packages.csv**, and Cowork reads everything else live. Tested against a live tenant on Oct 31, 2026:
+The Enterprise MCP server **can't read the Agent 365 catalog**: no MCP scope covers it, so a request to `/copilot/admin/catalog/packages` returns 403. So you give Cowork the agents and tools as a file, **Packages.csv**, and Defender's agent inventory as **DefenderAgents.csv**, and Cowork reads everything else live. Tested against a live tenant on Oct 31, 2026:
 
 | Data | Where Cowork gets it |
 | --- | --- |
@@ -17,6 +17,8 @@ The Enterprise MCP server **can't read the Agent 365 catalog**: no MCP scope cov
 | Blueprints: sponsors, owners, inheritable permissions, secrets, description | Enterprise MCP, live |
 | Groups the agents are assigned to: owners, description | Enterprise MCP, live (group IDs come from Packages.csv) |
 | Conditional Access policies for agents | Enterprise MCP, live |
+| Agents without Agent ID (older agents running as classic service principals, found by tag) | Enterprise MCP, live |
+| Agents Microsoft Defender found (AgentsInfo), to compare with the registry | **DefenderAgents.csv**, which you attach. The MCP can't run hunting queries (403) |
 | Attestation date, admin center settings (blueprint creation, inactivity policy, external publishers, sharing) | Not readable through the MCP. Manual checklist, or Cowork reads them in the browser if you turn that on |
 
 ## Pick a way
@@ -28,17 +30,17 @@ The Enterprise MCP server **can't read the Agent 365 catalog**: no MCP scope cov
 
 ## The prompt
 
-Attach **Packages.csv** and paste this. It's also printed at the bottom of every `Report.html`.
+Attach **Packages.csv** and **DefenderAgents.csv** and paste this. It's also printed at the bottom of every `Report.html`.
 
 ```text
 Run the agent and tools health check. Count anything unused for 90 days as stale.
 
-Use the attached Packages.csv for agents and tools. Use the Microsoft MCP Server for Enterprise to read: every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); and the Conditional Access policies.
+Use the attached Packages.csv for agents and tools, and the attached DefenderAgents.csv for agents Microsoft Defender found. Use the Microsoft MCP Server for Enterprise to read: service principals tagged as agents that aren't agent identities (agents without Agent ID); every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); and the Conditional Access policies.
 
 This is read-only. Don't change anything in the tenant, and don't send any email or Teams message.
 
 Apply the agent-tools-health rules and give me:
-1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
+1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Discovered agents, Agents without Agent ID) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
 2. A findings table sorted High, Medium, Low, with the item, what's wrong and the fix.
 3. The top 3 fixes to do first.
 4. The well-governed funnel for agent identities: with an active sponsor, a clear name, least privilege, in use.
@@ -46,7 +48,7 @@ Apply the agent-tools-health rules and give me:
 6. The HTML report from the skill's report template, named Agent and Tools Health.html.
 ```
 
-No Packages.csv? Leave out that line. Cowork checks identities, blueprints and Conditional Access, and says agents and tools were skipped.
+No Packages.csv or DefenderAgents.csv? Leave out that part. Cowork checks identities, blueprints and Conditional Access, and says agents and tools were skipped.
 
 For **way B**, attach `Findings.csv` and `Scorecard.csv` instead and ask: *"Explain these agent and tools health results and give me the top 3 fixes."*
 
@@ -84,11 +86,16 @@ Good follow-ups:
 - *"Compare this with last month's Findings.csv."*
 - *"Schedule this check for the first Monday of every month."* Attach a fresh Packages.csv each time.
 
-## Get Packages.csv
+## Get Packages.csv and DefenderAgents.csv
 
-Run `.\Get-AgentToolsHealth.ps1 -PackagesOnly` (a few minutes; one call per package). It needs the **AI Administrator** role and a **Microsoft Agent 365** license (included in Microsoft 365 E7).
+Run `.\Get-AgentToolsHealth.ps1 -PackagesOnly` (a few minutes; one call per package). It writes both files.
 
-Packages.csv has group IDs and agent names. Keep it private and out of source control.
+- Packages.csv needs the **AI Administrator** role and a **Microsoft Agent 365** license (included in Microsoft 365 E7).
+- DefenderAgents.csv needs **Security Reader** (it runs a Defender advanced hunting query on the `AgentsInfo` table). Add `-SkipDefender` if you don't have Defender.
+
+No PowerShell? With browser access on, Cowork can run the read-only AgentsInfo query in the Defender portal's advanced hunting instead.
+
+The files have group IDs and agent names. Keep it private and out of source control.
 
 ## Way A: admin setup (once per tenant)
 
