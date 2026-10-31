@@ -61,7 +61,7 @@ Use PIM for the admin roles and activate them only for the run.
 .\Get-AgentToolsReport.ps1 -Days 90 -AuditDays 90
 ```
 
-Each script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High), **USGovDoD** or **China**. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High, DoD and China use the scripts.
+Each script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High) or **USGovDoD**. China isn't offered: the Copilot and agent APIs these scripts use aren't expected to work there. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High and DoD use the scripts.
 
 Output goes to `.\AgentToolsReport-<date-time>\`: `Packages.csv`, `AgentIdentities.csv`, `Blueprints.csv` and, with `-AuditDays`, `AuditUsage.csv`. Keep it out of source control (the `.gitignore` here already excludes it).
 
