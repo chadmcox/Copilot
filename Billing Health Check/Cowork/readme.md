@@ -92,7 +92,7 @@ Good follow-ups:
 
 Pick one:
 
-- **Run the script** (quickest, about 1 minute): `.\Get-CopilotBillingHealth.ps1 -PoliciesOnly`. It writes only Policies.csv. Run it as a member of **Copilot Health Check Users** with the group activated (AI Reader is enough for Policies.csv).
+- **Run the script** (quickest, about 1 minute): `.\Get-CopilotBillingHealth.ps1 -PoliciesOnly`. It writes only Policies.csv. Run it as a member of **Copilot Health Check Users** with the group activated. If the policy calls return 403, AI Reader isn't enough in your tenant: Microsoft documents Global Reader and Billing Administrator for these reads.
 - **Type it by hand**: copy [Policies-template.csv](Policies-template.csv) and fill it from **Microsoft 365 admin center > Copilot > Cost management > Configuration**. You can leave **GroupIds** blank; Cowork then finds each group by its exact name.
 
 Policies.csv has group IDs and alert recipients. Keep it private and out of source control.

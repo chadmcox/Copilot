@@ -2,11 +2,11 @@
 
 Thresholds: stale after 90 days, credential warning 30 days before expiry, pending requests older than 14 days. The user can change them in the prompt.
 
-**Unclear name**: empty, fewer than 4 characters, or contains a word starting with *test*, *demo*, *sample* or *sandbox*, or the words *temp*, *tmp*, *copy*, *draft*, *POC*, *untitled*, *dummy*, *delete me*, *do not use*; or starts with *new agent*, *my agent*, *new plugin*, *my bot* and similar; or ends with a number after agent/plugin/skill/bot (*Agent 2*) or a copy marker (*(1)*). For agent identities, ignore the " (Microsoft Copilot Studio)" suffix before checking.
+**Unclear name** (this repo's list, not Microsoft's; Microsoft recommends a naming convention but publishes no word list): empty, fewer than 4 characters, or contains a word starting with *test*, *demo*, *sample* or *sandbox*, or the words *temp*, *tmp*, *copy*, *draft*, *POC*, *untitled*, *dummy*, *delete me*, *do not use*; or starts with *new agent*, *my agent*, *new plugin*, *my bot* and similar; or ends with a number after agent/plugin/skill/bot (*Agent 2*) or a copy marker (*(1)*). For agent identities, ignore the " (Microsoft Copilot Studio)" suffix before checking.
 
 **Poor description**: empty, under 20 characters, or the same as the name.
 
-**High-privilege Microsoft Graph permissions**: `Directory.*`, `RoleManagement.*`, `Application.*`, `AppRoleAssignment.*`, `Policy.*`, `User.*`, `Group.*`, `GroupMember.*`, `Domain.*`, `Organization.*` when they're ReadWrite, plus `Mail.Send`, `Mail.ReadWrite`, `Sites.FullControl.All`, `Sites.ReadWrite.All`, `Files.ReadWrite.All`, `Directory.AccessAsUser.All`, `full_access_as_app`. Any other `*.ReadWrite.All` is **tenant-wide write**.
+**High-privilege Microsoft Graph permissions** (this repo's list; Microsoft's guidance is least privilege, with no fixed list): `Directory.*`, `RoleManagement.*`, `Application.*`, `AppRoleAssignment.*`, `Policy.*`, `User.*`, `Group.*`, `GroupMember.*`, `Domain.*`, `Organization.*` when they're ReadWrite, plus `Mail.Send`, `Mail.ReadWrite`, `Sites.FullControl.All`, `Sites.ReadWrite.All`, `Files.ReadWrite.All`, `Directory.AccessAsUser.All`, `full_access_as_app`. Any other `*.ReadWrite.All` is **tenant-wide write**.
 
 Every check also carries a **Reference** (CIS Controls v8.1 safeguards and the CISA risk category); see **guidance.md**.
 
@@ -27,7 +27,7 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 | Unclear name | Medium | Naming | Rename it so people can tell what it does and who owns it |
 | Poor description (`shortDescription`) | Medium | Naming | Describe what it does, for whom, and what data it uses |
 | `requestStatus` is pending and `lastModifiedDateTime` is more than 14 days ago | Low | Usage | Approve or reject it |
-| Custom agent whose `elementTypes` include customEngine or bot, with no `agentIdentityId` | Low | Identity | Recreate it with Agent ID so it gets a sponsor, Conditional Access and lifecycle controls |
+| Custom agent whose `elementTypes` include customEngine or bot, with no `agentIdentityId` | Low | Identity | If it's a custom agent you own, move it to Agent ID so it gets a sponsor, Conditional Access and lifecycle controls |
 | Not blocked, no `activeUsers30d`, `lastUsedDateTime` empty or older than 90 days, and `lastModifiedDateTime` older than 90 days | Medium | Usage | Block it, or run Agent and Tools Cleanup |
 
 ## Agent identities
@@ -76,23 +76,23 @@ Microsoft Defender's `AgentsInfo` inventory covers Copilot Studio, Foundry, thir
 | Cloud agent (Platform isn't `LocalAgents`) not in the registry | Medium | Inventory | Add it to the registry (registry sync) with an owner, or remove it |
 | Not in the registry, and `Availability` is all users | High | Inventory | Limit it to a group, then register it |
 | Not in the registry, and `OwnerCount` is 0 | Medium | Ownership | Find who built it and make them the owner, or remove it |
-| Cloud agent with no `EntraAgentId` | Medium | Identity | Recreate or register it with an Agent ID so it gets a sponsor, Conditional Access and lifecycle controls |
+| Cloud agent with no `EntraAgentId` | Medium | Identity | Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls |
 | An `McpServerUrls` entry starts with `http://` (no TLS) | High | Tools | Use HTTPS only, or remove the server |
-| An `McpServerUrls` host isn't Microsoft-run (not under microsoft.com, cloud.microsoft, office.com, sharepoint.com, azure.com, azure-api.net, windows.net, dynamics.com, powerplatform.com, azurewebsites.net) | Low | Tools | Check it's on your approved tools list (Agents > Tools), and who runs it |
+| An `McpServerUrls` host isn't on this repo's list of Microsoft domains (not a Microsoft-published list: not under microsoft.com, cloud.microsoft, office.com, sharepoint.com, azure.com, azure-api.net, windows.net, dynamics.com, powerplatform.com, azurewebsites.net) | Low | Tools | Check it's on your approved tools list (Agents > Tools), and who runs it |
 | **No Packages.csv** (no Agent 365 catalog): Defender's agents become the agent list. Cloud agent `Availability` is all users | High | Access | Make it available to specific groups |
 | No Packages.csv: `OwnerCount` is 0 | Medium | Ownership | Find who built it and make them the owner, or remove it |
 | No Packages.csv: unclear `AgentName` | Medium | Naming | Rename it so people can tell what it does and who owns it |
 
-`LastActivity`, `Invocations30d` and `ToolCalls30d` come from Agent 365 activity in Defender (`CloudAppEvents`, last 30 days). When an agent in Packages.csv matches a Defender agent with a `LastActivity` within the stale period, it counts as used: don't report "Not used". A Defender agent without activity isn't proof it's unused, because only agents that send Agent 365 observability data appear there.
-| Local agent (Platform `LocalAgents`), one finding per agent name with the device count | Low | Inventory | Check it's an approved tool; govern it with Defender for Endpoint and Intune |
+`LastActivity`, `Invocations30d` and `ToolCalls30d` come from Agent 365 activity in Defender (`CloudAppEvents`, last 30 days), matched on the agent's Entra appId (the invoked agent is `TargetAgentId` on `InvokeAgent` records and `AgentId` on tool calls). The match to AgentsInfo on `EntraAgentId` is this repo's, not a documented join. When an agent in Packages.csv matches a Defender agent with a `LastActivity` within the stale period, it counts as used: don't report "Not used". A Defender agent without activity isn't proof it's unused, because only agents that send Agent 365 observability data appear there.
+| Local agent (Platform `LocalAgents`, not Uninstalled), one finding per agent name with the installation count (each row is one agent on one device for one account) | Low | Inventory | Check it's an approved tool; govern it with Defender for Endpoint and Intune |
 
 ## Agents without Agent ID (classic service principals)
 
-Older Copilot Studio and Foundry agents run as ordinary service principals. Find them by tag: `AgentCreatedBy:CopilotStudio`, `AgenticApp`, `AIAgentBuilder`, `AgenticInstance`, or a tag starting with `power-virtual-agents-`. Leave out anything that's an agent identity or a blueprint principal.
+Older Copilot Studio agents run as ordinary service principals. Find them by the tags Microsoft documents for Copilot Studio: `AgentCreatedBy:CopilotStudio`, `AgenticApp`, `AIAgentBuilder`, `AgenticInstance`, or a tag starting with `power-virtual-agents-`. Leave out anything that's an agent identity or a blueprint principal.
 
 | Check | Severity | Category | Fix |
 | --- | --- | --- | --- |
-| Runs as a classic service principal, not an Agent ID | Medium | Identity | Recreate it with Agent ID (there's no in-place migration), then retire this service principal |
+| Runs as a classic service principal, not an Agent ID | Medium | Identity | There's no in-place migration. Unused: retire it. Lightly used: recreate it with Agent ID, then retire this one. Busy production agent: Microsoft says wait for an automated migration path |
 | No owner | Medium | Ownership | Find who built it and make them the owner |
 | Enabled, no sign-in for 90 days, older than 90 days | Low | Usage | Check with the owner, then retire it instead of recreating it |
 
@@ -112,11 +112,11 @@ Well governed % = step 5 ÷ step 1.
 
 ## Manual checks (no API, or not readable through the Enterprise MCP)
 
-- Entra > Entra ID > Users > User settings: **Users can register agent identity blueprints** is No.
-- Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID: the **default inactivity policy** is on.
-- Microsoft 365 admin center > Agents > Settings > **Agent and plugin access**: external publishers are off, or reviewed.
-- Microsoft 365 admin center > Agents > Settings > **Sharing**: limited to a group.
+- Entra > Entra ID > Users > User settings: **Users can register agent identity blueprints** (Microsoft docs call it *Users can create agent blueprints*) is No. It's Yes by default.
+- Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID (Preview): the **default inactivity policy** (preview) is on. It notifies at 60 days, disables at 90, deletes at 455.
+- Microsoft 365 admin center > Agents > Settings > **Agent and plugin access**: **Allow agents and plugins built by external publishers** is off, or reviewed.
+- Microsoft 365 admin center > Agents > Settings > **Sharing**: Specific users, not All users (applies only to Agent Builder agents).
 - Agents > Tools > Registry: standalone MCP servers and skills have clear names, owners and group-scoped availability.
-- Sponsors attested each agent in the last 12 months (the attestation API isn't readable through the Enterprise MCP).
+- Sponsors attested each agent in the last 12 months (Microsoft suggests every 6 to 12 months) (the attestation API isn't readable through the Enterprise MCP).
 
 If the browser is available in Cowork, read these pages and report what you see. Never change a setting.

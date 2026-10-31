@@ -92,8 +92,9 @@ $adminGroups = @(
     @{ Name = "Copilot SharePoint Admin";         Hours = 8; Approval = $true;  Roles = @("SharePoint Administrator") }
     @{ Name = "Copilot Studio Environment Admin"; Hours = 8; Approval = $true;  Roles = @("Power Platform Administrator") }
     @{ Name = "Copilot Plugin Approvers";         Hours = 8; Approval = $false; Roles = @() }
-    # Read-only roles for the Copilot Billing and Agent and Tools health checks. No approval; MFA and a reason still apply.
-    @{ Name = "Copilot Health Check Users";       Hours = 8; Approval = $false; Roles = @("AI Reader", "Security Reader", "Reports Reader")
+    # Reader roles for the Copilot Billing and Agent and Tools health checks. Approval on: Microsoft recommends
+    # approval for groups used to activate Entra roles, and AI Reader is a privileged role.
+    @{ Name = "Copilot Health Check Users";       Hours = 8; Approval = $true;  Roles = @("AI Reader", "Security Reader", "Reports Reader")
        Desc = "People who run the Copilot Billing and Agent and Tools health checks (read-only). Scope of the health check Cowork plugins." }
 )
 

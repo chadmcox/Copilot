@@ -131,9 +131,10 @@ document instead**, even a short one. If you can't read the template, say so and
    - `fixFirst`: the three changes that raise the most scores, in plain words.
    - `manualChecks`: the manual checks from rules.md, with what you saw if you read them in the browser.
    - `graphCalls`: every Graph call you ran, without object IDs.
-   - `notes`: start with "References in brackets: CIS Controls v8.1 safeguards (AI Agent and MCP
-     Companion Guides, April 2026) and the CISA risk category from Careful Adoption of Agentic AI
-     Services (May 2026)." Then anything else the user should know, such as calls that failed or areas you skipped.
+   - `notes`: start with "References in brackets: this repo's mapping of each check to CIS Controls
+     v8.1 safeguards (AI Agent and MCP Companion Guides, April 2026) and to the CISA risk categories
+     in Careful Adoption of Agentic AI Services (2026). The mapping is a judgment, not published by
+     CIS or CISA." Then anything else the user should know, such as calls that failed or areas you skipped.
    It must stay valid JSON: escape quotes and backslashes in names.
 3. Use a script to write the file if that's easiest. Only Graph calls must not come from scripts.
 4. Open the report in the session so the user sees it, and give a short summary in chat: the score
@@ -146,7 +147,7 @@ permissions. Keep them in the user's session and OneDrive output folder only.
 
 - "Draft a note to each sponsor listing what to fix on their agents." Draft it; don't send it until the user approves.
 - "Which agents aren't in the registry?" or "Which agents have no Agent ID?" List the Discovered agents and Agents without Agent ID findings.
-- "How does this map to CISA or CIS?" Use references/guidance.md: group the findings by CIS safeguard or CISA risk category, and list what the guidance asks for that this check doesn't cover (logging, human oversight, tool allowlisting).
+- "How does this map to CISA or CIS?" Use references/guidance.md: group the findings by CIS safeguard or CISA risk category, say the mapping is this repo's judgment, and list what this check doesn't cover (logging, human oversight, approved tools). Don't quote CISA recommendations beyond the five risk categories: the guidance file says why.
 - "Which agents are stale?" List the Usage findings, and point to Agent and Tools Cleanup to block or disable them with an undo file.
 - "Show only High findings" or "only blueprints." The report's filters already do this; say so.
 - "Make me a spreadsheet." Build an Excel workbook with Scorecard and Findings sheets from the same data.

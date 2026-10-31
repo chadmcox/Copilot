@@ -70,18 +70,18 @@ Two checks work in opposite directions because of this:
 
 Put the people who run the health checks in one group: **Copilot Health Check Users**. The same group runs both the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks.
 
-1. **Create it as a role-assignable security group, and put it under PIM.** `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1` in the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md#copilot-health-check-users) do both. The roles sit on the group, only Privileged Role Administrators can change its members, and people activate it for 8 hours with MFA and a reason instead of holding reader roles all the time.
+1. **Create it as a role-assignable security group, and put it under PIM.** `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1` in the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md#copilot-health-check-users) do both. The roles sit on the group, so Groups Administrators and User Administrators can't change its members (only Global Administrators, Privileged Role Administrators and the group's owners can; give it no owners). People activate it for 8 hours with MFA, a reason and approval instead of holding reader roles all the time. Microsoft recommends approval for groups used to activate Entra roles.
 2. **Give the group reader roles only** (table below). Prefer these to Global Reader, which reads the whole tenant.
 3. **Scope the Cowork plugin to the group** when you upload it: Agents > Tools > Registry > Upload > Scope users > Specific users or groups > Copilot Health Check Users.
 4. Members also need a Microsoft 365 Copilot license and Cowork access to run the check in Copilot Cowork. The Enterprise MCP server acts as the signed-in person, so they see only what their activated roles allow.
 
 | Entra role | What this check reads with it |
 | --- | --- |
-| **AI Reader** | Spending policies, their groups, service settings and alerts; tenant credit balance; groups, owners, members; users, licenses and subscribed SKUs |
+| **AI Reader** | Groups, owners, members; users, licenses and subscribed SKUs (all in the Entra roles reference). Spending policies and credit balances: *not confirmed*, see below |
 | **Reports Reader** | The Microsoft 365 Copilot usage report (Cowork readiness funnel), and sign-in activity (inactive members) |
 | **Security Reader** | Not needed for this check (the Agent and Tools Health Check uses it) |
 
-If per-person credit balances return 403 for readers, run with `-SkipBalances`. Creating or changing spending policies isn't part of the check; that stays with **Copilot Billing Admin**.
+**Spending policies and credits: test AI Reader.** Microsoft's [cost management overview](https://learn.microsoft.com/microsoft-365/copilot/extensibility/api/admin-settings/cost-management/overview) names Global Reader and Billing Administrator for reads, and the API pages list no role. AI Reader is documented for viewing consumption in the admin center, not for this API. If the policy calls return 403 with the group active, use **Global Reader** for the run. If per-person credit balances return 403, run with `-SkipBalances`. Creating or changing spending policies isn't part of the check; that stays with **Copilot Billing Admin**.
 
 ## 1. Collect the data (read-only)
 

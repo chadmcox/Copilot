@@ -26,8 +26,9 @@
         newest date.
       - Agent identities and blueprints: the Entra service principal sign-in activity report
         (reports/servicePrincipalSignInActivities, preview), plus Agent 365 activity in Defender
-        matched through AgentsInfo.EntraAgentId. Many agents run without a recorded sign-in of their
-        own, so the Defender activity matters.
+        matched on the agent's appId (equal to the object ID for Agent ID agents). In testing, some
+        Copilot Studio agent identities had no recorded sign-in of their own, so the Defender
+        activity matters.
 
     Not covered: standalone MCP servers and standalone skills that aren't inside a package.
     Check those in the Microsoft 365 admin center under Agents > Tools > Registry.
@@ -83,7 +84,9 @@ $cutoff = $now.AddDays(-$Days)
 
 $scopes = @(
     "Application.Read.All"
+    "AgentIdentity.Read.All"
     "AgentIdentityBlueprint.Read.All"
+    "AgentIdentityBlueprintPrincipal.Read.All"
     "AuditLog.Read.All"
     if (-not $SkipPackages) { "CopilotPackages.Read.All" }
     if ($AuditDays)         { "AuditLogsQuery.Read.All" }
@@ -142,24 +145,27 @@ function Get-SignInIndex {
 }
 
 # Agent 365 activity in Microsoft Defender (CloudAppEvents), last 30 days. KQL through Graph advanced
-# hunting. Keyed by Defender agent ID, Entra agent ID and source agent ID (joined from AgentsInfo).
+# hunting. CloudAppEvents names agents by their Entra appId: on InvokeAgent records the invoked agent is
+# TargetAgentId (AgentId is the calling agent, all zeros when a person invokes it); on tool calls it's
+# AgentId. Keyed by that appId, plus the Defender and source agent IDs joined from AgentsInfo.
 function Get-DefenderActivity {
     $index = @{}
     if ($SkipDefender) { return $index }
     $kql = @'
 CloudAppEvents
 | where ActionType in ("InvokeAgent", "ExecuteToolByMCPServer", "ExecuteToolByGateway", "ExecuteToolBySDK")
-| extend AgentId = tostring(RawEventData.AgentId)
-| where isnotempty(AgentId)
-| summarize LastActivity = max(Timestamp) by AgentId
-| join kind=leftouter (AgentsInfo | summarize arg_max(Timestamp, EntraAgentId, SourceAgentId) by AgentId) on AgentId
-| project AgentId, EntraAgentId, SourceAgentId, LastActivity
+| extend Raw = parse_json(tostring(RawEventData))
+| extend AgentAppId = iff(ActionType == "InvokeAgent", tostring(Raw.TargetAgentId), tostring(Raw.AgentId))
+| where isnotempty(AgentAppId) and AgentAppId != "00000000-0000-0000-0000-000000000000"
+| summarize LastActivity = max(Timestamp) by AgentAppId
+| join kind=leftouter (AgentsInfo | summarize arg_max(Timestamp, AgentId, SourceAgentId) by EntraAgentId | extend EntraAgentId = tostring(EntraAgentId)) on $left.AgentAppId == $right.EntraAgentId
+| project AgentAppId, AgentId, SourceAgentId, LastActivity
 '@
     try {
         $body = @{ Query = $kql; Timespan = "P30D" } | ConvertTo-Json
         (Invoke-MgGraphRequest -Method POST -Uri "$graph/security/runHuntingQuery" -Body $body -ContentType "application/json" -OutputType PSObject).results | ForEach-Object {
             $last = ConvertTo-Utc $_.LastActivity
-            @($_.AgentId, $_.EntraAgentId, $_.SourceAgentId) | Where-Object { $_ } | ForEach-Object { if (-not $index["$_"] -or $last -gt $index["$_"]) { $index["$_"] = $last } }
+            @($_.AgentAppId, $_.AgentId, $_.SourceAgentId) | Where-Object { $_ } | ForEach-Object { if (-not $index["$_"] -or $last -gt $index["$_"]) { $index["$_"] = $last } }
         }
         Write-Host "Defender activity: $($index.Count) agent IDs with Agent 365 activity in the last 30 days."
     }

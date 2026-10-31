@@ -113,6 +113,8 @@ Connect-Entra -Scopes 'Application.ReadWrite.All', 'Directory.Read.All', 'Delega
 Grant-EntraBetaMCPServerPermission -ApplicationName VisualStudioCode
 ```
 
+This is the step in Microsoft's [Get started with the Microsoft MCP Server for Enterprise](https://learn.microsoft.com/graph/mcp-server/get-started). Without `-Scopes` it also grants **every** MCP scope to Visual Studio Code. If nobody uses VS Code with the MCP server, you can remove that grant later with `Revoke-EntraBetaMCPServerPermission`.
+
 ### 2. Register an app for Cowork
 
 In the **Microsoft Entra admin center > App registrations > New registration**:
