@@ -1,0 +1,4 @@
+# Results name agents, groups and permissions. Keep them out of source control.
+AgentToolsHealth-*/
+*.csv
+*.zip

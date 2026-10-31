@@ -1,0 +1,90 @@
+# Rules
+
+Thresholds: stale after 90 days, credential warning 30 days before expiry, pending requests older than 14 days. The user can change them in the prompt.
+
+**Unclear name**: empty, fewer than 4 characters, or contains a word starting with *test*, *demo*, *sample* or *sandbox*, or the words *temp*, *tmp*, *copy*, *draft*, *POC*, *untitled*, *dummy*, *delete me*, *do not use*; or starts with *new agent*, *my agent*, *new plugin*, *my bot* and similar; or ends with a number after agent/plugin/skill/bot (*Agent 2*) or a copy marker (*(1)*). For agent identities, ignore the " (Microsoft Copilot Studio)" suffix before checking.
+
+**Poor description**: empty, under 20 characters, or the same as the name.
+
+**High-privilege Microsoft Graph permissions**: `Directory.*`, `RoleManagement.*`, `Application.*`, `AppRoleAssignment.*`, `Policy.*`, `User.*`, `Group.*`, `GroupMember.*`, `Domain.*`, `Organization.*` when they're ReadWrite, plus `Mail.Send`, `Mail.ReadWrite`, `Sites.FullControl.All`, `Sites.ReadWrite.All`, `Files.ReadWrite.All`, `Directory.AccessAsUser.All`, `full_access_as_app`. Any other `*.ReadWrite.All` is **tenant-wide write**.
+
+Each finding has an **Area** (Agents, Tools, Agent identities, Blueprints, Tenant), an **Item** (the agent, tool, identity, blueprint or setting), a **Category** (Access, Ownership, Permissions, Naming, Usage, Security), a **Severity**, a **Check** and a **Fix**.
+
+Microsoft-published agents and tools, and blueprints from other publishers (a blueprint principal with no blueprint registered in this tenant), aren't checked for names, descriptions or use. Packages of kind **App** (Office add-ins, tabs) aren't checked.
+
+## Agents and tools (from Packages.csv)
+
+| Check | Severity | Category | Fix |
+| --- | --- | --- | --- |
+| Custom or external, `availableTo` is all users (`all` or `allowedForAll`) | High | Access | Make it available to specific groups |
+| Custom or external, `deployedTo` is all users (`all` or `acquiredForAll`) | High | Access | Install it for a group, or let people install it themselves |
+| `directUsers` more than 0 | Medium | Access | Assign it to a group instead |
+| An assigned group no longer exists | Medium | Access | Assign it to the right group |
+| An assigned group has fewer than two owners | Medium | Ownership | Add owners so there are at least two |
+| An assigned group has no description | Low | Access | Describe the group and name the agent or tool it's for |
+| Unclear name | Medium | Naming | Rename it so people can tell what it does and who owns it |
+| Poor description (`shortDescription`) | Medium | Naming | Describe what it does, for whom, and what data it uses |
+| `requestStatus` is pending and `lastModifiedDateTime` is more than 14 days ago | Low | Usage | Approve or reject it |
+| Not blocked, no `activeUsers30d`, `lastUsedDateTime` empty or older than 90 days, and `lastModifiedDateTime` older than 90 days | Medium | Usage | Block it, or run Agent and Tools Cleanup |
+
+## Agent identities
+
+| Check | Severity | Category | Fix |
+| --- | --- | --- | --- |
+| No sponsor | High | Ownership | Add a sponsor: the person accountable for what it does |
+| A sponsor or owner no longer exists, or is disabled | High | Ownership | Replace them with an active person |
+| High-privilege Microsoft Graph permissions (app roles or admin-consented delegated grants) | High | Permissions | Replace them with narrower permissions (least privilege), or remove them |
+| Tenant-wide write permissions | Medium | Permissions | Check each one is needed; prefer Selected or narrower scopes |
+| One sponsor and no owner | Medium | Ownership | Add an owner (technical admin) or a second sponsor |
+| Unclear name | Medium | Naming | Rename the agent so people can tell what it does and who owns it |
+| Enabled, last sign-in older than 90 days | Medium | Usage | Ask the sponsor if it's still needed, or run Agent and Tools Cleanup |
+| Enabled, no sign-in recorded, created more than 90 days ago | Low | Usage | Ask the sponsor if it's still needed |
+| Has an agent user account | Low | Permissions | Keep it only if the agent needs a mailbox or Teams presence |
+
+## Blueprints (registered in this tenant)
+
+| Check | Severity | Category | Fix |
+| --- | --- | --- | --- |
+| No sponsor | High | Ownership | Add a sponsor |
+| A sponsor or owner no longer exists, or is disabled | High | Ownership | Replace them with an active person |
+| An inheritable permission has `inheritableScopes.kind` or `inheritableRoles.kind` = `allAllowed` | High | Permissions | List only the scopes its agents need (enumerated scopes) |
+| The blueprint principal has high-privilege Graph permissions | High | Permissions | Replace them with narrower permissions, or remove them |
+| One sponsor and no owner | Medium | Ownership | Add an owner or a second sponsor |
+| Has a client secret (`passwordCredentials`) | Medium | Permissions | Use a certificate or a federated credential (managed identity) instead |
+| A credential expired, or expires within 30 days | Medium | Permissions | Remove it, or roll it before then |
+| Unclear name | Medium | Naming | Rename it so people can tell which agents it's for |
+| Poor description | Medium | Naming | Describe its purpose, scope and owning team |
+| No enabled agent identity signed in or created within 90 days, the blueprint hasn't signed in for 90 days, and it's older than 90 days | Low | Usage | Check it's still needed, or run Agent and Tools Cleanup |
+
+## Tenant
+
+| Check | Severity | Category | Fix |
+| --- | --- | --- | --- |
+| No Conditional Access policy targets agent identities (`conditions.clientApplications.includeAgentIdServicePrincipals` or `agentIdServicePrincipalFilter`, `conditions.agents`, or `conditions.agentIdRiskLevels`) | High | Security | Create agent policies (start in report-only): block high-risk agents, and limit what non-production agents reach |
+| Agent policies exist, but none is `enabled` | Medium | Security | Review the report-only results, then turn them on |
+| No enabled policy with `agentIdRiskLevels` including high and a `block` grant | Medium | Security | Add a policy that blocks agent identities at high risk |
+
+## Scoring
+
+Every item starts at 100: High −25, Medium −10, Low −3 (Info 0), never below 0. An area's score is the average of its items' scores; an area with no items scores 100. Rating: Green 80+, Amber 50–79, Red under 50. The Tenant area has one item, "Conditional Access".
+
+## Well-governed funnel (agent identities)
+
+1. Agent identities: all of them.
+2. With an active sponsor: no "No sponsor", "no longer exists" or "is disabled" finding.
+3. With a clear name: and no "Unclear name" finding.
+4. Least privilege: and no "High-privilege" finding.
+5. In use: and no "No sign-in" finding.
+
+Well governed % = step 5 ÷ step 1.
+
+## Manual checks (no API, or not readable through the Enterprise MCP)
+
+- Entra > Entra ID > Users > User settings: **Users can register agent identity blueprints** is No.
+- Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID: the **default inactivity policy** is on.
+- Microsoft 365 admin center > Agents > Settings > **Agent and plugin access**: external publishers are off, or reviewed.
+- Microsoft 365 admin center > Agents > Settings > **Sharing**: limited to a group.
+- Agents > Tools > Registry: standalone MCP servers and skills have clear names, owners and group-scoped availability.
+- Sponsors attested each agent in the last 12 months (the attestation API isn't readable through the Enterprise MCP).
+
+If the browser is available in Cowork, read these pages and report what you see. Never change a setting.
