@@ -36,7 +36,6 @@ Do these in order.
 | Folder | What it is | What you get |
 | --- | --- | --- |
 | [Personalization](Personalization/readme.md) | How to set Copilot custom instructions, with examples for different roles (Copilot admin, identity admin, students, HOA board member) | Better answers without repeating your role and preferences in every prompt |
-| [MCP](MCP/readme.md) | A link to Microsoft's guide for the Microsoft Learn MCP server | Copilot or another AI tool that can look up official Microsoft docs |
 
 ## About this repo
 
