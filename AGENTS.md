@@ -6,6 +6,11 @@ These are the owner's rules. Follow them in every script you add or change.
 - **The Az modules are allowed for Azure resources** (subscriptions, Log Analytics, diagnostic settings, Sentinel and so on), but **never for Entra**: use Graph for users, groups, apps, roles and policies, not `Get-AzAD*` or other Az cmdlets that read Entra.
 - **Use the Entra PowerShell modules (Microsoft.Entra, Microsoft.Entra.Beta) only when Graph can't do it**, such as `Grant-EntraBetaMCPServerPermission` for the Enterprise MCP server. Say in a comment why Graph doesn't work for that step.
 - **Exchange Online PowerShell is allowed** (module ExchangeOnlineManagement) for what Graph can't do, such as Defender for Office 365 and Exchange settings. Use `Connect-ExchangeOnline` with read-only `Get-` cmdlets unless the script is meant to make changes, map the cloud choice to `-ExchangeEnvironmentName` (Global: `O365Default`, USGov: `O365USGovGCCHigh`, USGovDoD: `O365USGovDoD`), and disconnect at the end with `Disconnect-ExchangeOnline -Confirm:$false`. Keep Graph calls on `Invoke-MgGraphRequest`.
+- **Bare minimum.** Every script needs as little as possible to run:
+  - **Modules:** only the ones it calls. Microsoft.Graph.Authentication for Graph; add ExchangeOnlineManagement, Az or Entra only for the steps that need them, and load them only on the path that uses them (so a run that skips that step doesn't need the module).
+  - **Graph scopes:** pass only the least-privileged scopes the calls need to `Connect-MgGraph -Scopes`, as listed on each API's Microsoft Learn page. Read-only scripts ask for `.Read` scopes only, never `ReadWrite`.
+  - **Roles:** name in the script's help the least-privileged Entra role that works (a reader role for read-only scripts), not Global Administrator.
+  - **Optional parts:** put anything that needs an extra license, module, role or scope behind a switch (like `-SkipDefender`), so the script still runs without it.
 - Use the Microsoft Graph **beta** endpoint (`https://graph.microsoft.com/beta`) for every call. It usually has more properties and APIs than v1.0.
 - Keep it simple. Don't over-complicate the code.
 - Never use `+=`. Let the pipeline collect output, or wrap it in `@( )`.
