@@ -4,6 +4,8 @@ Ask **Microsoft Copilot Cowork** to check your agents, tools, agent identities a
 
 **Read-only.** The Enterprise MCP server can only read; it can't change your tenant.
 
+Use GitHub Copilot in VS Code instead? The same skill works there, with a much shorter setup. See [GitHub Copilot/readme.md](../GitHub%20Copilot/readme.md).
+
 > Microsoft changes Cowork, plugins, Agent 365 and the Enterprise MCP server often, and parts are in preview. Test this in your own tenant first.
 
 ## What you need to know first

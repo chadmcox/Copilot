@@ -12,6 +12,7 @@ Find what nobody uses in Microsoft 365 Copilot and Agent 365, then block or disa
 | --- | --- | --- |
 | [Get-AgentToolsReport.ps1](Get-AgentToolsReport.ps1) | Writes CSVs with a status and recommendation for every agent, tool, agent identity and blueprint | No |
 | [Invoke-AgentToolsCleanup.ps1](Invoke-AgentToolsCleanup.ps1) | Blocks agents and tools, and disables identities and blueprint principals marked in the CSVs. Saves an undo file | Yes. Use `-WhatIf` first |
+| [GitHub Copilot/](GitHub%20Copilot/readme.md) | The same review in GitHub Copilot (VS Code or the Copilot CLI). Copilot can run the report script for you, and the cleanup with `-WhatIf` only | No |
 | [Cowork/](Cowork/readme.md) | The same review in Copilot Cowork: the Enterprise MCP for Entra data, and the browser for admin center pages no API covers | No |
 
 Both scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Microsoft.Graph.Authentication) against Graph beta, and work in Windows PowerShell 5.1 and PowerShell 7.
@@ -135,6 +136,10 @@ See **[Cowork/readme.md](Cowork/readme.md)**. The plugin has two skills:
 
 - **agent-tools-review** reads agent identities, blueprints and sign-ins live through the Microsoft MCP Server for Enterprise. The MCP server can't read the Agent 365 catalog or the audit log (no MCP scope covers them; the catalog returns 403), so for agents and tools you attach `Packages.csv`.
 - **admin-center-tools-review** uses Cowork's browser to read the admin center pages that have no API (standalone MCP servers and skills, plugin status, the agent usage report) and recommends what to clean up. It only reads.
+
+## Run it in GitHub Copilot
+
+See **[GitHub Copilot/readme.md](GitHub%20Copilot/readme.md)**. The same two skills work in VS Code and the Copilot CLI. One script installs them, with `Get-AgentToolsReport.ps1` and `Invoke-AgentToolsCleanup.ps1` in the skill's `scripts` folder. Copilot can run the report for you (it reads the catalog and Defender, which the MCP can't), and uses VS Code's browser tools for the admin center pages. It runs the cleanup only with `-WhatIf`.
 
 Changes stay in the script. Blocking and disabling need write scopes, `-WhatIf` and an undo file, so keep them in `Invoke-AgentToolsCleanup.ps1` rather than giving an agent write access.
 
