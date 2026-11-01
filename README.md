@@ -17,6 +17,7 @@ Do these in order.
 | --- | --- | --- |
 | [Billing Health Check](Billing%20Health%20Check/README.md) | A read-only check of your Copilot spending policies, their groups and their members. Run it in PowerShell, Copilot Cowork or GitHub Copilot | A scored HTML report with a fix for every finding |
 | [Agent and Tools Health Check](Agent%20and%20Tools%20Health%20Check/README.md) | A read-only check of agents, tools, Entra agent identities and blueprints against best practices: groups, sponsors, least privilege, clear names, stale items. Run it in PowerShell, Copilot Cowork or GitHub Copilot | A scored HTML report with a fix for every finding, mapped to CIS and CISA guidance |
+| [Entra ID Operations Report](Entra%20ID%20Operations%20Report/README.md) | A read-only check of your Entra tenant against Microsoft's Entra operations reference guide: sync, licensing, MFA, Conditional Access, consent, privileged roles and PIM, access reviews, recommendations. Run it in Copilot Cowork or GitHub Copilot through the Enterprise MCP | A scored HTML report with a fix for every finding, tied to the guide section it comes from |
 
 ## Clean up what isn't used
 
@@ -39,6 +40,6 @@ Do these in order.
 
 ## About this repo
 
-Each of these three folders has a **Cowork** folder (Microsoft 365 Copilot Cowork) and a **GitHub Copilot** folder (GitHub Copilot in VS Code and the Copilot CLI). Both use the same skill files, so the rules and reports match.
+Each of these four folders has a **Cowork** folder (Microsoft 365 Copilot Cowork) and a **GitHub Copilot** folder (GitHub Copilot in VS Code and the Copilot CLI). Both use the same skill files, so the rules and reports match.
 
 Scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` against Microsoft Graph beta. The coding rules for people and AI coding agents are in [AGENTS.md](AGENTS.md). Reports the scripts write can name people and groups, so keep them out of source control.

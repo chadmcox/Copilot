@@ -1,0 +1,4 @@
+# Results describe the tenant's weak spots. Keep them out of source control.
+Entra ID Operations Report*.html
+*.csv
+*.zip

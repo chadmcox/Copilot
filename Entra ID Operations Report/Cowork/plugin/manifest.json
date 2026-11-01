@@ -1,0 +1,44 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.29",
+  "version": "1.0.0",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "developer": {
+    "name": "Entra ID Operations Report",
+    "websiteUrl": "https://github.com/chadmcox/Copilot/tree/main/Entra%20ID%20Operations%20Report",
+    "privacyUrl": "https://github.com/chadmcox/Copilot/blob/main/Entra%20ID%20Operations%20Report/Cowork/readme.md#privacy",
+    "termsOfUseUrl": "https://github.com/chadmcox/Copilot/blob/main/Entra%20ID%20Operations%20Report/Cowork/readme.md#terms"
+  },
+  "name": {
+    "short": "Entra ID Operations",
+    "full": "Entra ID Operations Report for Copilot Cowork"
+  },
+  "description": {
+    "short": "Read-only check of Entra ID against Microsoft's operations guide",
+    "full": "Checks a Microsoft Entra tenant against Microsoft's Entra operations reference guide: sync and licensing, MFA and passwordless, password protection, app credentials, Conditional Access, legacy authentication, consent grants, user settings, emergency access, privileged roles and PIM, access reviews, guests, recommendations and health alerts. Scores each area and explains how to fix each finding. Reads Entra through the Microsoft MCP Server for Enterprise. Read-only."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#0078D4",
+  "agentSkills": [
+    { "folder": "./skills/entra-id-operations" }
+  ],
+  "agentConnectors": [
+    {
+      "id": "enterprise-mcp",
+      "displayName": "Microsoft MCP Server for Enterprise",
+      "description": "Read-only Microsoft Graph calls for Microsoft Entra: organization, users, groups, domains, applications, consent grants, roles and PIM, Conditional Access, authentication methods, sign-in logs, access reviews, entitlement management, recommendations and health alerts, as the signed-in admin.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "https://mcp.svc.cloud.microsoft/enterprise",
+          "authorization": {
+            "type": "OAuthPluginVault",
+            "referenceId": "REPLACE-WITH-OAUTH-CLIENT-REGISTRATION-ID"
+          }
+        }
+      }
+    }
+  ]
+}

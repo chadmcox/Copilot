@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID c3e624bd-42dd-423f-b57b-86d80ed63d11
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -134,6 +134,7 @@ $groups = @(
     @{ Name = "Copilot Studio Environment Admin";           Desc = "PPAC data policies and Copilot Studio governance.";   RoleAssignable = $true; Role = "Power Platform Administrator" }
     @{ Name = "Copilot Plugin Approvers";                   Desc = "Reviewers for org-wide agent/plugin publish requests. No Entra role mapped."; RoleAssignable = $true; Role = $null }
     @{ Name = "Copilot Health Check Users";                 Desc = "People who run the Copilot Billing and Agent and Tools health checks (read-only). Holds AI Reader, Security Reader and Reports Reader through PIM. Scope of the health check Cowork plugins."; RoleAssignable = $true; Role = @("AI Reader", "Security Reader", "Reports Reader") }
+    @{ Name = "Copilot Entra ID Operations Reader";         Desc = "People who run the Entra ID Operations Report (read-only). Holds Global Reader through PIM. Scope of the Entra ID Operations Cowork plugin."; RoleAssignable = $true; Role = @("Global Reader") }
 )
 
 if (-not $IncludeCodeGroups) { $groups = $groups | Where-Object { -not $_.Code } }

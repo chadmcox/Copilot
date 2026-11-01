@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID 637a6ced-4709-440e-a0aa-73c29f66b44f
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -135,6 +135,10 @@ $adminGroups = @(
     # approval for groups used to activate Entra roles, and AI Reader is a privileged role.
     @{ Name = "Copilot Health Check Users";       Hours = 8; Approval = $true;  Roles = @("AI Reader", "Security Reader", "Reports Reader")
        Desc = "People who run the Copilot Billing and Agent and Tools health checks (read-only). Scope of the health check Cowork plugins." }
+    # Global Reader for the Entra ID Operations Report. Approval on: Global Reader reads the whole tenant and
+    # Microsoft labels it a privileged role.
+    @{ Name = "Copilot Entra ID Operations Reader"; Hours = 8; Approval = $true;  Roles = @("Global Reader")
+       Desc = "People who run the Entra ID Operations Report (read-only). Scope of the Entra ID Operations Cowork plugin." }
 )
 
 # ---------------------------------------------------------------------------
