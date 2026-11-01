@@ -42,4 +42,4 @@ Do these in order.
 
 Each of these four folders has a **Cowork** folder (Microsoft 365 Copilot Cowork) and a **GitHub Copilot** folder (GitHub Copilot in VS Code and the Copilot CLI). Both use the same skill files, so the rules and reports match.
 
-Scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` against Microsoft Graph beta. The coding rules for people and AI coding agents are in [AGENTS.md](AGENTS.md). Reports the scripts write can name people and groups, so keep them out of source control.
+Scripts use `Connect-MgGraph` and `Invoke-MgGraphRequest` against Microsoft Graph beta, not the other Microsoft Graph PowerShell modules (they change too often). Exchange Online PowerShell is used where Graph can't reach. The coding rules for people and AI coding agents are in [AGENTS.md](AGENTS.md). Reports the scripts write can name people and groups, so keep them out of source control.

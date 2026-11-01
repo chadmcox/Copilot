@@ -2,7 +2,9 @@
 
 These are the owner's rules. Follow them in every script you add or change.
 
-- Use straight Microsoft Graph calls: `Connect-MgGraph` and `Invoke-MgGraphRequest` only (module Microsoft.Graph.Authentication). Don't require any other module or cmdlet (no `Get-Mg*`, `New-Mg*`, Entra or Az modules).
+- Use straight Microsoft Graph calls: `Connect-MgGraph` and `Invoke-MgGraphRequest` only (module Microsoft.Graph.Authentication). Don't use the other Microsoft Graph PowerShell modules or their cmdlets (no `Get-Mg*`, `New-Mg*`, `Update-Mg*`): they change too often between versions. Don't use the Az modules either.
+- **Use the Entra PowerShell modules (Microsoft.Entra, Microsoft.Entra.Beta) only when Graph can't do it**, such as `Grant-EntraBetaMCPServerPermission` for the Enterprise MCP server. Say in a comment why Graph doesn't work for that step.
+- **Exchange Online PowerShell is allowed** (module ExchangeOnlineManagement) for what Graph can't do, such as Defender for Office 365 and Exchange settings. Use `Connect-ExchangeOnline` with read-only `Get-` cmdlets unless the script is meant to make changes, map the cloud choice to `-ExchangeEnvironmentName` (Global: `O365Default`, USGov: `O365USGovGCCHigh`, USGovDoD: `O365USGovDoD`), and disconnect at the end with `Disconnect-ExchangeOnline -Confirm:$false`. Keep Graph calls on `Invoke-MgGraphRequest`.
 - Use the Microsoft Graph **beta** endpoint (`https://graph.microsoft.com/beta`) for every call. It usually has more properties and APIs than v1.0.
 - Keep it simple. Don't over-complicate the code.
 - Never use `+=`. Let the pipeline collect output, or wrap it in `@( )`.
