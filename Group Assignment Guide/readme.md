@@ -125,7 +125,7 @@ The access package script puts every package in a catalog named **Copilot Access
 
 These get roles through PIM, not through an admin center setting. The roles and activation times are in the Admin groups section below. Access packages for them are only made with `-IncludeAdminPackages` (Admin tier).
 
-Copilot Platform Admin, Copilot Delegated Admin, Copilot Agent Management Admin, Copilot Agent Registry Admin, Copilot AI Reader, Copilot Billing Admin, Copilot Cost Reader, Copilot Agent ID Admin, Copilot Agent ID Developers, Copilot Office Apps Admin, Copilot Compliance Admin, Copilot Teams Admin, Copilot SharePoint Admin, Copilot Studio Environment Admin, Copilot Plugin Approvers, Copilot Health Check Users.
+Copilot Platform Admin, Copilot Delegated Admin, Copilot Agent Management Admin, Copilot Agent Registry Admin, Copilot AI Reader, Copilot Billing Admin, Copilot Cost Reader, Copilot Agent ID Admin, Copilot Agent ID Developers, Copilot Office Apps Admin, Copilot Compliance Admin, Copilot Teams Admin, Copilot SharePoint Admin, Copilot Studio Environment Admin, Copilot Plugin Approvers, Copilot Health Check Users, Copilot Entra ID Operations Reader.
 
 Copilot Platform Admin is made by `New-CopilotAdminPim.ps1` and has no access package.
 
@@ -688,6 +688,7 @@ For agent settings (who can build, share, publish and receive agents), see the [
 | Copilot Studio Environment Admin | Power Platform Administrator (or a smaller environment admin role) | 8 hours, needs approval | Power Platform admin center |
 | Copilot Plugin Approvers | None | 8 hours | See the next section |
 | Copilot Health Check Users | AI Reader, Security Reader, Reports Reader | 8 hours, needs approval | **New.** Running the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks, read-only. Also the scope of their Cowork plugins. See [Copilot Health Check Users](#copilot-health-check-users) |
+| Copilot Entra ID Operations Reader | Global Reader | 8 hours, needs approval | **New.** Running the [Entra ID Operations Report](../Entra%20ID%20Operations%20Report/README.md), read-only. Also the scope of its Cowork plugin. See [Copilot Entra ID Operations Reader](#copilot-entra-id-operations-reader) |
 
 I checked every role name above in the tenant on Oct 26, 2026. They all exist.
 
@@ -718,6 +719,34 @@ Not covered by these readers, by design:
 - **Making changes** (blocking agents, disabling agent identities): not for this group. Use **Copilot Agent Management Admin** and **Copilot Agent ID Admin**.
 
 Members also need a Microsoft 365 Copilot license and Cowork access (one of the Cowork spend groups) to run the checks in Copilot Cowork. Scope both health check plugins to this group when you upload them (**Agents > Tools > Registry > Upload > Scope users > Specific users or groups**).
+
+## Copilot Entra ID Operations Reader
+
+One group for the people who run the [Entra ID Operations Report](../Entra%20ID%20Operations%20Report/README.md), which checks the tenant against Microsoft's [Microsoft Entra operations reference guide](https://learn.microsoft.com/entra/architecture/ops-guide-intro). The report is read-only, so the group holds one reader role: **Global Reader**.
+
+**Make it role-assignable, and put it under PIM.** Both scripts here do that, the same way as [Copilot Health Check Users](#copilot-health-check-users): `New-CopilotGroups.ps1` creates it as role-assignable, and `New-CopilotAdminPim.ps1` gives it Global Reader and makes people *eligible* members, active for 8 hours with MFA, a reason and approval.
+
+- The role sits on the group, so Groups Administrators, User Administrators and Exchange Administrators can't add themselves. Only Global Administrators, Privileged Role Administrators and the group's owners can change who's in it. Give the group no owners.
+- Approval is on because Global Reader reads everything a Global Administrator can, and Microsoft labels it a privileged role. Microsoft also recommends approval for groups used to activate Entra roles.
+- Role-assignable groups can't be dynamic, can't have other groups nested in them, and can only be made role-assignable when they're created.
+
+**Why Global Reader.** The report reads every part of Entra the operations guide covers. Global Reader is the one role that reads all of it, and for some reads it's the only reader role Microsoft documents:
+
+| What the report reads | Least-privileged reader Microsoft documents | Covered by Global Reader |
+| --- | --- | --- |
+| Authentication methods policy, external collaboration (guest invite) settings | Global Reader | Yes |
+| Conditional Access, named locations, Identity Protection risky users | Security Reader | Yes |
+| Sign-in logs, admins' MFA registration, Entra recommendations, Entra Health alerts | Reports Reader | Yes |
+| PIM role settings, role assignments, eligible assignments | Security Reader (PIM) | Yes |
+| Access reviews, entitlement management, consent grants, app credentials, domains, licenses | Directory reads | Yes |
+
+**Narrower option (test it).** Security Reader plus Reports Reader covers most of the report. They don't cover the authentication methods policy or the guest invite settings, where Microsoft documents Global Reader, so those checks may be skipped. If a few reads return 403 with the narrower pair, either accept the skipped checks or use Global Reader. Don't add an administrator role to make a read work.
+
+**Not for this group:**
+- **Making the fixes.** Use the matching admin role through its own PIM group (Conditional Access Administrator, Authentication Policy Administrator, Privileged Role Administrator and so on), for the change only.
+- **Entra Connect, hybrid agents and Secure Score.** The Enterprise MCP can't read them whatever the role (no MCP scope covers them), so they're on the report's manual checklist.
+
+Members also need a Microsoft 365 Copilot license and Cowork access to run the report in Copilot Cowork, or a GitHub Copilot plan to run it in VS Code. Scope the Entra ID Operations plugin to this group when you upload it (**Agents > Tools > Registry > Upload > Scope users > Specific users or groups**). Review the group's eligible members with an access review, like the report itself recommends.
 
 ## Groups with no setting yet
 
