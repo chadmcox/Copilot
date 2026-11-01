@@ -4,6 +4,8 @@ Run the Copilot billing health check by asking **Microsoft Copilot Cowork**, wit
 
 **Read-only.** The Enterprise MCP server can only read; it can't change your tenant.
 
+Use GitHub Copilot in VS Code instead? The same skill works there, with a much shorter setup. See [GitHub Copilot/readme.md](../GitHub%20Copilot/readme.md).
+
 > Microsoft changes Cowork, plugins and the Enterprise MCP server often, and parts are in preview. Test this in your own tenant first.
 
 ## What you need to know first

@@ -1,6 +1,6 @@
 # Copilot
 
-Guides, scripts and Copilot Cowork prompts for running Microsoft 365 Copilot. Each folder below is one thing, with a one-line explanation of what it is and what you get from it. Open a folder's readme for the full steps.
+Guides, scripts, and Copilot Cowork and GitHub Copilot skills for running Microsoft 365 Copilot. Each folder below is one thing, with a one-line explanation of what it is and what you get from it. Open a folder's readme for the full steps.
 
 ## Set up Copilot access
 
@@ -15,14 +15,14 @@ Do these in order.
 
 | Folder | What it is | What you get |
 | --- | --- | --- |
-| [Billing Health Check](Billing%20Health%20Check/README.md) | A read-only check of your Copilot spending policies, their groups and their members. Run it in PowerShell or Copilot Cowork | A scored HTML report with a fix for every finding |
-| [Agent and Tools Health Check](Agent%20and%20Tools%20Health%20Check/README.md) | A read-only check of agents, tools, Entra agent identities and blueprints against best practices: groups, sponsors, least privilege, clear names, stale items | A scored HTML report with a fix for every finding, mapped to CIS and CISA guidance |
+| [Billing Health Check](Billing%20Health%20Check/README.md) | A read-only check of your Copilot spending policies, their groups and their members. Run it in PowerShell, Copilot Cowork or GitHub Copilot | A scored HTML report with a fix for every finding |
+| [Agent and Tools Health Check](Agent%20and%20Tools%20Health%20Check/README.md) | A read-only check of agents, tools, Entra agent identities and blueprints against best practices: groups, sponsors, least privilege, clear names, stale items. Run it in PowerShell, Copilot Cowork or GitHub Copilot | A scored HTML report with a fix for every finding, mapped to CIS and CISA guidance |
 
 ## Clean up what isn't used
 
 | Folder | What it is | What you get |
 | --- | --- | --- |
-| [Agent and Tools Cleanup](Agent%20and%20Tools%20Cleanup/README.md) | Finds agents, plugins, skills and MCP servers nobody uses, plus stale agent identities and blueprints. Can block or disable them | A list of what to remove, and an undo file for anything it changes |
+| [Agent and Tools Cleanup](Agent%20and%20Tools%20Cleanup/README.md) | Finds agents, plugins, skills and MCP servers nobody uses, plus stale agent identities and blueprints. Can block or disable them. Review in PowerShell, Copilot Cowork or GitHub Copilot | A list of what to remove, and an undo file for anything it changes |
 
 ## Copilot Cowork prompts
 
@@ -38,5 +38,7 @@ Do these in order.
 | [Personalization](Personalization/readme.md) | How to set Copilot custom instructions, with examples for different roles (Copilot admin, identity admin, students, HOA board member) | Better answers without repeating your role and preferences in every prompt |
 
 ## About this repo
+
+Each of these three folders has a **Cowork** folder (Microsoft 365 Copilot Cowork) and a **GitHub Copilot** folder (GitHub Copilot in VS Code and the Copilot CLI). Both use the same skill files, so the rules and reports match.
 
 Scripts use only `Connect-MgGraph` and `Invoke-MgGraphRequest` against Microsoft Graph beta. The coding rules for people and AI coding agents are in [AGENTS.md](AGENTS.md). Reports the scripts write can name people and groups, so keep them out of source control.

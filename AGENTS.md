@@ -48,3 +48,12 @@ from the use or distribution of the Sample Code..
 url: <Microsoft Learn page title> - <https://learn.microsoft.com/...>
 #>
 ```
+
+## Cowork and GitHub Copilot folders
+
+Each solution that has a skill has two folders, and both use the same skill files:
+
+- **Cowork/**: the Copilot Cowork plugin. The skills live in `Cowork/plugin/skills/`. This is the only copy; don't duplicate a skill anywhere else.
+- **GitHub Copilot/**: setup for GitHub Copilot in VS Code and the Copilot CLI. `Install-GitHubCopilotSkill.ps1` copies the skills from `Cowork/plugin/skills/` (or downloads them from GitHub) and puts the solution's scripts in the skill's `scripts` folder.
+
+When you add a file to a skill, or a new skill, add it to both `New-CoworkPluginPackage.ps1` and `Install-GitHubCopilotSkill.ps1`. When a skill step only fits one product, say so in the skill's "If you're running in GitHub Copilot" section.

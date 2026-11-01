@@ -4,7 +4,7 @@ description: Read-only review of unused Copilot agents and tools, stale Entra ag
 license: MIT
 metadata:
   author: Chad Cox
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Agent and tools review
@@ -14,6 +14,28 @@ Find agents and tools nobody uses, agent identities that haven't signed in and b
 **Read-only.** Never create, change, disable, block or delete anything. Never send an email or Teams message unless the user asks and approves it. For changes, point the user to `Invoke-AgentToolsCleanup.ps1` in the `Agent and Tools Cleanup` folder of the Copilot repo and tell them to run it with `-WhatIf` first.
 
 For standalone MCP servers, skills and admin center pages with no API, use the **admin-center-tools-review** skill (browser).
+
+## If you're running in GitHub Copilot (VS Code or Copilot CLI)
+
+Everything below works the same, with these differences:
+
+- **You can run the repo's PowerShell script.** If `scripts/Get-AgentToolsReport.ps1` is in this
+  skill's folder (the GitHub Copilot installer puts it there), offer it first: it reads the Agent
+  365 catalog and Defender, which the Enterprise MCP server can't. Ask which cloud to use (Global,
+  USGov or USGovDoD) and pass `-Environment` so the script doesn't stop at a question. Run it in the
+  terminal: `pwsh -File scripts/Get-AgentToolsReport.ps1 -Environment <cloud> -OutFolder <folder>`
+  (or `powershell -File` on Windows without PowerShell 7). It signs in through a browser window;
+  tell the user to finish the sign-in (and activate **Copilot Health Check Users** in PIM first).
+  Then read Packages.csv, AgentIdentities.csv and Blueprints.csv and give the **Report** below.
+- **Never run `Invoke-AgentToolsCleanup.ps1` without `-WhatIf`**, even if the user asks. Run it
+  with `-WhatIf` if they want to see what would change, then give them the command to run themselves.
+- The rule against scripts calling Graph is about scripts **you** write. The repo's own script
+  signs in by itself, so it's the exception. Only run it when the user agrees.
+- The Enterprise MCP tools (`microsoft_graph_get` and the rest) show up only if the user added the
+  **Microsoft MCP Server for Enterprise** server in VS Code. If they're missing, use the script, or
+  the files the user has in the workspace.
+- For **admin-center-tools-review**, VS Code's browser tools stand in for the Cowork browser.
+- Remind the user not to commit the results: they name agents and tenant objects.
 
 ## What the Enterprise MCP server can and can't read
 

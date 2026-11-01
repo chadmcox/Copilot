@@ -8,7 +8,7 @@ description: |
 license: MIT
 metadata:
   author: Chad Cox
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Copilot billing health check
@@ -16,6 +16,30 @@ metadata:
 Find problems in Copilot Credits spending policies, their groups and their members, then say
 how to fix each one. **Read-only.** Never create, change or delete anything in the tenant.
 Never send an email or Teams message unless the user asks and approves it.
+
+## If you're running in GitHub Copilot (VS Code or Copilot CLI)
+
+Everything below works the same, with these differences:
+
+- **You can run the repo's PowerShell script.** If `scripts/Get-CopilotBillingHealth.ps1` is in this
+  skill's folder (the GitHub Copilot installer puts it there), offer it first: it reads
+  spending policies and each person's credit balance, which the Enterprise MCP server can't. Ask which cloud to use (Global, USGov or
+  USGovDoD) and pass `-Environment` so the script doesn't stop at a question. Run it in the
+  terminal with `pwsh -File` (or `powershell -File` on Windows without PowerShell 7). It signs in
+  through a browser window; tell the user to finish the sign-in (and activate **Copilot Health
+  Check Users** in PIM first).
+  - **Full check:** `scripts/Get-CopilotBillingHealth.ps1 -Environment <cloud> -OutputFolder <folder>`. Then
+    read the CSV files it wrote, give the summary from Step 5, and point to the Report.html it made
+    instead of building another one.
+  - **Only Policies.csv** (for the live check): add `-PoliciesOnly`, then carry on with the
+    steps below using the Enterprise MCP.
+- The rule against scripts calling Graph is about scripts **you** write. The repo's own script
+  signs in by itself, so it's the exception. Only run it when the user agrees.
+- The Enterprise MCP tools (`microsoft_graph_get` and the rest) show up only if the user added the
+  **Microsoft MCP Server for Enterprise** server in VS Code. If they're missing, use the script, or
+  the files the user has in the workspace.
+- There's no OneDrive output folder. Save the report in the folder the user names, or next to the
+  CSV files, and remind the user not to commit it: it names people.
 
 ## Step 1: Get the policies
 

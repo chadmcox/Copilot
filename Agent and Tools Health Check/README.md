@@ -11,6 +11,7 @@ A read-only check of how well your Copilot agents and tools, Entra agent identit
 | Way | How |
 | --- | --- |
 | **Copilot Cowork** (recommended) | Set up the plugin once, attach `Packages.csv` and `DefenderAgents.csv`, paste the prompt. See **[Cowork/readme.md](Cowork/readme.md)** |
+| **GitHub Copilot** (VS Code or the Copilot CLI) | Install the skill with one script, then ask. Copilot runs the script for you, or reads live through the Enterprise MCP. See **[GitHub Copilot/readme.md](GitHub%20Copilot/readme.md)** |
 | **PowerShell** | `.\Get-AgentToolsHealth.ps1`. Writes Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv and Report.html |
 
 ```powershell
@@ -24,7 +25,7 @@ A read-only check of how well your Copilot agents and tools, Entra agent identit
 
 The script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High) or **USGovDoD**. China isn't offered: the Copilot and agent APIs these scripts use aren't expected to work there. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High and DoD use the scripts.
 
-Both give the same HTML report from the same template: a score dial, a card per area, the well-governed funnel for agent identities, filterable findings, CSV export, print, and a manual checklist.
+All three give the same HTML report from the same template: a score dial, a card per area, the well-governed funnel for agent identities, filterable findings, CSV export, print, and a manual checklist.
 
 ## What good looks like (the rules)
 
@@ -124,6 +125,7 @@ The output files name agents, groups and permissions. Keep them private; the `.g
 | --- | --- |
 | [Get-AgentToolsHealth.ps1](Get-AgentToolsHealth.ps1) | The PowerShell check, and `-PackagesOnly` to make Packages.csv for Cowork |
 | [Cowork/](Cowork/readme.md) | Cowork setup guide, plugin, skill, rules and report template |
+| [GitHub Copilot/](GitHub%20Copilot/readme.md) | GitHub Copilot setup guide (VS Code and the Copilot CLI), and the script that installs the skill |
 
 ## References
 

@@ -11,6 +11,8 @@ The plugin has two skills:
 
 **Read-only.** The Enterprise MCP server can only read, and the browser skill is told never to select Block, Delete or any button that changes a setting. To block or disable anything, use `Invoke-AgentToolsCleanup.ps1` (see the [main README](../README.md)).
 
+Use GitHub Copilot in VS Code instead? The same skill works there, with a much shorter setup. See [GitHub Copilot/readme.md](../GitHub%20Copilot/readme.md).
+
 > Microsoft changes Cowork, plugins and the Enterprise MCP server often, and parts are in preview. Test this in your own tenant first.
 
 ## What Cowork can read through the Enterprise MCP
