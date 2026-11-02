@@ -103,7 +103,7 @@ Many of the guide's checks have no API (SSPR, Entra Connect version, diagnostic 
 | No `microsoft_graph_get` tool | Use Agent mode, not Ask. Run **MCP: List Servers** and start the server. Check the tools picker in Chat. On Copilot Business or Enterprise, ask your GitHub admin about the MCP servers policy |
 | Sign-in says the app needs permission or admin approval | The tenant setup above hasn't been done |
 | Many 403s | Activate Copilot Entra ID Operations Reader in PIM (My roles > Groups), sign out of the MCP server and back in, then try again |
-| 403 "not authorized by the available scopes" on a few calls | Expected for Entra Connect features, Secure Score and hybrid agents: the Enterprise MCP has no scope for them. They're on the manual checklist |
+| 403 "not authorized by the available scopes" on a few calls | Expected for Entra Connect feature settings, Microsoft Secure Score and hybrid agents: the Enterprise MCP has no scope for them (Secure Score needs `SecurityEvents.Read.All`; Entra Connect settings need `OnPremDirectorySynchronization.Read.All` and Global Administrator). They're on the manual checklist |
 | 403 that mentions a license on sign-in logs or risky users | The tenant doesn't have Entra ID P1 or P2. The report skips those checks and says so |
 
 ## What's in this folder
