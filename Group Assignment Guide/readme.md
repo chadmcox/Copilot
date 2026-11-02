@@ -688,7 +688,7 @@ For agent settings (who can build, share, publish and receive agents), see the [
 | Copilot Studio Environment Admin | Power Platform Administrator (or a smaller environment admin role) | 8 hours, needs approval | Power Platform admin center |
 | Copilot Plugin Approvers | None | 8 hours | See the next section |
 | Copilot Health Check Users | AI Reader, Security Reader, Reports Reader | 8 hours, needs approval | **New.** Running the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks, read-only. Also the scope of their Cowork plugins. See [Copilot Health Check Users](#copilot-health-check-users) |
-| Copilot Entra ID Operations Reader | Global Reader | 8 hours, needs approval | **New.** Running the [Entra ID Operations Report](../Entra%20ID%20Operations%20Report/README.md), read-only. Also the scope of its Cowork plugin. See [Copilot Entra ID Operations Reader](#copilot-entra-id-operations-reader) |
+| Copilot Entra ID Operations Reader | Global Reader | 8 hours, needs approval | **New.** Running the [Entra ID Operations Report](../Entra%20ID%20Operations%20Report/README.md) and the [Entra ID Security Review](../Entra%20ID%20Security%20Review/README.md), read-only. Also the scope of their Cowork plugins. See [Copilot Entra ID Operations Reader](#copilot-entra-id-operations-reader) |
 
 I checked every role name above in the tenant on Oct 26, 2026. They all exist.
 
@@ -722,7 +722,7 @@ Members also need a Microsoft 365 Copilot license and Cowork access (one of the 
 
 ## Copilot Entra ID Operations Reader
 
-One group for the people who run the [Entra ID Operations Report](../Entra%20ID%20Operations%20Report/README.md), which checks the tenant against Microsoft's [Microsoft Entra operations reference guide](https://learn.microsoft.com/entra/architecture/ops-guide-intro). The report is read-only, so the group holds one reader role: **Global Reader**.
+One group for the people who run the [Entra ID Operations Report](../Entra%20ID%20Operations%20Report/README.md), which checks the tenant against Microsoft's [Microsoft Entra operations reference guide](https://learn.microsoft.com/entra/architecture/ops-guide-intro), and the [Entra ID Security Review](../Entra%20ID%20Security%20Review/README.md), which checks it against CISA, CIS and attack guidance. Both are read-only and read the same things, so the group holds one reader role: **Global Reader**.
 
 **Make it role-assignable, and put it under PIM.** Both scripts here do that, the same way as [Copilot Health Check Users](#copilot-health-check-users): `New-CopilotGroups.ps1` creates it as role-assignable, and `New-CopilotAdminPim.ps1` gives it Global Reader and makes people *eligible* members, active for 8 hours with MFA, a reason and approval.
 
@@ -746,7 +746,7 @@ One group for the people who run the [Entra ID Operations Report](../Entra%20ID%
 - **Making the fixes.** Use the matching admin role through its own PIM group (Conditional Access Administrator, Authentication Policy Administrator, Privileged Role Administrator and so on), for the change only.
 - **Entra Connect, hybrid agents and Secure Score.** The Enterprise MCP can't read them whatever the role (no MCP scope covers them), so they're on the report's manual checklist.
 
-Members also need a Microsoft 365 Copilot license and Cowork access to run the report in Copilot Cowork, or a GitHub Copilot plan to run it in VS Code. Scope the Entra ID Operations plugin to this group when you upload it (**Agents > Tools > Registry > Upload > Scope users > Specific users or groups**). Review the group's eligible members with an access review, like the report itself recommends.
+Members also need a Microsoft 365 Copilot license and Cowork access to run the report in Copilot Cowork, or a GitHub Copilot plan to run it in VS Code. Scope the Entra ID Operations and Entra ID Security Review plugins to this group when you upload them (**Agents > Tools > Registry > Upload > Scope users > Specific users or groups**). Review the group's eligible members with an access review, like the report itself recommends.
 
 ## Groups with no setting yet
 

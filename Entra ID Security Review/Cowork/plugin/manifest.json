@@ -1,0 +1,44 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.29",
+  "version": "1.0.0",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "developer": {
+    "name": "Entra ID Security Review",
+    "websiteUrl": "https://github.com/chadmcox/Copilot/tree/main/Entra%20ID%20Security%20Review",
+    "privacyUrl": "https://github.com/chadmcox/Copilot/blob/main/Entra%20ID%20Security%20Review/Cowork/readme.md#privacy",
+    "termsOfUseUrl": "https://github.com/chadmcox/Copilot/blob/main/Entra%20ID%20Security%20Review/Cowork/readme.md#terms"
+  },
+  "name": {
+    "short": "Entra ID Security Review",
+    "full": "Entra ID Security Review for Copilot Cowork"
+  },
+  "description": {
+    "short": "Read-only Entra ID security review: CISA, CIS and attack paths",
+    "full": "Reviews a Microsoft Entra tenant against the CISA SCuBA Entra ID baseline, the CIS Microsoft 365 Foundations Benchmark, the Attack and Defense Playbook for Microsoft Entra and Microsoft, NSA and Mandiant incident guidance: privileged access, authentication methods, Conditional Access and risk, app consent and credentials, hybrid and federation, guests and cross-tenant settings, device settings and recent risky changes. Scores each area, maps each finding to the attack it helps stop and explains the fix. Reads Entra through the Microsoft MCP Server for Enterprise. Read-only."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#0078D4",
+  "agentSkills": [
+    { "folder": "./skills/entra-id-security-review" }
+  ],
+  "agentConnectors": [
+    {
+      "id": "enterprise-mcp",
+      "displayName": "Microsoft MCP Server for Enterprise",
+      "description": "Read-only Microsoft Graph calls for Microsoft Entra: users, groups, domains, applications and service principals, consent grants, roles and PIM, Conditional Access, authentication methods and strengths, device registration and cross-tenant policies, audit and sign-in logs, risky users and access reviews, as the signed-in admin.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "https://mcp.svc.cloud.microsoft/enterprise",
+          "authorization": {
+            "type": "OAuthPluginVault",
+            "referenceId": "REPLACE-WITH-OAUTH-CLIENT-REGISTRATION-ID"
+          }
+        }
+      }
+    }
+  ]
+}
