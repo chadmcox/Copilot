@@ -63,8 +63,7 @@ param(
 
 #Requires -Modules Microsoft.Graph.Authentication
 
-$scopes = @("Group.ReadWrite.All")
-if ($AssignRoles) { $scopes += "RoleManagement.ReadWrite.Directory" }
+$scopes = @("Group.ReadWrite.All"; if ($AssignRoles) { "RoleManagement.ReadWrite.Directory" })
 # Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
 # Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
 if (-not $Environment) {
@@ -76,7 +75,7 @@ $graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphE
 
 Connect-MgGraph -Environment $Environment -Scopes $scopes -NoWelcome
 
-$graph = "$graphEndpoint/v1.0"
+$graph = "$graphEndpoint/beta"
 
 # Role = Entra role display name(s) to assign when -AssignRoles is used ($null = no role). A list assigns each.
 # RoleAssignable = create as a role-assignable group (cannot be changed later).
@@ -87,7 +86,7 @@ $groups = @(
     @{ Name = "Copilot + Autopilot Access";                 Desc = "Microsoft Autopilot (formerly Scout, Frontier). Pair with Copilot Frontier Access; scope of the Autopilot spending policy once Microsoft publishes it (MC1479277)." }
     @{ Name = "Copilot Studio Access";                      Desc = "Copilot Studio makers." }
     @{ Name = "Copilot App Builder Access";                 Desc = "Who can build apps in Copilot Studio (Managed Runtime preview). Set via pac admin update-tenant-settings enabledGroupsManagedAppsMcsPreview." }
-    @{ Name = "Copilot Frontier Access";                    Desc = "Target of Copilot > Settings > Copilot Frontier. Required for Opal, Code, SpaceXAI subprocessor models, Azure DevOps data. Keep flat (direct members)." }
+    @{ Name = "Copilot Frontier Access";                    Desc = "Target of Copilot > Settings > Copilot Frontier. Gives public previews in Copilot, Teams, new Outlook, OneDrive and SharePoint (MC1529472). Required for Opal, Code, Autopilot, SpaceXAI models and Cowork app building. Keep flat (direct members)." }
     @{ Name = "Copilot Pilot Ring";                         Desc = "Early-validation users; scope of the New Services Pilot spending policy (auto-enrolls new credit-billed services)." }
 
     # ---------- Spend (spending policies in Copilot > Cost Management) ----------
@@ -108,14 +107,14 @@ $groups = @(
     # ---------- Models ----------
     @{ Name = "Copilot Anthropic Models Access";            Desc = "AI providers operating as Microsoft subprocessors > Anthropic. Required for Word/Excel/PowerPoint Agents." }
     @{ Name = "Copilot OpenAI Models Access";               Desc = "AI providers operating as Microsoft subprocessors > OpenAI (if restricting)." }
-    @{ Name = "Copilot SpaceXAI Models Access";             Desc = "SpaceXAI models (Frontier only). On Oct 23, 2026 SpaceXAI appeared under AI providers operating as independent processors, not subprocessors - use the page where you see it." }
-    @{ Name = "Copilot Independent Processor Models Access"; Desc = "AI providers operating as independent processors, every provider except SpaceXAI (e.g. Mistral AI, Anthropic Models with Data Retention). Data leaves Microsoft terms - legal approval required. Global Admin configures." }
+    @{ Name = "Copilot SpaceXAI Models Access";             Desc = "AI providers operating as Microsoft subprocessors > SpaceXAI (Frontier only): Grok models in Word, Excel, PowerPoint and, with usage-based billing, Chat. Cowork and Copilot Studio use the independent processor setting instead." }
+    @{ Name = "Copilot Independent Processor Models Access"; Desc = "AI providers operating as independent processors, every provider (e.g. Mistral AI, Anthropic Models with Data Retention, and SpaceXAI for Cowork and Copilot Studio). Data leaves Microsoft terms - legal approval required. Global Admin configures." }
 
     # ---------- Capability scoping ----------
     @{ Name = "Copilot + Cowork Browser Access";            Desc = "Copilot > Settings > Browser use in Microsoft Copilot > Allow local browser use (renamed from Cowork settings, MC1515930). Also the Intune Edge policy CopilotCoworkToolActionsEnabled (Edge 152+)." }
     @{ Name = "Copilot Advanced Package Upload Access";     Desc = "Who can upload agent/plugin packages with actions or MCP servers." }
     @{ Name = "Copilot Agent Sharing Access";               Desc = "Who can share Agent Builder agents org-wide." }
-    @{ Name = "Copilot Teams Policy Exceptions";            Desc = "Users assigned a non-default Teams meeting/calling Copilot policy." }
+    @{ Name = "Copilot Teams Policy Exceptions";            Desc = "Users assigned a non-default Teams meeting/calling AI policy. MeetingAI and TranscriptionWithMeetingAI replace the Copilot policy from mid-November 2026 (MC1532253)." }
     @{ Name = "Copilot Cloud Policy Exceptions";            Desc = "Users with non-default Cloud Policy (web search, Pages/Notebooks, code previews)." }
 
     # ---------- Delegated administration (role-assignable) ----------
@@ -128,7 +127,7 @@ $groups = @(
     @{ Name = "Copilot Agent ID Admin";                     Desc = "Entra Agent ID identities and blueprints.";           RoleAssignable = $true; Role = "Agent ID Administrator" }
     @{ Name = "Copilot Agent ID Developers";                Desc = "Can create agent blueprints after 'Users can register agent identity blueprints' is set to No (MC1506733).";  RoleAssignable = $true; Role = "Agent ID Developer" }
     @{ Name = "Copilot Office Apps Admin";                  Desc = "Cloud Policy (config.office.com) Copilot settings.";  RoleAssignable = $true; Role = "Office Apps Administrator" }
-    @{ Name = "Copilot Compliance Admin";                   Desc = "Purview DLP, audit, eDiscovery, DSPM for AI.";        RoleAssignable = $true; Role = "Compliance Administrator" }
+    @{ Name = "Copilot Compliance Admin";                   Desc = "Purview DLP, audit, eDiscovery, DSPM.";               RoleAssignable = $true; Role = "Compliance Administrator" }
     @{ Name = "Copilot Teams Admin";                        Desc = "Teams meeting/calling Copilot policies.";             RoleAssignable = $true; Role = "Teams Administrator" }
     @{ Name = "Copilot SharePoint Admin";                   Desc = "RCD/RAC, DAG reports, agent access insights.";        RoleAssignable = $true; Role = "SharePoint Administrator" }
     @{ Name = "Copilot Studio Environment Admin";           Desc = "PPAC data policies and Copilot Studio governance.";   RoleAssignable = $true; Role = "Power Platform Administrator" }
@@ -222,14 +221,12 @@ $results = foreach ($g in $groups) {
         }
     } }) -join "; "
 
-    [pscustomobject]@{
-        Group          = $displayName
-        Status         = $status
-        RoleAssignable = $roleAssignable
-        Role           = @($g.Role) -join ", "
-        RoleStatus     = $roleStatus
-        Id             = $group.id
-    }
+    $g | Select-Object @{ n = "Group"; e = { $displayName } },
+        @{ n = "Status"; e = { $status } },
+        @{ n = "RoleAssignable"; e = { $roleAssignable } },
+        @{ n = "Role"; e = { @($g.Role) -join ", " } },
+        @{ n = "RoleStatus"; e = { $roleStatus } },
+        @{ n = "Id"; e = { $group.id } }
 }
 
 $results | Format-Table -AutoSize
