@@ -1,6 +1,6 @@
 # Agent and Tools Cleanup
 
-Updated Oct 31, 2026
+Updated Nov 2, 2026
 
 Find what nobody uses in Microsoft 365 Copilot and Agent 365, then block or disable it with an undo:
 
@@ -32,11 +32,13 @@ How each package is labelled, from its `elementTypes`:
 
 | Kind | Element types | Can be auto-blocked? |
 | --- | --- | --- |
-| Agent | declarativeAgent, customEngine..., bot | Yes |
-| Tool | anything with skill, connector, MCP, plugin or action in the name | Yes |
+| Agent | Bots, CustomEngineCopilots, AgenticUserTemplates, or DeclarativeCopilots without any tool parts | Yes |
+| Tool | AgentSkills, MCPServers, ToolPlugins or AgentConnectors (a declarative agent that ships skills or MCP servers counts as a tool, as in the admin center) | Yes |
 | App | everything else (Office add-ins, tabs, message extensions) | No, Review only |
 
-Microsoft doesn't document every `elementTypes` value for plugins yet. Check the `elementTypes` column in `Packages.csv` the first time you run it, and tell me if a tool shows up as App.
+Skills aren't a kind of their own: they ship inside a package. `hasSkills` and `hasMCP` in `Packages.csv` show which packages carry skills or MCP servers. Microsoft doesn't document every `elementTypes` value yet, so check the `elementTypes` column the first time you run it.
+
+`deploymentScope` is **NotDeployed** when the package is in the catalog but deployed to nobody (`deployedTo` = `acquiredForNone`), and **Deployed** otherwise. Not-deployed packages stay in the report: users can still install them if they're available to them, and in testing some showed real use.
 
 Notes:
 - The catalog API needs a **Microsoft Agent 365** license (included in Microsoft 365 E7) and the **AI Administrator** role. Without it, run with `-SkipPackages`.
@@ -80,10 +82,12 @@ Output goes to `.\AgentToolsReport-<date-time>\`: `Packages.csv`, `AgentIdentiti
 | --- | --- |
 | Disable | Disables the agent identity or blueprint principal |
 | Block | Blocks the agent or tool in the catalog |
+| RestrictAvailability | Nothing by default. An unused third-party agent or tool nobody deployed. Limit who can install third-party agents in the admin center, or block these too with `-BlockPackages -IncludeNotDeployed` |
 | Keep, Review, AlreadyDisabled, AlreadyBlocked | Nothing |
 
 Safety rules built into the recommendations:
-- **Microsoft-built packages are Keep. Apps are Review.**
+- **Microsoft-built packages (`type` firstParty) are Keep. Apps are Review.**
+- **An identity whose agent is in use is Active.** The last use of the package that points to it (`agentIdentityId`) counts, shown as `packageLastUsed`.
 - **No sign-in data means Review, never Disable.**
 - **NoActivity identities are Review, not Disable.** In testing, some Copilot Studio agent identities that were in use had no recorded sign-in of their own (an observation, not documented behavior). Only identities that signed in before and then stopped get Disable.
 - **Blueprints from Microsoft or other publishers are Review.** A blueprint principal with no blueprint registered in your tenant (such as the Copilot Studio agent identity blueprint) backs every agent built on that product. Disabling it breaks all of them.
@@ -105,7 +109,7 @@ Change `recommendation` to `Keep` for anything you want to keep: seasonal agents
 .\Invoke-AgentToolsCleanup.ps1 -ReportFolder .\AgentToolsReport-20261031-0900 -DisableBlueprints
 ```
 
-`-BlockPackages` blocks both agents and tools. Disabling a blueprint principal stops every agent identity under it from getting tokens in this tenant.
+`-BlockPackages` blocks both agents and tools marked Block. Add `-IncludeNotDeployed` to also block the RestrictAvailability rows. Disabling a blueprint principal stops every agent identity under it from getting tokens in this tenant.
 
 ### 4. Undo
 
