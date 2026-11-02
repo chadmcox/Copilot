@@ -41,6 +41,8 @@ Each finding has an **Area** (Identity and access, Authentication, Governance, O
 | Sync is on and `EnableBannedPasswordCheckOnPremises` is false, or `BannedPasswordCheckOnPremisesMode` is `Audit` | Medium | Password protection | Deploy on-premises password protection and move it from Audit to Enforced | Auth > Enable self-service password reset and password protection |
 | A verified domain's `passwordValidityPeriodInDays` isn't 2147483647 (passwords expire) | Low | Password policies | Microsoft's password guidance is not to force expiry; set passwords to never expire and rely on MFA, password protection and risk policies | Auth > Password policies |
 | A domain's `authenticationType` is `Federated` | Medium | On-premises outage resiliency | Plan to move to cloud authentication; until then make sure password hash sync is on as a backup | Auth > On-premises outage authentication resiliency |
+| Sync is on and `organization.onPremisesLastPasswordSyncDateTime` is empty | Medium (High if any domain's `authenticationType` is `Federated`) | Password hash sync | Password hash sync looks off. Turn it on in Entra Connect, even if you federate: it's the fallback sign-in when on-premises authentication is down, and it lets leaked credential detection work | Auth > Password policies |
+| Sync is on, the last directory sync is within 24 hours, and `onPremisesLastPasswordSyncDateTime` is more than 7 days ago | Medium | Password hash sync | Password hash sync may have stopped while directory sync still runs. Check the Entra Connect server and its Connect Health alerts | Auth > Password policies |
 | An app registration has client secrets (`passwordCredentials`); one finding per app | Medium | Programmatic credentials | Ask the owner how the secret is stored. Use a certificate, managed identity or federated credential instead, or Key Vault if that isn't possible | Auth > Programmatic usage of credentials |
 | A secret or certificate on an app expired, or expires within 30 days | Low | Programmatic credentials | Remove the expired one, or roll it before it expires | Auth > Programmatic usage of credentials |
 | A non-Microsoft service principal has its own `passwordCredentials` | Medium | Programmatic credentials | Ask the owner what uses it, then remove it or replace it with a certificate | Auth > Programmatic usage of credentials |
@@ -128,7 +130,7 @@ The guide has many process and on-premises checks that no API answers. List them
 - Microsoft Entra Connect is less than six months behind the latest version, with automatic upgrade on (Entra admin center > Entra Connect > Connect Sync).
 - A staging-mode Connect server exists and matches production.
 - The source anchor is `ms-DS-ConsistencyGuid`, custom sync rules have precedence under 100 and are simple, and sync is scoped by OU or a cloudFiltered attribute (not group filtering).
-- Password hash sync is on (Entra admin center > Entra Connect > Connect Sync), even if you federate.
+- The Entra Connect feature settings match what you expect: password writeback, group writeback and the accidental deletion threshold (Entra admin center > Entra Connect > Connect Sync). The report checks password hash sync from the last password sync time, but these settings are only in `/directory/onPremisesSynchronization`, which needs Global Administrator.
 - Apps are provisioned with automatic user provisioning, not CSV files or manual steps (Enterprise apps > each app > Provisioning).
 
 **Authentication management**

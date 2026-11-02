@@ -62,7 +62,7 @@ collections like `onPremisesProvisioningErrors` need the header `ConsistencyLeve
 
 | What | Graph call |
 | --- | --- |
-| Sync status and notification addresses | `GET /beta/organization?$select=onPremisesSyncEnabled,onPremisesLastSyncDateTime,technicalNotificationMails` (count the addresses; don't report them) |
+| Sync status, password hash sync and notification addresses | `GET /beta/organization?$select=onPremisesSyncEnabled,onPremisesLastSyncDateTime,onPremisesLastPasswordSyncDateTime,technicalNotificationMails` (count the addresses; don't report them). `onPremisesLastPasswordSyncDateTime` is beta only |
 | Sync errors | `GET /beta/users?$filter=onPremisesProvisioningErrors/any(e:e/category eq 'PropertyConflict')&$count=true&$select=id,onPremisesProvisioningErrors` with `ConsistencyLevel: eventual`. Use `occurredDateTime` for the 100-day rule |
 | License errors | `GET /beta/groups?$filter=hasMembersWithLicenseErrors eq true&$select=id,displayName` |
 | Direct license assignments | `GET /beta/users?$filter=assignedLicenses/$count ne 0&$count=true&$select=id,licenseAssignmentStates&$top=999` with `ConsistencyLevel: eventual`. Stop after 20 pages in a large tenant and say the count is from a sample |
@@ -95,11 +95,22 @@ collections like `onPremisesProvisioningErrors` need the header `ConsistencyLeve
 | Entra Health alerts | `GET /beta/reports/healthMonitoring/alerts?$filter=state eq 'active'&$select=alertType,scenario,state,createdDateTime` |
 
 **Not readable through the Enterprise MCP** (tested: the MCP returns 403 "not authorized by the
-available scopes"): Entra Connect sync features such as password hash sync
-(`/directory/onPremisesSynchronization`), Secure Score (`/security/secureScores`; use
-recommendations instead), pass-through authentication agents and private network connectors
-(`/onPremisesPublishingProfiles/...`), and the tenant-wide registration counts
-(`usersRegisteredByFeature`). They go on the manual checklist, or are covered by recommendations.
+available scopes", because no MCP scope matches the Graph permission these APIs need):
+
+- Entra Connect sync features and settings (`/directory/onPremisesSynchronization`, which needs
+  `OnPremDirectorySynchronization.Read.All`). Outside the MCP it's also delegated only and
+  Global Administrator is the only supported role, so a reader can't read it anyway. Password
+  hash sync is still checked, from `organization.onPremisesLastPasswordSyncDateTime`; the other
+  feature flags go on the manual checklist.
+- Microsoft Secure Score (`/security/secureScores`, which needs `SecurityEvents.Read.All`). The
+  API exists and works with Graph PowerShell or an app that has that permission, but not here.
+  Use Entra recommendations instead: they're the items behind the Identity Secure Score, with
+  `currentScore` and `maxScore` for each.
+- Pass-through authentication agents and private network connectors
+  (`/onPremisesPublishingProfiles/...`), and the tenant-wide registration counts
+  (`usersRegisteredByFeature`).
+
+They go on the manual checklist, or are covered by recommendations.
 
 If a call returns 403, say which part was skipped and carry on. The person running the report
 should be an activated member of **Copilot Entra ID Operations Reader** (Global Reader, through

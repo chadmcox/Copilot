@@ -20,7 +20,8 @@ Everything comes live from the Enterprise MCP. No files to attach. Tested agains
 | Conditional Access policies and named locations, risky users (P2), legacy authentication sign-ins (P1) | Enterprise MCP, live |
 | Role assignments, PIM eligibility and activation settings, access reviews, guests, access packages | Enterprise MCP, live |
 | Microsoft Entra recommendations (the Identity Secure Score list) and Entra Health alerts | Enterprise MCP, live |
-| Password hash sync and Entra Connect features, Secure Score, pass-through authentication agents, private network connectors | **Not readable**: the MCP returns 403 for these. Manual checklist, or recommendations cover them |
+| Password hash sync (from the last password sync time on the organization) | Enterprise MCP, live |
+| Entra Connect feature settings, Microsoft Secure Score, pass-through authentication agents, private network connectors | **Not readable**: the MCP has no scope for these and returns 403 (Entra Connect settings also need Global Administrator). Manual checklist, or recommendations cover them |
 | Process checks: task owners, SIEM, staging server, Entra Connect version, AD FS, Tier 0 | No API. Manual checklist, or Cowork reads the admin center in the browser if you turn that on |
 
 ## Pick a way

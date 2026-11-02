@@ -744,7 +744,7 @@ One group for the people who run the [Entra ID Operations Report](../Entra%20ID%
 
 **Not for this group:**
 - **Making the fixes.** Use the matching admin role through its own PIM group (Conditional Access Administrator, Authentication Policy Administrator, Privileged Role Administrator and so on), for the change only.
-- **Entra Connect, hybrid agents and Secure Score.** The Enterprise MCP can't read them whatever the role (no MCP scope covers them), so they're on the report's manual checklist.
+- **Entra Connect settings, hybrid agents and Microsoft Secure Score.** The Enterprise MCP can't read them whatever the role (no MCP scope covers them), so they're on the report's manual checklist. Entra Connect settings also need Global Administrator outside the MCP. The report still checks sync times and password hash sync from the organization object, and uses Entra recommendations in place of Secure Score.
 
 Members also need a Microsoft 365 Copilot license and Cowork access to run the report in Copilot Cowork, or a GitHub Copilot plan to run it in VS Code. Scope the Entra ID Operations plugin to this group when you upload it (**Agents > Tools > Registry > Upload > Scope users > Specific users or groups**). Review the group's eligible members with an access review, like the report itself recommends.
 
