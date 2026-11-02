@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID 13dac29b-6a78-460e-98c8-cdc63f4b5277
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -38,6 +38,8 @@ url: Update agentIdentity - https://learn.microsoft.com/graph/api/agentidentity-
       -DisableBlueprints       PATCH accountEnabled=false on each blueprint principal. This stops
                                every agent identity under that blueprint from getting tokens.
       -BlockPackages           POST .../packages/{id}/block for agents and tools in the Agent 365 catalog.
+      -IncludeNotDeployed      With -BlockPackages, also block rows marked RestrictAvailability
+                               (unused third-party catalog entries nobody has deployed).
 
     Every change is saved to cleanup-undo-<time>.json in the report folder. Run again with
     -Restore -UndoFile <file> to re-enable and unblock exactly those objects.
@@ -63,6 +65,7 @@ param(
     [switch]$DisableAgentIdentities,
     [switch]$DisableBlueprints,
     [switch]$BlockPackages,
+    [switch]$IncludeNotDeployed,
     [switch]$Restore,
     [string]$UndoFile,
     [ValidateSet("Global", "USGov", "USGovDoD")][string]$Environment
@@ -98,7 +101,8 @@ function Get-CleanupItems {
             Select-Object @{ n = "kind"; e = { "blueprintPrincipal" } }, @{ n = "id"; e = { $_.principalId } }, displayName
     }
     if ($BlockPackages -and (Test-Path $packages)) {
-        Import-Csv $packages | Where-Object recommendation -eq "Block" |
+        $actOn = @("Block"; if ($IncludeNotDeployed) { "RestrictAvailability" })
+        Import-Csv $packages | Where-Object recommendation -in $actOn |
             Select-Object @{ n = "kind"; e = { "package" } }, id, displayName
     }
 }

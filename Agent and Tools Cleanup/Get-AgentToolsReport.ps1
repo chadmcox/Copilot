@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID 24704920-b6c2-4955-9815-d5938744c70e
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -38,9 +38,10 @@ url: Agent 365 Package Management API overview - https://learn.microsoft.com/mic
       Blueprints.csv       Agent identity blueprints with child counts and last sign-in.
       AuditUsage.csv       Only with -AuditDays: agents and plugins seen in Copilot audit records.
 
-    Every row has a status and a recommendation (Keep, Disable, Block, Review,
-    AlreadyDisabled, AlreadyBlocked). Invoke-AgentToolsCleanup.ps1 acts only on rows marked
-    Disable or Block, so review the CSVs and change any row to Keep before you run it.
+    Every row has a status and a recommendation (Keep, Disable, Block, RestrictAvailability,
+    Review, AlreadyDisabled, AlreadyBlocked). Invoke-AgentToolsCleanup.ps1 acts only on rows
+    marked Disable or Block (and RestrictAvailability with -IncludeNotDeployed), so review the
+    CSVs and change any row to Keep before you run it.
 
     Where "last used" comes from:
       - Packages: the package detail call (GET /copilot/admin/catalog/packages/{id}) returns
@@ -51,9 +52,16 @@ url: Agent 365 Package Management API overview - https://learn.microsoft.com/mic
         newest date.
       - Agent identities and blueprints: the Entra service principal sign-in activity report
         (reports/servicePrincipalSignInActivities, preview), plus Agent 365 activity in Defender
-        matched on the agent's appId (equal to the object ID for Agent ID agents). In testing, some
-        Copilot Studio agent identities had no recorded sign-in of their own, so the Defender
-        activity matters.
+        matched on the agent's appId (equal to the object ID for Agent ID agents), plus the last use
+        of the catalog package that points to the identity (agentIdentityId). In testing, some
+        Copilot Studio agent identities had no recorded sign-in of their own while their agent was
+        in use, so the Defender and package activity matter.
+
+    Packages that are in the catalog but not deployed to anyone (deployedTo = acquiredForNone)
+    stay in Packages.csv with deploymentScope = NotDeployed. Users can still install them when
+    they're available to them, so they can show use. Unused third-party ones get
+    RestrictAvailability instead of Block: limit who can install them in the admin center, or
+    block them with Invoke-AgentToolsCleanup.ps1 -BlockPackages -IncludeNotDeployed.
 
     Not covered: standalone MCP servers and standalone skills that aren't inside a package.
     Check those in the Microsoft 365 admin center under Agents > Tools > Registry.
@@ -243,22 +251,32 @@ function Get-IdentityRecommendation {
     }
 }
 
-function Get-AgentIdentityReport($signIns, $blueprintPrincipals) {
+function Get-AgentIdentities($signIns) {
     "$graph/servicePrincipals/microsoft.graph.agentIdentity?`$select=id,appId,displayName,accountEnabled,agentIdentityBlueprintId,createdByAppId,createdDateTime" |
         Get-GraphCollection |
         Select-Object id, displayName, appId, accountEnabled, agentIdentityBlueprintId, createdByAppId,
             @{ n = "createdDateTime";    e = { ConvertTo-Utc $_.createdDateTime } },
             @{ n = "lastSignInDateTime"; e = { if ($_.appId) { $signIns[$_.appId] } } },
-            @{ n = "defenderLastActivity"; e = { $script:defenderActivity[$_.id] } } |
-        Select-Object *, @{ n = "lastUsedDateTime"; e = { @($_.lastSignInDateTime, $_.defenderLastActivity) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1 } } |
-        Select-Object *,
-            @{ n = "daysSinceUsed";     e = { Get-DaysSince $_.lastUsedDateTime } },
-            @{ n = "status";            e = { Get-UsageStatus $_.lastUsedDateTime $_.createdDateTime } },
-            @{ n = "blueprintInTenant"; e = { [bool]($_.agentIdentityBlueprintId -and $blueprintPrincipals[$_.agentIdentityBlueprintId]) } } |
-        Select-Object *,
-            @{ n = "sponsorCount"; e = { if ($_.status -in "Stale", "NoActivity") { Get-RelatedCount $_.id "microsoft.graph.agentIdentity" "sponsors" } } },
-            @{ n = "ownerCount";   e = { if ($_.status -in "Stale", "NoActivity") { Get-RelatedCount $_.id "microsoft.graph.agentIdentity" "owners" } } } |
-        Get-IdentityRecommendation
+            @{ n = "defenderLastActivity"; e = { $script:defenderActivity[$_.id] } }
+}
+
+# Adds the last use of the package that points to the identity (agent identity ID -> package row),
+# then status, sponsors and recommendation. An identity whose package is Active is Active.
+function Add-IdentityStatus {
+    param([Parameter(ValueFromPipeline)]$Identity, $PackageUse, $BlueprintPrincipals)
+    process {
+        $Identity |
+            Select-Object *, @{ n = "packageLastUsed"; e = { $PackageUse[$_.id].lastUsedDateTime } } |
+            Select-Object *, @{ n = "lastUsedDateTime"; e = { @($_.lastSignInDateTime, $_.defenderLastActivity, $_.packageLastUsed) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1 } } |
+            Select-Object *,
+                @{ n = "daysSinceUsed";     e = { Get-DaysSince $_.lastUsedDateTime } },
+                @{ n = "status";            e = { if ($PackageUse[$_.id].status -eq "Active") { "Active" } else { Get-UsageStatus $_.lastUsedDateTime $_.createdDateTime } } },
+                @{ n = "blueprintInTenant"; e = { [bool]($_.agentIdentityBlueprintId -and $BlueprintPrincipals[$_.agentIdentityBlueprintId]) } } |
+            Select-Object *,
+                @{ n = "sponsorCount"; e = { if ($_.status -in "Stale", "NoActivity") { Get-RelatedCount $_.id "microsoft.graph.agentIdentity" "sponsors" } } },
+                @{ n = "ownerCount";   e = { if ($_.status -in "Stale", "NoActivity") { Get-RelatedCount $_.id "microsoft.graph.agentIdentity" "owners" } } } |
+            Get-IdentityRecommendation
+    }
 }
 
 # ---------------------------------------------------------------------------
@@ -351,11 +369,16 @@ function Get-AuditUsage {
 # ---------------------------------------------------------------------------
 # Agents and tools in the Agent 365 catalog
 # ---------------------------------------------------------------------------
+# Element types seen in the catalog: Bots, CustomEngineCopilots, AgenticUserTemplates and
+# DeclarativeCopilots are agents; AgentSkills, MCPServers, ToolPlugins and AgentConnectors are tools.
+# A declarative agent that ships skills or MCP servers is listed as a tool, like the admin center does.
+# "Connectors" alone is a Teams Office 365 connector, not a tool.
 function Get-PackageKind($elementTypes) {
     $types = @($elementTypes) -join " "
-    if ($types -match 'declarativeAgent|customEngine|bot')        { "Agent" }
-    elseif ($types -match 'skill|connector|mcp|plugin|action')    { "Tool" }
-    else                                                          { "App" }
+    if ($types -match 'bot|customEngine|agenticUser')                 { "Agent" }
+    elseif ($types -match 'skill|mcp|plugin|agentConnector|action')   { "Tool" }
+    elseif ($types -match 'declarative')                              { "Agent" }
+    else                                                              { "App" }
 }
 
 # Adds the usage fields that only the detail call returns
@@ -376,7 +399,11 @@ function Get-PackageReport($identityIndex, $usage, $audit) {
         Select-Object id, displayName,
             @{ n = "kind";         e = { Get-PackageKind $_.elementTypes } },
             @{ n = "elementTypes"; e = { @($_.elementTypes) -join ";" } },
-            type, publisher, platform, isBlocked, availableTo, deployedTo, appId, manifestId, agentIdentityId,
+            @{ n = "hasSkills";    e = { [bool](@($_.elementTypes) -match 'skill') } },
+            @{ n = "hasMCP";       e = { [bool](@($_.elementTypes) -match 'mcp') } },
+            type, publisher, platform, isBlocked, availableTo, deployedTo,
+            @{ n = "deploymentScope"; e = { if ($_.deployedTo -eq "acquiredForNone") { "NotDeployed" } elseif ($_.deployedTo) { "Deployed" } else { "Unknown" } } },
+            appId, manifestId, agentIdentityId,
             @{ n = "lastModifiedDateTime"; e = { ConvertTo-Utc $_.lastModifiedDateTime } },
             detailLastUsed, activeUsers30d, sessions30d,
             @{ n = "reportLastActivity"; e = { $p = $_; @($p.id, $p.manifestId, $p.appId) | Where-Object { $_ -and $usage[$_] } | ForEach-Object { $usage[$_] } | Sort-Object -Descending | Select-Object -First 1 } },
@@ -393,11 +420,12 @@ function Get-PackageReport($identityIndex, $usage, $audit) {
                 else { Get-UsageStatus $_.lastUsedDateTime $_.lastModifiedDateTime }
             } } |
         Select-Object *, @{ n = "recommendation"; e = {
-            if ($_.isBlocked)                      { "AlreadyBlocked" }
-            elseif ($_.type -eq "microsoft")       { "Keep" }
-            elseif ($_.status -in "Active", "New") { "Keep" }
-            elseif ($_.kind -eq "App")             { "Review" }   # Office add-ins, tabs and other apps: not in scope for automatic blocking
-            else                                   { "Block" }
+            if ($_.isBlocked)                                { "AlreadyBlocked" }
+            elseif ($_.type -in "microsoft", "firstParty")   { "Keep" }     # built by Microsoft
+            elseif ($_.status -in "Active", "New")           { "Keep" }
+            elseif ($_.kind -eq "App")                       { "Review" }   # Office add-ins, tabs and other apps: not in scope for automatic blocking
+            elseif ($_.deploymentScope -eq "NotDeployed")    { "RestrictAvailability" }   # catalog entry nobody installed: a policy decision, not a cleanup
+            else                                             { "Block" }
         } }
 }
 
@@ -420,11 +448,7 @@ $blueprintPrincipals = @{}
 "$graph/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal?`$select=id,appId,displayName,accountEnabled" | Get-GraphCollection | ForEach-Object { $blueprintPrincipals[$_.appId] = $_ }
 
 Write-Host "Reading agent identities..."
-$identities = @(Get-AgentIdentityReport $signIns $blueprintPrincipals)
-$identities | Export-Csv -Path (Join-Path $OutFolder "AgentIdentities.csv") -NoTypeInformation -Encoding UTF8
-
-$blueprints = @(Get-BlueprintReport $blueprintPrincipals $blueprintApps $identities $signIns)
-$blueprints | Export-Csv -Path (Join-Path $OutFolder "Blueprints.csv") -NoTypeInformation -Encoding UTF8
+$rawIdentities = @(Get-AgentIdentities $signIns)
 
 $audit = @{}
 if ($AuditDays) {
@@ -443,7 +467,7 @@ $packages = @()
 if (-not $SkipPackages) {
     Write-Host "Reading agents and tools from the Agent 365 catalog (one detail call per package)..."
     $identityIndex = @{}
-    $identities | ForEach-Object { $identityIndex[$_.id] = $_.lastUsedDateTime }
+    $rawIdentities | ForEach-Object { $identityIndex[$_.id] = @($_.lastSignInDateTime, $_.defenderLastActivity) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1 }
     try {
         $packages = @(Get-PackageReport $identityIndex (Get-UsageIndex $AgentUsageCsv) $audit)
         $packages | Export-Csv -Path (Join-Path $OutFolder "Packages.csv") -NoTypeInformation -Encoding UTF8
@@ -452,6 +476,15 @@ if (-not $SkipPackages) {
         Write-Warning "Couldn't read the Agent 365 catalog. It needs an Agent 365 license and the AI Administrator role. Run with -SkipPackages to skip it. $($_.Exception.Message)"
     }
 }
+
+# Identities and blueprints after the packages, so an agent that's in use keeps its identity
+$packageUse = @{}
+$packages | Where-Object agentIdentityId | Sort-Object { $_.status -eq "Active" }, lastUsedDateTime | ForEach-Object { $packageUse[$_.agentIdentityId] = $_ }
+$identities = @($rawIdentities | Add-IdentityStatus -PackageUse $packageUse -BlueprintPrincipals $blueprintPrincipals)
+$identities | Export-Csv -Path (Join-Path $OutFolder "AgentIdentities.csv") -NoTypeInformation -Encoding UTF8
+
+$blueprints = @(Get-BlueprintReport $blueprintPrincipals $blueprintApps $identities $signIns)
+$blueprints | Export-Csv -Path (Join-Path $OutFolder "Blueprints.csv") -NoTypeInformation -Encoding UTF8
 
 # Summary
 @(
