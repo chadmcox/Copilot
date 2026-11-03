@@ -2,6 +2,24 @@
 
 **Group:** Mobility · [Back to index](../README.md)
 
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **General Manager, recurring:** every morning, the flash report, arrivals, open guest issues and overnight incidents in one operations summary. → [jump](#11-operationsfacilities)
+2. **Director of Revenue Management, hand-off:** the weekly revenue meeting deck built from pickup, comp-set rates and group displacement. → [jump](#14-industry-specific-revenue-management)
+3. **Room Attendant, quick win:** "What are my room assignments, checkouts and guest requests today?" → [jump](#3-frontline-worker)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+
 **Why the two industry personas:** Revenue Management and Events & Catering are core hotel profit drivers with distinct workflows.
 
 ## Personas at a glance
@@ -30,204 +48,167 @@
 
 **Title:** Hotel Financial Controller  
 **Duty:** Manage hotel accounting, forecasting, payroll and P&L reporting.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ERP/Accounting (confirm, e.g., Sun Systems), PMS (confirm, e.g., Opera)
+**Systems:** Power BI, ERP/Accounting (confirm; e.g., Sun Systems), PMS (confirm; e.g., Opera)
 
-1. *Daily:* "Summarize yesterday's flash report for [property]" → scheduled digest.
-2. *Analytical:* "Analyze RevPAR, GOP and labor cost versus budget" → Excel tracker.
-3. *Leadership:* "Prepare the monthly P&L review for ownership" → PowerPoint deck.
-4. *Daily:* "List open AR city-ledger items over 60 days" → Excel tracker.
-5. *Analytical:* "Compare departmental cost per occupied room across [portfolio]" → Word doc.
-6. *Leadership:* "Draft a note to the GM on forecast risks" → draft email for approval.
+- **Quick win:** "Which city-ledger AR items are over 60 days?" → Excel workbook
+- **Hand-off:** "Analyze RevPAR, GOP and labor cost vs. budget and departmental cost per occupied room across the portfolio, and prepare the monthly P&L review for ownership" → PowerPoint deck
+- **Recurring:** "Every morning, summarize yesterday's flash report for [property]" → scheduled digest
 
 ### 2. HR
 
 **Title:** Director of Human Resources  
 **Duty:** Lead hotel recruitment, onboarding, training and associate relations.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, HRIS (confirm, e.g., Workday), Scheduling system (confirm)
+**Systems:** HRIS (confirm; e.g., Workday), Scheduling system (confirm)
 
-1. *Daily:* "List open requisitions and new hires starting this week at [property]" → Excel tracker.
-2. *Analytical:* "Analyze turnover by department and tenure" → Word doc.
-3. *Leadership:* "Prepare an associate engagement update for the executive committee" → PowerPoint deck.
-4. *Daily:* "Find expiring certifications like food handler and alcohol service" → Excel tracker.
-5. *Analytical:* "Compare overtime and agency labor by department" → Excel tracker.
-6. *Leadership:* "Draft an associate announcement on open enrollment" → Teams post drafted for approval.
+- **Quick win:** "Who starts this week at [property] and which reqs are still open?" → Excel workbook
+- **Hand-off:** "Analyze turnover by department and tenure, add engagement survey comments, and prepare the associate engagement update for the executive committee" → Word doc
+- **Recurring:** "On the 1st of each month, list food handler and alcohol service certifications expiring and draft reminders" → email drafts
 
 ### 3. Frontline Worker
 
 **Title:** Room Attendant  
 **Duty:** Clean and prepare guest rooms to brand standards.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Housekeeping app (confirm, e.g., HotSOS), PMS (confirm)
+**Systems:** Housekeeping app (confirm; e.g., HotSOS), PMS (confirm)
 
-1. *Daily:* "What are my room assignments, checkouts and guest requests today?" → scheduled digest.
-2. *Analytical:* "Which of my rooms had guest complaints this week?" → Excel tracker.
-3. *Leadership:* "Summarize this week's brand-standard updates" → Word doc one-pager.
-4. *Daily:* "List rush rooms and early check-ins on my floor" → Excel tracker.
-5. *Analytical:* "Compare my inspection scores with the team average" → Word doc with tips.
-6. *Leadership:* "Draft a message to engineering about a broken fixture in [room]" → Teams post drafted for approval.
+- **Quick win:** "What are my room assignments, checkouts and guest requests today?" → Word doc (one page)
+- **Hand-off:** "Pull this week's brand-standard updates and guest comments on my rooms into one page" → Word doc (one page)
+- **Recurring:** "At the start of each shift, list rush rooms and early check-ins on my floor" → scheduled digest
 
 ### 4. Frontline Supervisor
 
 **Title:** Housekeeping Supervisor  
 **Duty:** Inspect rooms, assign boards and lead room attendants.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Housekeeping app (confirm), PMS (confirm)
+**Systems:** Housekeeping app (confirm), PMS (confirm)
 
-1. *Daily:* "Summarize today's room status, inspections and out-of-order rooms" → Excel tracker.
-2. *Analytical:* "Analyze minutes per room cleaned versus standard" → Word doc.
-3. *Leadership:* "Prepare the pre-shift huddle on guest feedback" → PowerPoint deck.
-4. *Daily:* "List attendants nearing overtime this week" → Excel tracker.
-5. *Analytical:* "Compare cleanliness scores by floor" → Excel tracker with Power BI figures.
-6. *Leadership:* "Draft recognition for top attendants" → Teams post drafted for approval.
+- **Quick win:** "Which attendants are nearing overtime this week?" → Excel workbook
+- **Hand-off:** "Analyze minutes per room vs. standard and cleanliness scores by floor, add guest feedback, and prepare the pre-shift huddle" → Word doc (one page)
+- **Recurring:** "Every morning, summarize room status, inspections and out-of-order rooms" → scheduled digest
 
 ### 5. Quality
 
 **Title:** Quality & Brand Standards Manager  
 **Duty:** Run brand audits, guest feedback programs and corrective actions.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Guest survey platform (confirm, e.g., Medallia), Reputation tool (confirm)
+**Systems:** Guest survey platform (confirm; e.g., Medallia), Reputation tool (confirm)
 
-1. *Daily:* "Summarize new online reviews and survey alerts for [property]" → scheduled digest.
-2. *Analytical:* "Analyze guest satisfaction drivers over the quarter" → Word doc.
-3. *Leadership:* "Prepare a brand audit readiness deck" → PowerPoint deck.
-4. *Daily:* "Track open corrective actions from the last audit" → Excel tracker.
-5. *Analytical:* "Compare review scores across [portfolio]" → Excel tracker.
-6. *Leadership:* "Draft review response guidance for managers" → draft email for approval.
+- **Quick win:** "What new reviews and survey alerts came in for [property]?" → Word doc (one page)
+- **Hand-off:** "Analyze guest satisfaction drivers for the quarter, compare review scores across the portfolio, and prepare the brand audit readiness deck" → PowerPoint deck
+- **Recurring:** "Every day, draft responses to new online reviews for approval" → email drafts
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Purchasing Manager  
 **Duty:** Source F&B, amenities and operating supplies within budget.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Procurement system (confirm, e.g., Birchstreet), Inventory system (confirm)
+**Systems:** Procurement system (confirm; e.g., Birchstreet), Inventory system (confirm)
 
-1. *Daily:* "List open POs and late deliveries for [property]" → Excel tracker.
-2. *Analytical:* "Analyze food and beverage cost variances by supplier" → Word doc.
-3. *Leadership:* "Prepare a supplier review deck" → PowerPoint deck.
-4. *Daily:* "Summarize par-level shortages reported by departments" → Excel tracker.
-5. *Analytical:* "Compare contract pricing versus invoices" → Excel tracker.
-6. *Leadership:* "Draft a message to [supplier] about price increases" → draft email for approval.
+- **Quick win:** "Which POs are open and which deliveries are late for [property]?" → Excel workbook
+- **Hand-off:** "Compare contract pricing to invoices and F&B cost variances by supplier, and prepare the supplier review deck" → PowerPoint deck
+- **Recurring:** "Every Monday, summarize par-level shortages reported by departments" → scheduled digest
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 7. Safety/EHS
 
 **Title:** Director of Security & Safety  
 **Duty:** Oversee guest and associate safety, incidents and emergency readiness.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Incident reporting system (confirm), Life-safety system (confirm)
+**Systems:** Incident reporting system (confirm), Life-safety system (confirm)
 
-1. *Daily:* "Summarize last night's security incidents" → scheduled digest.
-2. *Analytical:* "Analyze associate injury trends by department" → Word doc.
-3. *Leadership:* "Prepare an emergency preparedness briefing" → PowerPoint deck.
-4. *Daily:* "List overdue fire drills and life-safety inspections" → Excel tracker.
-5. *Analytical:* "Compare incident rates across [portfolio]" → Excel tracker.
-6. *Leadership:* "Draft a safety reminder for associates" → Teams post drafted for approval.
+- **Quick win:** "Which fire drills and life-safety inspections are overdue?" → Excel workbook
+- **Hand-off:** "Analyze associate injury trends by department and incident rates across the portfolio, and prepare the emergency preparedness briefing" → Word doc
+- **Recurring:** "Every morning, summarize last night's security incidents" → scheduled digest
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Maintenance Engineer  
 **Duty:** Repair and maintain rooms, HVAC, plumbing and building systems.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Work order system (confirm, e.g., HotSOS), Building management system (confirm)
+**Systems:** Work order system (confirm; e.g., HotSOS), Building management system (confirm)
 
-1. *Daily:* "List my open work orders and out-of-order rooms" → Excel tracker.
-2. *Analytical:* "Analyze recurring room defects by type" → Word doc.
-3. *Leadership:* "Prepare a preventive maintenance status brief" → PowerPoint deck.
-4. *Daily:* "Summarize shift handover notes" → Word doc.
-5. *Analytical:* "Compare energy usage versus occupancy" → Excel tracker.
-6. *Leadership:* "Draft a vendor service request for [chiller]" → draft email for approval.
+- **Quick win:** "Which work orders and out-of-order rooms are on my list?" → Excel workbook
+- **Hand-off:** "Analyze recurring room defects by type and energy use vs. occupancy, and prepare the preventive maintenance status brief" → Word doc
+- **Recurring:** "At the end of each shift, draft my handover from open work orders and notes" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 9. Sales/Marketing
 
 **Title:** Director of Sales & Marketing  
 **Duty:** Drive group, corporate and leisure revenue through sales and campaigns.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Sales & catering system (confirm, e.g., Delphi), Revenue management system (confirm)
+**Systems:** Dynamics 365, Sales & catering system (confirm; e.g., Delphi), Revenue management system (confirm)
 
-1. *Daily:* "Summarize this week's group leads and tentative bookings" → scheduled digest.
-2. *Analytical:* "Analyze group pace versus last year" → Excel tracker.
-3. *Leadership:* "Prepare a sales strategy deck for the revenue meeting" → PowerPoint deck.
-4. *Daily:* "List accounts with RFPs due this month" → Excel tracker from Dynamics 365.
-5. *Analytical:* "Compare channel mix and acquisition cost" → Word doc.
-6. *Leadership:* "Draft a proposal follow-up to [account]" → draft email for approval.
+- **Quick win:** "Which accounts have RFPs due this month?" → Excel workbook
+- **Hand-off:** "Analyze group pace vs. last year and channel mix and acquisition cost, and prepare the sales strategy deck for the revenue meeting" → PowerPoint deck
+- **Recurring:** "Every Monday, summarize group leads and tentative bookings" → scheduled digest
 
 ### 10. Customer Service
 
 **Title:** Front Office Manager  
 **Duty:** Lead front desk, guest relations and service recovery.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, PMS (confirm), Guest messaging platform (confirm)
+**Systems:** Dynamics 365, PMS (confirm), Guest messaging platform (confirm)
 
-1. *Daily:* "List VIP arrivals and special requests today" → scheduled digest.
-2. *Analytical:* "Analyze top front-desk complaint reasons" → Word doc.
-3. *Leadership:* "Prepare a front office service briefing" → PowerPoint deck.
-4. *Daily:* "Track open guest cases and compensation" → Excel tracker.
-5. *Analytical:* "Compare check-in wait times by shift" → Excel tracker.
-6. *Leadership:* "Draft an apology letter for [guest]" → draft email for approval.
+- **Quick win:** "Which VIPs arrive today and what did they request?" → Word doc (one page)
+- **Hand-off:** "For [guest]'s complaint, gather the folio, case notes, messages and compensation already given, and draft the apology letter" → Word doc + email draft
+- **Recurring:** "Every morning, list open guest cases and compensation given" → scheduled digest
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 11. Operations/Facilities
 
 **Title:** General Manager  
 **Duty:** Lead hotel operations, guest experience and financial results.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, PMS (confirm), Revenue management system (confirm)
+**Systems:** PMS (confirm), Revenue management system (confirm)
 
-1. *Daily:* "Give me the morning operations summary for [property]" → scheduled digest.
-2. *Analytical:* "Analyze RevPAR index versus comp set" → Word doc.
-3. *Leadership:* "Prepare the owner's quarterly review" → PowerPoint deck.
-4. *Daily:* "List open action items from executive committee meetings" → Excel tracker.
-5. *Analytical:* "Compare departmental KPIs versus budget" → Excel tracker.
-6. *Leadership:* "Schedule an executive committee meeting on peak readiness" → meeting invite drafted for approval.
+- **Quick win:** "What are the open action items from executive committee meetings?" → Excel workbook
+- **Hand-off:** "Analyze RevPAR index vs. comp set and departmental KPIs vs. budget, and prepare the owner's quarterly review" → PowerPoint deck
+- **Recurring:** "Every morning, summarize the flash report, arrivals, open guest issues and overnight incidents" → scheduled digest
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** IT Manager  
 **Duty:** Support hotel systems, networks and guest technology.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, IT service management (confirm), Network management (confirm)
+**Systems:** IT service management (confirm), Network management (confirm)
 
-1. *Daily:* "List open IT tickets and outages" → Excel tracker.
-2. *Analytical:* "Analyze guest Wi-Fi complaints" → Word doc.
-3. *Leadership:* "Prepare a PMS upgrade readiness deck" → PowerPoint deck.
-4. *Daily:* "Summarize vendor patch notices" → Word doc.
-5. *Analytical:* "Compare technology spend versus budget" → Excel tracker.
-6. *Leadership:* "Draft an associate notice on planned downtime" → Teams post drafted for approval.
+- **Quick win:** "Which IT tickets and outages are open?" → Excel workbook
+- **Hand-off:** "Analyze guest Wi-Fi complaints, vendor patch notices and technology spend vs. budget, and prepare the PMS upgrade readiness deck" → PowerPoint deck
+- **Recurring:** "Before planned downtime, draft the associate notice" → Teams post draft
 
 ### 13. Executive
 
 **Title:** Regional Vice President of Operations  
 **Duty:** Lead regional portfolio performance, owners and brand standards.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ERP (confirm), Business intelligence (confirm)
+**Systems:** Power BI, ERP (confirm), Business intelligence (confirm)
 
-1. *Daily:* "Give me a weekly portfolio scorecard" → scheduled digest.
-2. *Analytical:* "Analyze GOP margin trends across [portfolio]" → Word doc.
-3. *Leadership:* "Build an owner relations deck" → PowerPoint deck.
-4. *Daily:* "List escalations from GMs this week" → Excel tracker.
-5. *Analytical:* "Compare guest satisfaction by property" → Excel tracker.
-6. *Leadership:* "Draft a regional message on priorities" → draft email for approval.
+- **Quick win:** "What did GMs escalate this week?" → Word doc (one page)
+- **Hand-off:** "Analyze GOP margin trends and guest satisfaction across the portfolio, and build the owner relations deck" → PowerPoint deck
+- **Recurring:** "Every Monday, send the portfolio scorecard" → scheduled digest
 
 ### 14. Industry-Specific: Revenue Management
 
 **Title:** Director of Revenue Management  
 **Duty:** Optimize pricing, inventory and distribution to maximize RevPAR.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Revenue management system (confirm, e.g., IDeaS), Rate shopping tool (confirm)
+**Systems:** Revenue management system (confirm; e.g., IDeaS), Rate shopping tool (confirm)
 
-1. *Daily:* "Summarize pickup and pace for the next 30 days" → scheduled digest.
-2. *Analytical:* "Analyze rate positioning versus comp set" → Excel tracker.
-3. *Leadership:* "Prepare the weekly revenue meeting deck" → PowerPoint deck.
-4. *Daily:* "List dates with displacement risk from groups" → Excel tracker.
-5. *Analytical:* "Compare OTA versus direct channel performance" → Word doc.
-6. *Leadership:* "Draft a pricing recommendation to the GM" → draft email for approval.
+- **Quick win:** "Which dates have displacement risk from groups?" → Excel workbook
+- **Hand-off:** "Pull pickup and pace for the next 30 days, rate positioning vs. comp set and OTA vs. direct performance, and prepare the weekly revenue meeting deck" → PowerPoint deck
+- **Recurring:** "Each week, draft the pricing recommendation to the GM" → email draft
 
 ### 15. Industry-Specific: Events & Catering
 
 **Title:** Director of Catering & Events  
 **Duty:** Sell and execute banquets, meetings and weddings.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Sales & catering system (confirm), Event management (confirm)
+**Systems:** Sales & catering system (confirm), Event management (confirm)
 
-1. *Daily:* "List this week's BEOs and changes" → Excel tracker.
-2. *Analytical:* "Analyze banquet revenue per square foot" → Word doc.
-3. *Leadership:* "Prepare a catering forecast deck" → PowerPoint deck.
-4. *Daily:* "Summarize client requests from emails for [event]" → Word doc.
-5. *Analytical:* "Compare event margins by type" → Excel tracker.
-6. *Leadership:* "Schedule a pre-con meeting for [event]" → meeting invite drafted for approval.
+- **Quick win:** "What BEOs changed this week?" → Excel workbook
+- **Hand-off:** "Gather client requests for [event] from email, the BEOs and the floor plan, and prepare the pre-con brief" → Word doc + meeting invite draft
+- **Recurring:** "Every Monday, compare event margins by type for last week's events" → scheduled digest
 
 ## Top 5 custom skills to build first
 
-- **daily-flash-digest** (General Manager; Hotel Financial Controller): Gather occupancy, ADR, RevPAR → compare to budget → produce scheduled digest.
+- **daily-flash-digest** (General Manager; Hotel Financial Controller): Gather occupancy, ADR, RevPAR → compare to budget → produce scheduled digest. Start from [shift-handover-digest](../skills/shift-handover-digest.md).
 - **revenue-meeting-pack** (Director of Revenue Management; Director of Sales & Marketing): Collect pace and comp-set data → analyze → produce deck.
-- **review-response-coach** (Quality & Brand Standards Manager; Front Office Manager): Gather reviews → theme issues → draft responses for approval.
+- **review-response-coach** (Quality & Brand Standards Manager; Front Office Manager): Gather reviews → theme issues → draft responses for approval. Start from [customer-escalation-pack](../skills/customer-escalation-pack.md).
 - **room-readiness-board** (Housekeeping Supervisor; Room Attendant): Pull room status and requests → prioritize → produce tracker.
-- **beo-change-tracker** (Director of Catering & Events): Collect event emails and BEOs → flag changes → produce Excel tracker.
+- **beo-change-tracker** (Director of Catering & Events): Collect event emails and BEOs → flag changes → produce Excel workbook.
 
 ## Top 5 connectors to demo
 

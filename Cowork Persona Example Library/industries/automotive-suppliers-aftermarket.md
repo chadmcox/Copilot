@@ -2,6 +2,24 @@
 
 **Group:** Mobility · [Back to index](../README.md)
 
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **Materials Manager / Purchasing Buyer, recurring:** every morning, customer EDI release changes compared with inventory and sub-tier deliveries, with shortages flagged. → [jump](#6-supply-chainprocurement)
+2. **Supplier Quality / Customer Quality Engineer, hand-off:** PPM, open 8Ds and IATF findings for one OEM pulled into the customer quality review. → [jump](#5-quality)
+3. **Machine Operator (Stamping, Molding, or Machining), quick win:** "What changed on my cell since last shift?" from handover notes and quality alerts. → [jump](#3-frontline-worker)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+
 **Why the two industry personas:** Program Management and Aftermarket Channel are added because APQP launches and distributor channels drive supplier revenue.
 
 ## Personas at a glance
@@ -30,202 +48,167 @@
 
 **Title:** Plant Controller  
 **Duty:** Manage plant costing, quoting support, and customer price-downs.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Power BI, ERP (confirm, e.g., SAP or Plex)
+**Systems:** Power BI, ERP (confirm; e.g., SAP or Plex)
 
-1. *Daily:* "Summarize open cost questions from this week's [plant] meetings" → Excel action tracker.
-2. *Analytical:* "Analyze part margin after annual price-downs by customer" → Excel margin tracker.
-3. *Leadership:* "Draft the monthly plant financial review" → PowerPoint deck.
-4. *Daily:* "Collect premium freight approvals from email" → Excel freight tracker.
-5. *Analytical:* "Compare quoted vs. actual cost for [part]" → Word variance memo.
-6. *Leadership:* "Draft a note on forecast deadlines" → draft email for approval.
+- **Quick win:** "Which premium freight approvals came through email this week, and for how much?" → Excel workbook
+- **Hand-off:** "Pull quoted vs. actual cost for [part] from the ERP, apply this year's customer price-downs, and write the margin explanation for the monthly plant financial review" → Word doc + Excel workbook
+- **Recurring:** "Each month before forecast lock, draft a reminder to department heads listing who hasn't submitted" → email draft
 
 ### 2. HR
 
 **Title:** HR Manager, Plant  
 **Duty:** Support plant hiring, retention, and skills training.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, HRIS (confirm)
+**Systems:** HRIS (confirm)
 
-1. *Daily:* "List open operator and maintenance tech requisitions" → Excel hiring tracker.
-2. *Analytical:* "Analyze turnover by shift and tenure" → Excel trend tracker.
-3. *Leadership:* "Prepare talking points for the plant all-hands" → Word brief.
-4. *Daily:* "Gather new hire questions from Teams" → Word FAQ.
-5. *Analytical:* "Compare skills matrix coverage by cell" → Excel gap tracker.
-6. *Leadership:* "Announce the attendance incentive program" → Teams post drafted for approval.
+- **Quick win:** "List open operator and maintenance tech reqs with days open" → Excel workbook
+- **Hand-off:** "Gather turnover by shift and tenure, exit notes and the skills matrix by cell, find where we're most exposed, and prepare talking points for the plant all-hands" → Word doc
+- **Recurring:** "Every Friday, summarize new-hire questions from Teams and draft answers for the onboarding FAQ" → Word doc
 
 ### 3. Frontline Worker
 
 **Title:** Machine Operator (Stamping, Molding, or Machining)  
 **Duty:** Run production equipment and perform in-process quality checks.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Teams shifts, MES (confirm)
+**Systems:** MES (confirm)
 
-1. *Daily:* "Summarize shift handover notes for my cell" → Word shift brief.
-2. *Analytical:* "List recent quality alerts for part [part]" → Excel alert list.
-3. *Leadership:* "Draft a message to my team lead about a die issue" → draft email for approval.
-4. *Daily:* "Find the work instruction for [part] changeover" → Word quick-reference card.
-5. *Analytical:* "Compare my training against cells I run" → Excel personal tracker.
-6. *Leadership:* "Draft an improvement idea for the team board" → Teams post drafted for approval.
+- **Quick win:** "What changed on my cell since last shift?" → Word doc (one page)
+- **Hand-off:** "Find the changeover work instruction for [part], recent quality alerts on it and the last handover notes, and put them on one page before I start the changeover" → Word doc (one page)
+- **Recurring:** "Each month, compare my training against the cells I run and list what's expiring" → scheduled digest
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 4. Frontline Supervisor
 
 **Title:** Production Supervisor  
 **Duty:** Lead shift output, OEE, scrap, and safety in assigned cells.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Power BI, MES (confirm)
+**Systems:** MES (confirm)
 
-1. *Daily:* "Build my start-of-shift brief from handovers and downtime" → Word shift brief.
-2. *Analytical:* "Analyze OEE and scrap by cell over four weeks" → Excel Pareto tracker.
-3. *Leadership:* "Prepare my daily production meeting update" → PowerPoint slide.
-4. *Daily:* "Collect operator issues from Teams" → Excel issue log.
-5. *Analytical:* "Compare staffing vs. customer releases next week" → Excel coverage tracker.
-6. *Leadership:* "Schedule a layered process audit" → meeting invite drafted for approval.
+- **Quick win:** "Do I have enough people for next week's customer releases?" → Excel workbook
+- **Hand-off:** "Pull four weeks of OEE and scrap by cell, operator issues raised in Teams and downtime notes, find the top three losses, and prepare my daily production meeting update" → PowerPoint deck
+- **Recurring:** "At the start of each shift, build my brief from handovers and downtime" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 5. Quality
 
 **Title:** Supplier Quality / Customer Quality Engineer  
 **Duty:** Manage PPAP, customer complaints, 8Ds, and IATF 16949 compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Power BI, QMS (confirm), customer supplier portal (confirm)
+**Systems:** QMS (confirm), customer supplier portal (confirm)
 
-1. *Daily:* "List open customer complaints with 8D status" → Excel 8D tracker.
-2. *Analytical:* "Analyze PPM by customer and part" → Word trend report.
-3. *Leadership:* "Prepare the customer quality review deck for [OEM]" → PowerPoint deck.
-4. *Daily:* "Summarize IATF audit findings and actions" → Excel audit tracker.
-5. *Analytical:* "Compare control plan updates against PFMEA changes" → Word gap summary.
-6. *Leadership:* "Draft a containment notice to [OEM] quality" → draft email for approval.
+- **Quick win:** "List open customer complaints with 8D status and days open" → Excel workbook
+- **Hand-off:** "Pull PPM by part for [OEM], open 8Ds, IATF audit findings and the customer portal scorecard, and prepare the customer quality review deck" → PowerPoint deck
+- **Recurring:** "Every Friday, check control plan updates against PFMEA changes and flag mismatches" → scheduled digest
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Materials Manager / Purchasing Buyer  
 **Duty:** Manage EDI releases, resin/steel buys, and sub-tier suppliers.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ERP (confirm)
+**Systems:** ERP (confirm)
 
-1. *Daily:* "Summarize today's customer release changes and shortages" → Excel release tracker.
-2. *Analytical:* "Analyze sub-tier supplier delivery and premium freight" → Excel scorecard.
-3. *Leadership:* "Draft the supplier review deck for [supplier]" → PowerPoint deck.
-4. *Daily:* "Gather raw material price updates from emails" → Excel cost tracker.
-5. *Analytical:* "Compare inventory vs. customer forecast" → Excel risk tracker.
-6. *Leadership:* "Draft a recovery plan request to [supplier]" → draft email for approval.
+- **Quick win:** "What customer release changes came in today and where are we short?" → Excel workbook
+- **Hand-off:** "Gather sub-tier delivery performance, premium freight spend and raw material price emails, and draft the supplier review deck for [supplier]" → PowerPoint deck
+- **Recurring:** "Every morning, compare customer EDI release changes with inventory and sub-tier deliveries and flag shortages" → scheduled digest
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 7. Safety/EHS
 
 **Title:** EHS Coordinator  
 **Duty:** Manage plant safety, machine guarding, and environmental compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Power BI, EHS system (confirm)
+**Systems:** EHS system (confirm)
 
-1. *Daily:* "Summarize this week's incidents and near misses" → Excel incident tracker.
-2. *Analytical:* "Analyze injuries by cell and cause" → Word risk summary.
-3. *Leadership:* "Prepare the monthly safety update" → PowerPoint deck.
-4. *Daily:* "Find the lockout/tagout procedure for [press]" → Word checklist.
-5. *Analytical:* "Compare open audit actions against due dates" → Excel tracker.
-6. *Leadership:* "Announce a safety stand-down" → Teams post drafted for approval.
+- **Quick win:** "Find the lockout/tagout procedure for [press] and list the key steps" → Word doc (one page)
+- **Hand-off:** "Pull a year of injuries by cell and cause, near misses and open audit actions, find the patterns, and prepare the monthly safety update" → PowerPoint deck
+- **Recurring:** "Every Friday, list open safety audit actions past their due date" → scheduled digest
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Aftermarket Field Technical Specialist  
 **Duty:** Support installers and repair shops with product technical issues.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, warranty system (confirm)
+**Systems:** warranty system (confirm)
 
-1. *Daily:* "Build my visit plan from open technical cases" → Word visit brief.
-2. *Analytical:* "Analyze warranty returns by part and failure code" → Excel failure tracker.
-3. *Leadership:* "Draft a technical summary for engineering" → Word report.
-4. *Daily:* "Find the latest installation guide for [part]" → Word checklist.
-5. *Analytical:* "Compare return rates by distributor" → Excel tracker.
-6. *Leadership:* "Draft a reply to [shop] on the fix" → draft email for approval.
+- **Quick win:** "What's the latest installation guide for [part]?" → Word doc (one page)
+- **Hand-off:** "Pull warranty returns by part and failure code, shop case notes and return rates by distributor, and write the technical summary for engineering" → Word doc
+- **Recurring:** "Every Monday, build my visit plan from open technical cases" → Word doc
 
 ### 9. Sales/Marketing
 
 **Title:** Account Manager (OEM) / Aftermarket Category Manager  
 **Duty:** Win business, manage RFQs, and grow aftermarket channel sales.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI
+**Systems:** Dynamics 365
 
-1. *Daily:* "Prepare a customer meeting brief for [OEM]" → Word brief.
-2. *Analytical:* "Analyze RFQ win rate and pipeline by customer" → Excel pipeline tracker.
-3. *Leadership:* "Draft the quarterly business review deck for [OEM]" → PowerPoint deck.
-4. *Daily:* "Summarize open RFQ questions from emails" → Excel RFQ tracker.
-5. *Analytical:* "Compare aftermarket sell-through by distributor" → Word analysis.
-6. *Leadership:* "Draft a quote follow-up to [customer]" → draft email for approval.
+- **Quick win:** "Prep me for the meeting with [OEM]: open RFQs, recent emails and quality issues" → Word doc (one page)
+- **Hand-off:** "Analyze RFQ win rate and pipeline by customer in Dynamics 365, add aftermarket sell-through by distributor, and draft the quarterly business review deck for [OEM]" → PowerPoint deck
+- **Recurring:** "Every Friday, list open RFQ questions from email with who owes the answer" → scheduled digest
 
 ### 10. Customer Service
 
 **Title:** Customer Service Representative (Aftermarket)  
 **Duty:** Handle distributor orders, returns, and product inquiries.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365 Customer Service, ERP (confirm)
+**Systems:** Dynamics 365 Customer Service, ERP (confirm)
 
-1. *Daily:* "Summarize my open orders and backorder cases" → Excel case tracker.
-2. *Analytical:* "Analyze return reasons by product line" → Word trend summary.
-3. *Leadership:* "Draft a backorder response for [distributor]" → draft email for approval.
-4. *Daily:* "Find the cross-reference for part [part]" → Word response.
-5. *Analytical:* "Compare fill rate by distributor" → Excel tracker.
-6. *Leadership:* "Prepare a weekly service digest" → scheduled digest drafted for approval.
+- **Quick win:** "What's the cross-reference for part [part]?" → Word doc (one page)
+- **Hand-off:** "Pull this month's returns by reason and fill rate by distributor, find the products driving backorders, and draft responses for the distributors most affected" → Excel workbook + email drafts
+- **Recurring:** "Every Monday, summarize my open orders and backorder cases" → scheduled digest
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 11. Operations/Facilities
 
 **Title:** Maintenance Manager  
 **Duty:** Maintain presses, molding machines, and tooling for uptime.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Power BI, CMMS (confirm)
+**Systems:** CMMS (confirm)
 
-1. *Daily:* "List overdue PM on critical presses" → Excel PM tracker.
-2. *Analytical:* "Analyze MTBF and MTTR by asset" → Excel reliability tracker.
-3. *Leadership:* "Prepare the tooling capital plan update" → PowerPoint deck.
-4. *Daily:* "Summarize maintenance meeting actions" → Excel action log.
-5. *Analytical:* "Compare die repair hours by part" → Word summary.
-6. *Leadership:* "Notify production of planned downtime" → draft email for approval.
+- **Quick win:** "Which critical presses are overdue for PM?" → Excel workbook
+- **Hand-off:** "Pull MTBF and MTTR by asset, die repair hours by part and the maintenance meeting actions, and prepare the tooling capital plan update" → PowerPoint deck
+- **Recurring:** "Before planned downtime, draft the notice to production with timing and affected cells" → email draft
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** Product Engineer / Manufacturing Engineer  
 **Duty:** Design parts and processes to meet customer specifications.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Power BI, PLM (confirm)
+**Systems:** PLM (confirm)
 
-1. *Daily:* "Summarize open engineering changes for [OEM] program" → Excel ECN tracker.
-2. *Analytical:* "Analyze capability data for critical characteristics" → Excel Cpk tracker.
-3. *Leadership:* "Draft the design review deck" → PowerPoint deck.
-4. *Daily:* "Find PFMEA decisions from meeting notes" → Word decision log.
-5. *Analytical:* "Compare validation test results vs. specification" → Word summary.
-6. *Leadership:* "Schedule an APQP phase review" → meeting invite drafted for approval.
+- **Quick win:** "What did we decide in the PFMEA review for [part]?" → Word doc (one page)
+- **Hand-off:** "Pull capability data for critical characteristics, validation results vs. spec and open engineering changes for [OEM] program, and draft the design review deck" → PowerPoint deck
+- **Recurring:** "Before each APQP phase review, gather open items and draft the invite with the agenda" → meeting invite draft
 
 ### 13. Executive
 
 **Title:** General Manager / President  
 **Duty:** Lead business unit growth, profitability, and customer relationships.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Power BI, ERP (confirm)
+**Systems:** Power BI, ERP (confirm)
 
-1. *Daily:* "Give me a morning brief on deliveries, quality, and escalations" → Word executive brief.
-2. *Analytical:* "Analyze plant KPIs vs. plan" → PowerPoint deck.
-3. *Leadership:* "Draft my town hall message" → Word speech draft.
-4. *Daily:* "Summarize staff meeting escalations" → Excel tracker.
-5. *Analytical:* "Compare customer scorecards across plants" → Excel tracker.
-6. *Leadership:* "Draft an update to [OEM] executive on performance" → draft email for approval.
+- **Quick win:** "Give me a morning brief on deliveries, quality and escalations" → Word doc (one page)
+- **Hand-off:** "Compare customer scorecards and KPIs vs. plan across plants, add this week's staff meeting escalations, and draft the update to [OEM] executive" → Word doc
+- **Recurring:** "Every Friday, summarize escalations from this week's staff meetings" → scheduled digest
 
 ### 14. Program Management (industry-specific)
 
 **Title:** APQP Program Manager  
 **Duty:** Manage new part launches through APQP and PPAP.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Power BI, PLM (confirm)
+**Systems:** PLM (confirm)
 
-1. *Daily:* "Summarize open APQP items for [program]" → Excel program tracker.
-2. *Analytical:* "Analyze timing risk vs. SOP date" → Excel risk tracker.
-3. *Leadership:* "Prepare the launch review deck for [OEM]" → PowerPoint deck.
-4. *Daily:* "Gather tooling status from emails" → Word status summary.
-5. *Analytical:* "Compare PPAP submission status by part" → Excel PPAP tracker.
-6. *Leadership:* "Draft a timing update to [OEM] buyer" → draft email for approval.
+- **Quick win:** "Which APQP items for [program] are open and who owns them?" → Excel workbook
+- **Hand-off:** "Gather tooling status emails, PPAP submission status by part and timing risk vs. SOP date, and prepare the launch review deck for [OEM]" → PowerPoint deck
+- **Recurring:** "Every Friday, draft the timing update to the [OEM] buyer" → email draft
 
 ### 15. Aftermarket Channel (industry-specific)
 
 **Title:** Distribution Channel Manager  
 **Duty:** Manage distributor relationships and catalog coverage.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, catalog/PIM system (confirm)
+**Systems:** catalog/PIM system (confirm)
 
-1. *Daily:* "Summarize distributor issues this week" → Excel issue tracker.
-2. *Analytical:* "Analyze catalog coverage gaps by vehicle segment" → Excel gap tracker.
-3. *Leadership:* "Draft the distributor business review deck" → PowerPoint deck.
-4. *Daily:* "Gather promotion feedback from distributor calls" → Word summary.
-5. *Analytical:* "Compare sell-in vs. sell-through by distributor" → Excel tracker.
-6. *Leadership:* "Draft a promotion announcement to distributors" → draft email for approval.
+- **Quick win:** "What distributor issues came up this week?" → Word doc (one page)
+- **Hand-off:** "Analyze catalog coverage gaps by vehicle segment and sell-in vs. sell-through by distributor, add promotion feedback from calls, and draft the distributor business review deck" → PowerPoint deck
+- **Recurring:** "Before each promotion, draft the announcement to distributors from the promotion brief" → email draft
 
 ## Top 5 custom skills to build first
 
-- **8d-status-tracker** (Quality): Gather complaints → check 8D status → produce Excel tracker.
-- **release-change-digest** (Supply Chain/Procurement): Gather release changes → assess impact → produce digest drafted for approval.
-- **shift-start-brief** (Frontline Supervisor; Frontline Worker): Collect handovers → highlight issues → produce Word brief.
+- **8d-status-tracker** (Quality): Gather complaints → check 8D status → produce Excel workbook. Start from [customer-escalation-pack](../skills/customer-escalation-pack.md).
+- **release-change-digest** (Supply Chain/Procurement): Gather release changes → assess impact → produce scheduled digest.
+- **shift-start-brief** (Frontline Supervisor; Frontline Worker): Collect handovers → highlight issues → produce Word brief. Start from [shift-handover-digest](../skills/shift-handover-digest.md).
 - **apqp-launch-review** (Program Management (industry-specific)): Gather APQP items → score risk → produce PowerPoint deck.
 - **customer-qbr-pack** (Sales/Marketing; Executive): Collect scorecards and emails → summarize → produce QBR deck.
 

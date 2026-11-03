@@ -2,6 +2,24 @@
 
 **Group:** Mobility · [Back to index](../README.md)
 
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **Customer Service Representative (Load Planner), recurring:** every morning, in-transit exceptions matched to customers with ETA updates drafted for approval. → [jump](#10-customer-service)
+2. **Director of Safety, hand-off:** an accident review pack built from the police report, video telematics events and the driver's history. → [jump](#7-safetyehs)
+3. **Over-the-Road Truck Driver, quick win:** "Put tomorrow's load, appointments and shipper notes into one trip sheet." → [jump](#3-frontline-worker)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+
 **Why the two industry personas:** Brokerage carrier sales reps and cross-dock supervisors run distinct, high-volume workflows (capacity sourcing and LTL freight handling) found in most trucking and logistics companies.
 
 ## Personas at a glance
@@ -30,205 +48,169 @@
 
 **Title:** Freight Billing & Settlement Analyst  
 **Duty:** Audit freight bills, reconcile accessorials, process carrier and driver settlements.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, TMS (confirm; e.g., McLeod, Trimble TMW), ERP/AP (confirm)
+**Systems:** Power BI, TMS (confirm; e.g., McLeod, Trimble TMW), ERP/AP (confirm)
 
-1. *Daily:* "Pull this week's disputed accessorial emails, match them to TMS loads, and list detention and lumper charges missing proof" → Excel tracker
-2. *Analytical:* "Compare cost per mile and fuel surcharge recovery by lane for the last quarter and flag lanes below margin target" → Excel tracker
-3. *Leadership:* "Summarize DSO drivers and top aged shipper receivables for the CFO review" → PowerPoint deck
-4. *Daily:* "Gather owner-operator settlement questions from Teams and draft answers with deduction breakdowns" → draft email for approval
-5. *Analytical:* "Analyze deadhead percentage and empty-mile cost by terminal from Power BI and explain the variance" → Word doc
-6. *Leadership:* "Draft a note to terminal managers on new accessorial documentation rules before month-end close" → Teams post drafted for approval
+- **Quick win:** "Which disputed accessorials are missing detention or lumper proof?" → Excel workbook
+- **Hand-off:** "Compare cost per mile and fuel surcharge recovery by lane for the quarter, flag lanes below margin target, and draft the lane margin review" → Word doc + Excel workbook
+- **Recurring:** "Every Friday, match disputed accessorial emails to TMS loads" → Excel workbook
 
 ### 2. HR
 
 **Title:** Driver Recruiting & Retention Manager  
 **Duty:** Recruit CDL drivers, manage onboarding, reduce turnover across terminals.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ATS (confirm; e.g., Tenstreet), HRIS (confirm)
+**Systems:** ATS (confirm; e.g., Tenstreet), HRIS (confirm)
 
-1. *Daily:* "List applicants from the past week still missing MVR, PSP, or drug screen results and who owns each follow-up" → Excel tracker
-2. *Analytical:* "Analyze 90-day driver turnover by terminal and recruiter source using exit interview notes" → Excel tracker
-3. *Leadership:* "Build a retention update for leadership on pay, home time, and turnover trends" → PowerPoint deck
-4. *Daily:* "Compile orientation logistics for next Monday's class at [terminal] and draft the welcome email" → draft email for approval
-5. *Analytical:* "Compare driver complaints in Teams and transcripts by theme and rank the top five retention risks" → Word doc
-6. *Leadership:* "Draft a driver appreciation week announcement with terminal-level events" → Teams post drafted for approval
+- **Quick win:** "Which applicants are still missing MVR, PSP or drug screen results?" → Excel workbook
+- **Hand-off:** "Analyze 90-day driver turnover by terminal and recruiter source with exit notes, and build the retention update for leadership" → PowerPoint deck
+- **Recurring:** "Every morning, list applicant follow-ups due and who owns them" → scheduled digest
 
 ### 3. Frontline Worker
 
 **Title:** Over-the-Road Truck Driver  
 **Duty:** Safely transport freight, complete pre-trips, meet delivery appointments.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ELD/telematics (confirm; e.g., Samsara, Omnitracs), TMS (confirm)
+**Systems:** ELD/telematics (confirm; e.g., Samsara, Omnitracs), TMS (confirm)
 
-1. *Daily:* "Gather my load assignment, pickup and delivery appointments, and shipper notes for tomorrow into one trip sheet" → Word doc
-2. *Analytical:* "Summarize my last month of detention events and on-time delivery from my messages and dispatch notes" → Excel tracker
-3. *Leadership:* "Draft a summary of the unsafe dock condition at [shipper] for my fleet manager" → draft email for approval
-4. *Daily:* "Collect receiver instructions and lumper requirements for my next drop from emails and chats" → Word doc
-5. *Analytical:* "Compare my fuel stops this week against the fuel network list and note out-of-network purchases" → Excel tracker
-6. *Leadership:* "Write a short post for my fleet channel about the road closure on [route] with detour details" → Teams post drafted for approval
+- **Quick win:** "Put tomorrow's load, appointments and shipper notes into one trip sheet" → Word doc (one page)
+- **Hand-off:** "Summarize my last month of detention events and on-time delivery from my messages and dispatch notes for my fleet manager" → Word doc (one page)
+- **Recurring:** "The night before each load, send me the trip sheet with appointments and shipper notes" → scheduled digest
 
 ### 4. Frontline Supervisor
 
 **Title:** Fleet Manager / Dispatcher  
 **Duty:** Assign loads, manage driver hours, resolve exceptions, maintain service levels.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, TMS (confirm), ELD/telematics (confirm)
+**Systems:** TMS (confirm), ELD/telematics (confirm)
 
-1. *Daily:* "Summarize today's late-risk loads from Teams and dispatch emails with driver HOS notes and recovery options" → Excel tracker
-2. *Analytical:* "Analyze my board's on-time pickup and delivery for last month and identify repeat-late shippers" → Excel tracker
-3. *Leadership:* "Prepare a fleet huddle brief covering safety reminders, service misses, and driver recognitions" → PowerPoint deck
-4. *Daily:* "Compile driver home-time requests for next week and match them against planned loads" → Excel tracker
-5. *Analytical:* "Review driver hours-of-service violations and coaching notes this quarter and find patterns by shift" → Word doc
-6. *Leadership:* "Draft the weekly driver meeting invite with agenda and safety topic" → meeting invite drafted for approval
+- **Quick win:** "Which loads are at risk of running late today?" → Excel workbook
+- **Hand-off:** "Analyze last month's on-time pickup and delivery for my board, find repeat-late shippers, and prepare the fleet huddle brief" → Word doc
+- **Recurring:** "Every morning, summarize late-risk loads with driver HOS and recovery options" → scheduled digest
 
 ### 5. Quality
 
 **Title:** Quality & Compliance Manager (DOT)  
 **Duty:** Maintain DQ files, audit HOS logs, ensure FMCSA compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Compliance/DQ file system (confirm), ELD (confirm)
+**Systems:** Compliance/DQ file system (confirm), ELD (confirm)
 
-1. *Daily:* "List driver qualification files expiring in 30 days, including medical cards and annual reviews" → Excel tracker
-2. *Analytical:* "Analyze roadside inspection findings by BASIC category over six months and flag trends" → Excel tracker
-3. *Leadership:* "Draft a CSA score briefing for leadership with corrective action priorities" → PowerPoint deck
-4. *Daily:* "Gather this week's log edits and unassigned drive time issues and assign follow-ups" → Excel tracker
-5. *Analytical:* "Compare cargo claim root causes by shipper and terminal and recommend prevention actions" → Word doc
-6. *Leadership:* "Draft an audit-readiness reminder to terminal managers ahead of the DOT compliance review" → draft email for approval
+- **Quick win:** "Which DQ files expire in 30 days?" → Excel workbook
+- **Hand-off:** "Analyze six months of roadside inspection findings by BASIC category, and draft the CSA briefing for leadership" → Word doc
+- **Recurring:** "Every Monday, list DQ files, medical cards and annual reviews expiring in 30 days" → scheduled digest
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Procurement & Fuel Manager  
 **Duty:** Manage fuel programs, tires, parts and carrier purchasing contracts.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ERP/procurement (confirm), fuel card platform (confirm; e.g., WEX, Comdata)
+**Systems:** ERP/procurement (confirm), fuel card platform (confirm; e.g., WEX, Comdata)
 
-1. *Daily:* "Summarize open purchase requests for tires and parts by terminal with approval status" → Excel tracker
-2. *Analytical:* "Analyze fuel spend versus index pricing and identify stations with the highest discount leakage" → Excel tracker
-3. *Leadership:* "Prepare a supplier review deck for the tire vendor covering fill rates and pricing" → PowerPoint deck
-4. *Daily:* "Gather supplier backorder emails this week and list affected units and expected dates" → Excel tracker
-5. *Analytical:* "Compare tractor parts spend across shops and highlight off-contract purchases" → Word doc
-6. *Leadership:* "Draft a renewal negotiation email to the fuel network with requested terms" → draft email for approval
+- **Quick win:** "Which tire and parts requests are waiting for approval?" → Excel workbook
+- **Hand-off:** "Analyze fuel spend vs. index pricing, find stations with discount leakage, and prepare the supplier review deck for the tire vendor" → PowerPoint deck
+- **Recurring:** "Every Monday, summarize open purchase requests by terminal" → scheduled digest
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 7. Safety/EHS
 
 **Title:** Director of Safety  
 **Duty:** Lead driver safety programs, accident review, and loss prevention.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Video telematics (confirm; e.g., Lytx), claims/risk system (confirm)
+**Systems:** Video telematics (confirm; e.g., Lytx), claims/risk system (confirm)
 
-1. *Daily:* "Compile last week's DOT-recordable accidents and preventability determinations pending review" → Excel tracker
-2. *Analytical:* "Analyze hard-braking and following-distance events by driver cohort and tenure" → Excel tracker
-3. *Leadership:* "Build the quarterly safety committee deck with accident frequency and claims cost" → PowerPoint deck
-4. *Daily:* "Gather camera events flagged for coaching and assign them to fleet managers" → Excel tracker
-5. *Analytical:* "Review accident transcripts and reports to identify top contributing factors" → Word doc
-6. *Leadership:* "Draft a winter driving safety bulletin for all drivers" → Teams post drafted for approval
+- **Quick win:** "Which DOT-recordable accidents are waiting for a preventability decision?" → Excel workbook
+- **Hand-off:** "For [accident], gather the report, video telematics events and the driver's history into a review pack" → Word doc
+- **Recurring:** "Every Monday, analyze hard-braking and following-distance events by driver cohort" → scheduled digest
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Diesel Technician / Shop Lead  
 **Duty:** Perform PMs, diagnose tractor and trailer repairs, maintain DVIR compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Fleet maintenance system (confirm; e.g., TMT, Fleetio), telematics fault codes (confirm)
+**Systems:** Fleet maintenance system (confirm; e.g., TMT, Fleetio), telematics fault codes (confirm)
 
-1. *Daily:* "List tractors due for PM-A and PM-B this week with open DVIR defects" → Excel tracker
-2. *Analytical:* "Analyze repeat repairs by unit and component over 90 days to find comeback trends" → Excel tracker
-3. *Leadership:* "Draft a shop update for the maintenance director on downtime and parts holds" → Word doc
-4. *Daily:* "Collect overnight breakdown reports from Teams and build today's roadside repair priority list" → Excel tracker
-5. *Analytical:* "Compare road call cost by vendor and region and flag outliers" → Excel tracker
-6. *Leadership:* "Draft a parts request email for units waiting on aftertreatment components" → draft email for approval
+- **Quick win:** "Which tractors are due for PM-A or PM-B this week with open DVIR defects?" → Excel workbook
+- **Hand-off:** "Analyze 90 days of repeat repairs by unit and component, and draft the shop update on downtime and parts holds for the maintenance director" → Word doc
+- **Recurring:** "At the end of each shift, draft my handover of units in the shop and parts waiting" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 9. Sales/Marketing
 
 **Title:** Account Executive / Freight Sales  
 **Duty:** Grow shipper accounts, quote lanes, and win bid freight.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, CRM in Dynamics 365, load board/rate tool (confirm; e.g., DAT)
+**Systems:** Dynamics 365, load board/rate tool (confirm; e.g., DAT)
 
-1. *Daily:* "Gather open RFP questions from shipper emails and track due dates and lane counts" → Excel tracker
-2. *Analytical:* "Analyze my top shippers' volume and margin trend versus last year" → Excel tracker
-3. *Leadership:* "Build a quarterly business review deck for [shipper] with service metrics" → PowerPoint deck
-4. *Daily:* "Summarize yesterday's spot quotes and which ones converted to loads" → Excel tracker
-5. *Analytical:* "Compare our bid rates against market rate benchmarks for my key lanes" → Word doc
-6. *Leadership:* "Draft a follow-up email after the [shipper] QBR with agreed actions" → draft email for approval
+- **Quick win:** "Which shipper RFP questions are open and when are they due?" → Excel workbook
+- **Hand-off:** "Analyze my top shippers' volume and margin vs. last year, and build the QBR deck for [shipper]" → PowerPoint deck
+- **Recurring:** "Every Friday, summarize new lane opportunities from email" → scheduled digest
 
 ### 10. Customer Service
 
 **Title:** Customer Service Representative (Load Planner)  
 **Duty:** Track shipments, update customers, resolve delivery exceptions.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, TMS (confirm), customer portal/EDI (confirm)
+**Systems:** Dynamics 365, TMS (confirm), customer portal/EDI (confirm)
 
-1. *Daily:* "Summarize today's in-transit exceptions and draft ETA updates for affected customers" → draft email for approval
-2. *Analytical:* "Analyze customer complaints by type this month and link to terminals" → Excel tracker
-3. *Leadership:* "Prepare a service recovery summary for my manager on the missed [shipper] deliveries" → Word doc
-4. *Daily:* "Gather proof-of-delivery requests and track which PODs are still missing" → Excel tracker
-5. *Analytical:* "Compare tender acceptance and EDI status issues by customer over 30 days" → Excel tracker
-6. *Leadership:* "Draft a customer notice about holiday pickup schedules" → draft email for approval
+- **Quick win:** "What's the story on the missed [shipper] delivery?" → Word doc (one page)
+- **Hand-off:** "Analyze this month's complaints by type and terminal, and prepare the service recovery summary for my manager" → Word doc
+- **Recurring:** "Every morning, summarize in-transit exceptions and draft ETA updates for affected customers" → email drafts
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 11. Operations/Facilities
 
 **Title:** Terminal Manager  
 **Duty:** Run terminal operations, yard, drivers, and facility performance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, TMS (confirm), yard management system (confirm)
+**Systems:** TMS (confirm), yard management system (confirm)
 
-1. *Daily:* "Compile today's terminal snapshot: available tractors, trailer pool, out-of-service units, and drivers on duty" → Word doc
-2. *Analytical:* "Analyze trailer dwell and yard utilization over four weeks" → Excel tracker
-3. *Leadership:* "Build the monthly terminal operations review for regional leadership" → PowerPoint deck
-4. *Daily:* "Gather facility work orders and security incidents from email and track status" → Excel tracker
-5. *Analytical:* "Compare terminal cost per load against peer terminals and explain gaps" → Word doc
-6. *Leadership:* "Draft a Teams post on yard traffic changes during the paving project" → Teams post drafted for approval
+- **Quick win:** "Give me today's terminal snapshot: tractors, trailer pool, out-of-service units and drivers on duty" → Word doc (one page)
+- **Hand-off:** "Analyze four weeks of trailer dwell and yard utilization, and build the monthly terminal operations review" → PowerPoint deck
+- **Recurring:** "Every morning, send the terminal snapshot" → scheduled digest
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** Transportation Technology / Network Engineering Manager  
 **Duty:** Manage TMS, telematics integrations, routing optimization and data.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, TMS (confirm), routing optimization tool (confirm)
+**Systems:** TMS (confirm), routing optimization tool (confirm)
 
-1. *Daily:* "Summarize open integration tickets for ELD and EDI feeds with impact and owner" → Excel tracker
-2. *Analytical:* "Analyze route optimization results versus actual miles driven for last month" → Excel tracker
-3. *Leadership:* "Prepare a technology roadmap update for the executive team" → PowerPoint deck
-4. *Daily:* "Gather user feedback on the new driver app from Teams and categorize issues" → Excel tracker
-5. *Analytical:* "Compare telematics data gaps by unit model and recommend fixes" → Word doc
-6. *Leadership:* "Draft a release notice to dispatchers for the TMS update" → Teams post drafted for approval
+- **Quick win:** "Which ELD and EDI integration tickets are open and who owns them?" → Excel workbook
+- **Hand-off:** "Compare route optimization results with actual miles driven, add user feedback, and prepare the technology roadmap update" → PowerPoint deck
+- **Recurring:** "Every Monday, summarize integration incidents and their impact" → scheduled digest
 
 ### 13. Executive
 
 **Title:** President / COO  
 **Duty:** Lead carrier strategy, profitability, safety and customer growth.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, TMS (confirm), ERP (confirm)
+**Systems:** Power BI, TMS (confirm), ERP (confirm)
 
-1. *Daily:* "Give me a morning brief on yesterday's loads, on-time service, safety events, and revenue per truck" → scheduled digest
-2. *Analytical:* "Analyze operating ratio drivers by division versus plan this quarter" → PowerPoint deck
-3. *Leadership:* "Draft my board update on capacity, driver turnover, and freight market outlook" → Word doc
-4. *Daily:* "Summarize key customer escalations from leadership emails this week" → Word doc
-5. *Analytical:* "Compare revenue per tractor per week across divisions and explain differences" → Excel tracker
-6. *Leadership:* "Draft an all-hands message on safety performance and peak season priorities" → draft email for approval
+- **Quick win:** "Give me a morning brief on yesterday's loads, on-time service, safety and revenue per truck" → Word doc (one page)
+- **Hand-off:** "Analyze operating ratio drivers by division vs. plan, and draft my board update on capacity, driver turnover and freight market" → PowerPoint deck
+- **Recurring:** "Every Friday, summarize top customer and safety escalations" → scheduled digest
 
 ### 14. Brokerage / Carrier Sales
 
 **Title:** Carrier Sales Representative (Brokerage)  
 **Duty:** Source capacity, negotiate carrier rates, vet carriers for brokered loads.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Brokerage TMS (confirm), carrier vetting tool (confirm; e.g., Highway, RMIS)
+**Systems:** Dynamics 365, Brokerage TMS (confirm), carrier vetting tool (confirm; e.g., Highway, RMIS)
 
-1. *Daily:* "List today's uncovered loads with target buy rates and suggest carriers from recent emails" → Excel tracker
-2. *Analytical:* "Analyze gross margin per load and fall-off rate by carrier over 60 days" → Excel tracker
-3. *Leadership:* "Prepare a carrier scorecard summary for brokerage leadership" → PowerPoint deck
-4. *Daily:* "Gather carrier onboarding packets missing insurance or W-9 documents" → Excel tracker
-5. *Analytical:* "Compare spot buy rates against posted market rates for my top lanes" → Word doc
-6. *Leadership:* "Draft a capacity request email to preferred carriers for next week's surge" → draft email for approval
+- **Quick win:** "Which loads are uncovered today and which carriers could take them?" → Excel workbook
+- **Hand-off:** "Analyze margin per load and fall-off rate by carrier over 60 days, and prepare the carrier scorecard for brokerage leadership" → PowerPoint deck
+- **Recurring:** "Every morning, list uncovered loads with target buy rates and suggested carriers" → scheduled digest
 
 ### 15. Warehouse / Cross-Dock
 
 **Title:** Cross-Dock Supervisor  
 **Duty:** Manage dock loading, freight transfers, and LTL shipment accuracy.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, WMS (confirm), LTL dock system (confirm)
+**Systems:** WMS (confirm), LTL dock system (confirm)
 
-1. *Daily:* "Summarize tonight's inbound trailers, door assignments, and expected hand-offs" → Word doc
-2. *Analytical:* "Analyze OS&D exceptions by shift and freight type over the last month" → Excel tracker
-3. *Leadership:* "Draft a shift recap for the terminal manager on productivity and damages" → Word doc
-4. *Daily:* "Gather overtime requests and staffing gaps for the weekend shift" → Excel tracker
-5. *Analytical:* "Compare dock productivity per hour across shifts and recommend changes" → Excel tracker
-6. *Leadership:* "Draft a Teams post reminding dock staff of new freight handling rules" → Teams post drafted for approval
+- **Quick win:** "What inbound trailers and door assignments do I have tonight?" → Excel workbook
+- **Hand-off:** "Analyze a month of OS&D exceptions by shift and freight type, and draft the shift recap for the terminal manager" → Word doc
+- **Recurring:** "At the end of each shift, draft my recap on productivity and damages" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ## Top 5 custom skills to build first
 
-- **load-exception-brief** (Fleet Manager / Dispatcher; Customer Service Representative (Load Planner)): Gather late-risk loads from chats and emails → match HOS and appointment notes → produce exception tracker and draft customer updates for approval
-- **dq-file-expiry-check** (Quality & Compliance Manager (DOT)): Collect DQ file data → flag expiring items → draft reminders for approval
-- **accident-review-pack** (Director of Safety): Gather accident reports and transcripts → classify contributing factors → produce review Word doc
-- **lane-margin-analysis** (Freight Billing & Settlement Analyst; Account Executive / Freight Sales): Pull lane revenue and cost data → compute margin by lane → produce Excel tracker and summary
-- **terminal-daily-snapshot** (Terminal Manager; President / COO): Gather equipment, staffing and service data → summarize → scheduled digest
-
+- **load-exception-brief** (Fleet Manager / Dispatcher; Customer Service Representative (Load Planner)): Gather late-risk loads from chats and emails → match HOS and appointment notes → produce exception tracker and draft customer updates for approval. Start from [customer-escalation-pack](../skills/customer-escalation-pack.md).
+- **dq-file-expiry-check** (Quality & Compliance Manager (DOT)): Collect DQ file data → flag expiring items → reminder email drafts
+- **accident-review-pack** (Director of Safety): Gather accident reports and transcripts → classify contributing factors → produce review Word doc. Start from [safety-incident-brief](../skills/safety-incident-brief.md).
+- **lane-margin-analysis** (Freight Billing & Settlement Analyst; Account Executive / Freight Sales): Pull lane revenue and cost data → compute margin by lane → produce Excel workbook and summary
+- **terminal-daily-snapshot** (Terminal Manager; President / COO): Gather equipment, staffing and service data → summarize → scheduled digest. Start from [shift-handover-digest](../skills/shift-handover-digest.md).
 ## Top 5 connectors to demo
 
 - **TMS** (Fleet Manager / Dispatcher; Customer Service Representative (Load Planner)): A dispatcher sees late-risk loads and drafts ETA updates in minutes.

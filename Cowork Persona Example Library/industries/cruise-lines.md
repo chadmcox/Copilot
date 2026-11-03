@@ -2,6 +2,24 @@
 
 **Group:** Mobility · [Back to index](../README.md)
 
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **Port Operations Manager, recurring:** every evening, tomorrow's port call with berth or tender status, agent emails and weather, and what's still open. → [jump](#15-industry-specific-port--itinerary-operations)
+2. **Guest Services Manager, hand-off:** a service-recovery pack for an upset guest built from the folio, case notes and the guest's emails. → [jump](#10-customer-service)
+3. **Stateroom Attendant, quick win:** "What special requests and turndown notes do my staterooms have today?" → [jump](#3-frontline-worker)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+
 **Why the two industry personas:** Shore Excursions and Port & Itinerary Operations are unique, high-impact cruise functions driving revenue and voyage continuity.
 
 ## Personas at a glance
@@ -30,203 +48,168 @@
 
 **Title:** Shipboard Finance Manager  
 **Duty:** Oversee onboard revenue, payroll, cash and voyage P&L reporting.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ERP (confirm, e.g., SAP), Onboard POS/folio system (confirm)
+**Systems:** Power BI, ERP (confirm; e.g., SAP), Onboard POS/folio system (confirm)
 
-1. *Daily:* "Summarize yesterday's onboard revenue variances for [ship] from finance emails and the POS export" → Excel tracker of variances by outlet.
-2. *Analytical:* "Compare voyage P&L for the last three sailings on [ship] and explain cost drivers" → Word doc with variance analysis.
-3. *Leadership:* "Prepare a voyage financial briefing for the Hotel Director" → PowerPoint deck of revenue, cost and per-diem trends.
-4. *Daily:* "List open crew payroll and cash-office queries from Teams and email" → Excel tracker with owner and due date.
-5. *Analytical:* "Analyze beverage-package and shore-excursion revenue per guest across [fleet]" → Excel tracker with Power BI figures and commentary.
-6. *Leadership:* "Draft a note to shoreside finance on month-end close issues for [ship]" → draft email for approval.
+- **Quick win:** "What onboard revenue variances showed up yesterday on [ship]?" → Excel workbook
+- **Hand-off:** "Compare voyage P&L for the last three sailings on [ship], find the cost drivers, and prepare the voyage financial briefing for the Hotel Director" → Word doc
+- **Recurring:** "Every sea day, list open crew payroll and cash-office queries" → scheduled digest
 
 ### 2. HR
 
 **Title:** Crew HR & Manning Manager  
 **Duty:** Manage crew manning, contracts, sign-on/sign-off and welfare.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Crew management system (confirm), HRIS (confirm, e.g., Workday)
+**Systems:** Crew management system (confirm), HRIS (confirm; e.g., Workday)
 
-1. *Daily:* "Show crew sign-ons and sign-offs at next port of [ship] and missing documents" → Excel tracker of crew changes.
-2. *Analytical:* "Analyze crew attrition and contract-extension trends by department over two quarters" → Word doc with findings.
-3. *Leadership:* "Build a crew welfare update for the Captain's management meeting" → PowerPoint deck.
-4. *Daily:* "Collect pending STCW and medical certificate expiries from HR emails and files" → Excel tracker with expiry dates.
-5. *Analytical:* "Compare manning levels against minimum safe manning and hotel ratios for [ship]" → Excel tracker with gap notes.
-6. *Leadership:* "Draft a crew announcement about the new rest-hour policy" → Teams post drafted for approval.
+- **Quick win:** "Who signs on and off at the next port on [ship], and what documents are missing?" → Excel workbook
+- **Hand-off:** "Analyze crew attrition and contract extensions by department over two quarters, add welfare feedback, and build the crew welfare update for the Captain's meeting" → Word doc
+- **Recurring:** "On the 1st of each month, list STCW and medical certificates expiring in 90 days and draft reminders" → email drafts
 
 ### 3. Frontline Worker
 
 **Title:** Stateroom Attendant  
 **Duty:** Clean and service assigned staterooms to brand standards daily.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Housekeeping app (confirm), PMS (confirm, e.g., Fidelio Cruise)
+**Systems:** Housekeeping app (confirm), PMS (confirm; e.g., Fidelio Cruise)
 
-1. *Daily:* "What special requests and turndown notes do my staterooms have today?" → scheduled digest of guest requests by cabin.
-2. *Analytical:* "Which of my cabins had repeat guest complaints this cruise?" → Excel tracker with themes.
-3. *Leadership:* "Summarize the brand-standard changes from this week's housekeeping briefing" → Word doc one-pager.
-4. *Daily:* "List my embarkation-day cabin turnover order and ready times" → Excel tracker for my section.
-5. *Analytical:* "Compare my comment-card scores with section average this cruise" → Word doc with improvement tips.
-6. *Leadership:* "Draft a message to my supervisor about a maintenance defect in [cabin]" → Teams post drafted for approval.
+- **Quick win:** "What special requests and turndown notes do my staterooms have today?" → Word doc (one page)
+- **Hand-off:** "Pull this week's housekeeping briefing changes and repeat guest comments on my cabins into one page" → Word doc (one page)
+- **Recurring:** "On each embarkation day, list my cabin turnover order and ready times" → scheduled digest
 
 ### 4. Frontline Supervisor
 
 **Title:** Housekeeping Supervisor (Deck Supervisor)  
 **Duty:** Lead stateroom attendants, inspections and turnaround on assigned decks.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Housekeeping app (confirm), Maintenance system (confirm, e.g., AMOS)
+**Systems:** Housekeeping app (confirm), Maintenance system (confirm; e.g., AMOS)
 
-1. *Daily:* "Summarize today's cabin inspection results and open defects on my decks" → Excel tracker by cabin.
-2. *Analytical:* "Analyze turnaround-day ready times versus target for the last four embarkations" → Word doc with bottlenecks.
-3. *Leadership:* "Prepare a section briefing on guest feedback themes for the team huddle" → PowerPoint deck.
-4. *Daily:* "List attendants with overtime or rest-hour risks this week" → Excel tracker.
-5. *Analytical:* "Compare guest satisfaction for housekeeping across decks" → Excel tracker with Power BI figures.
-6. *Leadership:* "Draft a recognition note for top-performing attendants" → Teams post drafted for approval.
+- **Quick win:** "Which attendants are at overtime or rest-hour risk this week?" → Excel workbook
+- **Hand-off:** "Analyze ready times vs. target for the last four embarkations, today's inspection defects and guest feedback, and prepare the section briefing for the huddle" → Word doc (one page)
+- **Recurring:** "Every morning, summarize cabin inspection results and open defects on my decks" → scheduled digest
 
 ### 5. Quality
 
 **Title:** Guest Experience & Quality Manager  
 **Duty:** Monitor service standards, audits, guest feedback and corrective actions.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Guest survey platform (confirm, e.g., Medallia), PMS (confirm)
+**Systems:** Guest survey platform (confirm; e.g., Medallia), PMS (confirm)
 
-1. *Daily:* "Summarize yesterday's guest complaints by department on [ship]" → scheduled digest.
-2. *Analytical:* "Analyze post-cruise survey NPS drivers for the last three sailings" → Word doc with root causes.
-3. *Leadership:* "Build a quality review for the Hotel Director's meeting" → PowerPoint deck.
-4. *Daily:* "Track open corrective actions from the last brand audit" → Excel tracker with owners.
-5. *Analytical:* "Compare complaint rates across [fleet] by venue" → Excel tracker with commentary.
-6. *Leadership:* "Draft service-recovery guidance for department heads" → draft email for approval.
+- **Quick win:** "What did guests complain about yesterday on [ship], by department?" → Word doc (one page)
+- **Hand-off:** "Analyze NPS drivers for the last three sailings, compare complaint rates across the fleet by venue, and build the quality review for the Hotel Director" → PowerPoint deck
+- **Recurring:** "Every Friday, track open corrective actions from the last brand audit" → scheduled digest
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Fleet Provisioning & Procurement Manager  
 **Duty:** Plan provisioning, purchasing and port loading for fleet operations.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Procurement/ERP (confirm, e.g., SAP Ariba), Inventory system (confirm)
+**Systems:** Procurement/ERP (confirm; e.g., SAP Ariba), Inventory system (confirm)
 
-1. *Daily:* "List provisions loading at next turnaround port for [ship] and open POs" → Excel tracker.
-2. *Analytical:* "Analyze food cost per guest-day and supplier price changes this quarter" → Word doc analysis.
-3. *Leadership:* "Prepare a supplier performance review deck" → PowerPoint deck.
-4. *Daily:* "Find late or short deliveries reported by ships this week" → Excel tracker with supplier and port.
-5. *Analytical:* "Compare consumption versus forecast for top 50 SKUs" → Excel tracker with reorder notes.
-6. *Leadership:* "Draft a message to [supplier] about repeated short shipments" → draft email for approval.
+- **Quick win:** "What's loading at the next turnaround port for [ship], and which POs are still open?" → Excel workbook
+- **Hand-off:** "Analyze food cost per guest-day and supplier price changes, add late or short deliveries reported by ships, and prepare the supplier performance review" → PowerPoint deck
+- **Recurring:** "Every Monday, list late or short deliveries ships reported last week" → scheduled digest
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 7. Safety/EHS
 
 **Title:** Environmental & Safety Officer  
 **Duty:** Ensure SOLAS, MARPOL compliance, drills and incident reporting.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Safety management system (confirm), Environmental compliance system (confirm)
+**Systems:** Safety management system (confirm), Environmental compliance system (confirm)
 
-1. *Daily:* "Summarize this week's drills, findings and open safety observations on [ship]" → Excel tracker.
-2. *Analytical:* "Analyze near-miss and incident trends by department over six months" → Word doc.
-3. *Leadership:* "Prepare an ESMS briefing for the Captain" → PowerPoint deck.
-4. *Daily:* "List upcoming port state and flag inspections and readiness items" → Excel tracker.
-5. *Analytical:* "Compare waste, discharge and fuel records against MARPOL thresholds" → Word doc with exceptions.
-6. *Leadership:* "Draft a safety bulletin on a recent slip incident" → Teams post drafted for approval.
+- **Quick win:** "Which port state and flag inspections are coming up and what's not ready?" → Excel workbook
+- **Hand-off:** "Analyze six months of near misses and incidents by department, this week's drill findings and environmental logs, and prepare the ESMS briefing for the Captain" → Word doc
+- **Recurring:** "Every Friday, summarize the week's drills, findings and open safety observations" → scheduled digest
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Marine Engineer (Staff Chief Engineer)  
 **Duty:** Maintain propulsion, power and hotel technical systems onboard.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Planned maintenance system (confirm, e.g., AMOS), OEM portals (confirm)
+**Systems:** Planned maintenance system (confirm; e.g., AMOS), OEM portals (confirm)
 
-1. *Daily:* "List overdue planned maintenance jobs and critical spares for [ship]" → Excel tracker.
-2. *Analytical:* "Analyze recurring HVAC and plumbing defects from cabin work orders" → Word doc with root causes.
-3. *Leadership:* "Prepare a dry-dock scope briefing for technical superintendents" → PowerPoint deck.
-4. *Daily:* "Summarize engine-room handover notes and open defects" → Word doc.
-5. *Analytical:* "Compare fuel consumption per nautical mile across recent voyages" → Excel tracker.
-6. *Leadership:* "Draft a request to [OEM] for service engineer attendance at [port]" → draft email for approval.
+- **Quick win:** "Which planned maintenance jobs are overdue and which critical spares are short?" → Excel workbook
+- **Hand-off:** "Analyze recurring HVAC and plumbing defects from cabin work orders and engine-room handover notes, and prepare the dry-dock scope briefing for superintendents" → Word doc
+- **Recurring:** "At each watch change, draft the engine-room handover from open defects and notes" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 9. Sales/Marketing
 
 **Title:** Trade Sales & Revenue Marketing Manager  
 **Duty:** Drive cruise bookings through travel partners and campaigns.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Reservation system (confirm), Marketing automation (confirm)
+**Systems:** Dynamics 365, Reservation system (confirm), Marketing automation (confirm)
 
-1. *Daily:* "Summarize booking pace for next season's [itinerary] from latest reports" → scheduled digest.
-2. *Analytical:* "Analyze campaign performance versus booked revenue by source market" → Excel tracker.
-3. *Leadership:* "Build a travel-partner quarterly review" → PowerPoint deck.
-4. *Daily:* "List top travel advisors with open group quotes" → Excel tracker from Dynamics 365.
-5. *Analytical:* "Compare pricing and occupancy by cabin category for [sailing]" → Word doc with recommendations.
-6. *Leadership:* "Draft a partner announcement for the new itinerary launch" → draft email for approval.
+- **Quick win:** "What's the booking pace for next season's [itinerary]?" → Word doc (one page)
+- **Hand-off:** "Analyze campaign performance vs. booked revenue by source market and pricing by cabin category, and build the travel-partner quarterly review" → PowerPoint deck
+- **Recurring:** "Every Monday, list top travel advisors with open group quotes" → scheduled digest
 
 ### 10. Customer Service
 
 **Title:** Guest Services Manager  
 **Duty:** Lead guest services desk, onboard requests and service recovery.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, PMS (confirm), Contact center platform (confirm)
+**Systems:** Dynamics 365, PMS (confirm), Contact center platform (confirm)
 
-1. *Daily:* "Summarize open guest cases and folio disputes on [ship]" → Excel tracker.
-2. *Analytical:* "Analyze top guest-services contact reasons this cruise" → Word doc.
-3. *Leadership:* "Prepare a disembarkation-day readiness briefing" → PowerPoint deck.
-4. *Daily:* "List guests with special needs or VIP status embarking today" → scheduled digest.
-5. *Analytical:* "Compare compensation and onboard credits issued by reason" → Excel tracker.
-6. *Leadership:* "Draft a guest letter about an itinerary change" → draft email for approval.
+- **Quick win:** "Which VIP or special-needs guests embark today?" → Excel workbook
+- **Hand-off:** "For [guest]'s complaint, gather the folio, case notes, emails and credits already given, and draft the service recovery reply" → Word doc + email draft
+- **Recurring:** "Every morning, summarize open guest cases and folio disputes" → scheduled digest
+
+Related example skill: [voyage-guest-recovery](../skills/voyage-guest-recovery.md)
 
 ### 11. Operations/Facilities
 
 **Title:** Hotel Director  
 **Duty:** Run onboard hotel operations across housekeeping, F&B and guest services.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, PMS (confirm), Maintenance system (confirm)
+**Systems:** PMS (confirm), Maintenance system (confirm)
 
-1. *Daily:* "Give me the morning hotel operations summary for [ship]" → scheduled digest.
-2. *Analytical:* "Analyze hotel revenue and cost per guest-day versus budget" → Excel tracker.
-3. *Leadership:* "Prepare a hotel performance deck for the fleet operations call" → PowerPoint deck.
-4. *Daily:* "List open action items from department head meetings" → Excel tracker.
-5. *Analytical:* "Compare guest satisfaction by hotel department over three cruises" → Word doc.
-6. *Leadership:* "Schedule a department heads meeting on turnaround readiness" → meeting invite drafted for approval.
+- **Quick win:** "Give me the morning hotel operations summary for [ship]" → Word doc (one page)
+- **Hand-off:** "Analyze hotel revenue and cost per guest-day vs. budget and satisfaction by department, and prepare the deck for the fleet operations call" → PowerPoint deck
+- **Recurring:** "After each department head meeting, list action items with owners" → Excel workbook
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** Shipboard IT Officer  
 **Duty:** Support onboard networks, guest connectivity and systems.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, IT service management (confirm, e.g., ServiceNow), Satellite connectivity portal (confirm)
+**Systems:** IT service management (confirm; e.g., ServiceNow), Satellite connectivity portal (confirm)
 
-1. *Daily:* "List open IT tickets and connectivity outages on [ship]" → Excel tracker.
-2. *Analytical:* "Analyze guest Wi-Fi usage and complaints by deck" → Word doc.
-3. *Leadership:* "Prepare a systems readiness brief before dry dock" → PowerPoint deck.
-4. *Daily:* "Summarize patch and backup status from shoreside emails" → Word doc.
-5. *Analytical:* "Compare bandwidth costs against package revenue" → Excel tracker.
-6. *Leadership:* "Draft a crew notice about a planned network outage" → Teams post drafted for approval.
+- **Quick win:** "Which IT tickets and connectivity outages are open on [ship]?" → Excel workbook
+- **Hand-off:** "Analyze guest Wi-Fi usage and complaints by deck, compare bandwidth cost to package revenue, and prepare the systems readiness brief before dry dock" → Word doc
+- **Recurring:** "Before each systems change, draft the crew notice" → Teams post draft
 
 ### 13. Executive
 
 **Title:** VP Fleet Hotel Operations  
 **Duty:** Lead fleet hotel strategy, guest experience and profitability.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ERP (confirm), Guest survey platform (confirm)
+**Systems:** Power BI, ERP (confirm), Guest survey platform (confirm)
 
-1. *Daily:* "Give me a weekly fleet scorecard digest" → scheduled digest.
-2. *Analytical:* "Analyze NPS and onboard revenue per diem across [fleet]" → Word doc.
-3. *Leadership:* "Build a board-ready fleet performance deck" → PowerPoint deck.
-4. *Daily:* "List escalations from ship Hotel Directors this week" → Excel tracker.
-5. *Analytical:* "Compare cost-per-guest-day trends by ship class" → Excel tracker.
-6. *Leadership:* "Draft a fleet-wide message on service priorities" → draft email for approval.
+- **Quick win:** "What did ship Hotel Directors escalate this week?" → Word doc (one page)
+- **Hand-off:** "Analyze NPS and onboard revenue per diem across the fleet and cost per guest-day by ship class, and build the board fleet performance deck" → PowerPoint deck
+- **Recurring:** "Every Monday, send the fleet scorecard digest" → scheduled digest
 
 ### 14. Industry-Specific: Shore Excursions
 
 **Title:** Shore Excursions Manager  
 **Duty:** Plan, sell and coordinate port tours with local operators.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Tour operator management system (confirm), Reservation system (confirm)
+**Systems:** Tour operator management system (confirm), Reservation system (confirm)
 
-1. *Daily:* "List tomorrow's tours, capacities and operator confirmations at [port]" → Excel tracker.
-2. *Analytical:* "Analyze excursion sales and cancellations by port" → Word doc.
-3. *Leadership:* "Prepare a port performance review for the itinerary team" → PowerPoint deck.
-4. *Daily:* "Summarize weather or port-change impacts on booked tours" → Word doc.
-5. *Analytical:* "Compare operator incident and rating data" → Excel tracker.
-6. *Leadership:* "Draft a guest notice about a cancelled tour" → draft email for approval.
+- **Quick win:** "Which tours tomorrow at [port] still need operator confirmation?" → Excel workbook
+- **Hand-off:** "Analyze excursion sales and cancellations by port, compare operator incident and rating data, and prepare the port performance review" → PowerPoint deck
+- **Recurring:** "When weather or a port change hits, summarize impacts on booked tours and draft guest notices" → Word doc + email drafts
+
+Related example skill: [voyage-guest-recovery](../skills/voyage-guest-recovery.md)
 
 ### 15. Industry-Specific: Port & Itinerary Operations
 
 **Title:** Port Operations Manager  
 **Duty:** Coordinate port calls, agents, berths and turnaround logistics.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Port agency portal (confirm), Voyage planning system (confirm)
+**Systems:** Port agency portal (confirm), Voyage planning system (confirm)
 
-1. *Daily:* "Summarize next week's port calls with berth and tender status" → Excel tracker.
-2. *Analytical:* "Analyze port-fee and delay trends by port" → Word doc.
-3. *Leadership:* "Prepare an itinerary disruption briefing" → PowerPoint deck.
-4. *Daily:* "List open items from port agents' emails" → Excel tracker.
-5. *Analytical:* "Compare turnaround times across homeports" → Excel tracker.
-6. *Leadership:* "Schedule a call with [port agent] on berth conflicts" → meeting invite drafted for approval.
+- **Quick win:** "What's still open with the port agents for next week's calls?" → Excel workbook
+- **Hand-off:** "Analyze port fees and delay trends by port and turnaround times across homeports, and prepare the itinerary disruption briefing" → Word doc
+- **Recurring:** "Every evening, summarize tomorrow's port call with berth or tender status, agent emails and open items" → scheduled digest
 
 ## Top 5 custom skills to build first
 
-- **turnaround-day-readiness** (Hotel Director; Housekeeping Supervisor; Port Operations Manager): Gather port, provisioning and cabin status → identify gaps → produce readiness tracker.
+- **turnaround-day-readiness** (Hotel Director; Housekeeping Supervisor; Port Operations Manager): Gather port, provisioning and cabin status → identify gaps → produce readiness tracker. Start from [shift-handover-digest](../skills/shift-handover-digest.md).
 - **voyage-pnl-review** (Shipboard Finance Manager; VP Fleet Hotel Operations): Collect revenue and cost data → analyze variances → produce deck.
-- **guest-feedback-digest** (Guest Experience & Quality Manager; Guest Services Manager): Gather complaints and surveys → theme by department → produce scheduled digest.
-- **crew-certificate-tracker** (Crew HR & Manning Manager; Environmental & Safety Officer): Collect certificate records → flag expiries → produce Excel tracker.
+- **guest-feedback-digest** (Guest Experience & Quality Manager; Guest Services Manager): Gather complaints and surveys → theme by department → produce scheduled digest. Start from [voyage-guest-recovery](../skills/voyage-guest-recovery.md).
+- **crew-certificate-tracker** (Crew HR & Manning Manager; Environmental & Safety Officer): Collect certificate records → flag expiries → produce Excel workbook.
 - **planned-maintenance-brief** (Marine Engineer (Staff Chief Engineer); Hotel Director): Gather overdue jobs and defects → prioritize → produce Word brief.
 
 ## Top 5 connectors to demo

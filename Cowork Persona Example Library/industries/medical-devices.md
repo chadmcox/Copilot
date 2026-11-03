@@ -2,6 +2,24 @@
 
 **Group:** Discrete · [Back to index](../README.md)
 
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **Clinical Specialist, recurring:** every afternoon, tomorrow's case coverage brief with procedures, surgeon preferences and device notes. → [jump](#15-industry-specific-clinicalfield-clinical-specialist)
+2. **Quality Engineer – Design/Production, hand-off:** complaint trends on a device with a Pareto of failure modes, ready for the CAPA effectiveness review. → [jump](#5-quality)
+3. **Regulatory Affairs Specialist, quick win:** "Which design changes need a regulatory filing?" → [jump](#14-industry-specific-regulatory-affairs)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+
 **Why the two industry personas:** Regulatory Affairs Specialist chosen because FDA/EU MDR submissions gate market access; Clinical Specialist chosen because case coverage and surgeon support drive adoption and feedback.
 
 ## Personas at a glance
@@ -30,201 +48,168 @@
 
 **Title:** Plant Controller  
 **Duty:** Manage plant costing, inventory reserves, and monthly close.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Oracle)
+**Systems:** ERP (confirm; e.g., SAP or Oracle)
 
-1. *Daily:* "Gather this month's scrap and inventory reserve items for [plant] into a close tracker" → Excel tracker
-2. *Analytical:* "Analyze standard vs. actual cost on top catheter and implant SKUs" → Excel tracker
-3. *Leadership:* "Prepare the plant month-end results deck" → PowerPoint deck
-4. *Daily:* "Summarize open close tasks from Teams by owner" → Excel tracker
-5. *Analytical:* "Compare resin and titanium cost changes against plan" → Word doc
-6. *Leadership:* "Draft a note to plant leaders on revised standards" → draft email for approval
+- **Quick win:** "What close tasks are open in Teams, by owner?" → Excel workbook
+- **Hand-off:** "Analyze standard vs. actual cost on top catheter and implant SKUs, add scrap and reserve items, and prepare the plant month-end results deck" → PowerPoint deck
+- **Recurring:** "Before each close, gather scrap and inventory reserve items into the close tracker" → Excel workbook
 
 ### 2. HR
 
 **Title:** HR Business Partner – Operations  
 **Duty:** Support plant staffing, training compliance, and retention.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + HCM (confirm); LMS (confirm)
+**Systems:** HCM (confirm), LMS (confirm)
 
-1. *Daily:* "List open cleanroom operator reqs with aging" → Excel tracker
-2. *Analytical:* "Analyze turnover by shift and site" → Word doc
-3. *Leadership:* "Prepare a workforce update for the plant leadership meeting" → PowerPoint deck
-4. *Daily:* "Summarize onboarding and GMP training status for new hires" → Excel tracker
-5. *Analytical:* "Compare training-to-floor time across sites" → Excel tracker
-6. *Leadership:* "Draft a shift announcement on the new attendance policy" → Teams post drafted for approval
+- **Quick win:** "Which cleanroom operator reqs are open and aging?" → Excel workbook
+- **Hand-off:** "Analyze turnover by shift and site and training-to-floor time across sites, and prepare the workforce update for plant leadership" → Word doc
+- **Recurring:** "Every Friday, report onboarding and GMP training status for new hires" → scheduled digest
 
 ### 3. Frontline Worker
 
 **Title:** Cleanroom Assembly Technician  
 **Duty:** Assemble devices in cleanroom per work instructions and DHR.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + MES/eDHR (confirm); eQMS (confirm; e.g., MasterControl)
+**Systems:** MES/eDHR (confirm), eQMS (confirm; e.g., MasterControl)
 
-1. *Daily:* "Summarize today's work orders and WI revisions for my cell from shift handoff" → Word doc
-2. *Analytical:* "Compare recent nonconformances on my line and list common causes" → Word doc
-3. *Leadership:* "Draft a note to my lead on missing components for [lot]" → Teams post drafted for approval
-4. *Daily:* "Gather new document changes (DCOs) affecting my job into a checklist" → Excel tracker
-5. *Analytical:* "List my training records due for retraining" → Excel tracker
-6. *Leadership:* "Draft a kaizen idea on gowning flow for the huddle" → Teams post drafted for approval
+- **Quick win:** "Which DCOs since my last shift affect my job?" → Word doc (one page)
+- **Hand-off:** "Pull today's work orders, WI revisions and recent nonconformances on my line into one page with the common causes" → Word doc (one page)
+- **Recurring:** "At the end of each shift, draft my handoff with lots in progress and missing components" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 4. Frontline Supervisor
 
 **Title:** Manufacturing Supervisor  
 **Duty:** Lead cleanroom production to meet quality, compliance, and output targets.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + MES/eDHR (confirm); ERP (confirm; e.g., SAP or Oracle)
+**Systems:** MES/eDHR (confirm), ERP (confirm; e.g., SAP or Oracle)
 
-1. *Daily:* "Build my shift huddle from yesterday's yield, DHR exceptions, and safety notes" → Word doc
-2. *Analytical:* "Analyze yield losses by line over two weeks" → Excel tracker
-3. *Leadership:* "Summarize weekly output vs. plan for the operations manager" → PowerPoint deck
-4. *Daily:* "Plan second-shift staffing from absences and training qualifications" → Excel tracker
-5. *Analytical:* "Compare DHR review cycle times by line" → Excel tracker
-6. *Leadership:* "Draft a recognition post for the team with zero deviations this month" → Teams post drafted for approval
+- **Quick win:** "Who's trained and available to cover second shift?" → Excel workbook
+- **Hand-off:** "Analyze two weeks of yield losses by line and DHR exceptions, and summarize output vs. plan for the operations manager" → Word doc
+- **Recurring:** "At the start of each shift, build my huddle from yesterday's yield, DHR exceptions and safety notes" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 5. Quality
 
 **Title:** Quality Engineer – Design/Production  
 **Duty:** Drive CAPA, nonconformance, and ISO 13485/FDA QMSR compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + eQMS (confirm; e.g., MasterControl)
+**Systems:** eQMS (confirm; e.g., MasterControl)
 
-1. *Daily:* "Gather open NCRs and CAPAs into an aging tracker" → Excel tracker
-2. *Analytical:* "Analyze complaint trends on [device] and Pareto failure modes" → Excel tracker
-3. *Leadership:* "Prepare a CAPA effectiveness summary for management review" → Word doc
-4. *Daily:* "Summarize today's MRB meeting transcript into decisions and owners" → Word doc
-5. *Analytical:* "Compare supplier SCARs over two quarters" → Excel tracker
-6. *Leadership:* "Draft an FDA inspection readiness brief" → PowerPoint deck
+- **Quick win:** "Summarize today's MRB meeting into decisions and owners" → Word doc (one page)
+- **Hand-off:** "Analyze complaint trends on [device] with a Pareto of failure modes, add open CAPAs, and prepare the CAPA effectiveness summary for management review" → PowerPoint deck
+- **Recurring:** "Every Monday, update the NCR and CAPA aging tracker" → Excel workbook
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Strategic Sourcing Manager  
 **Duty:** Source components and sterilization services; manage supplier quality.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Oracle); supplier portal (confirm)
+**Systems:** ERP (confirm; e.g., SAP or Oracle), supplier portal (confirm)
 
-1. *Daily:* "List shortage-risk components from supplier emails and MRP" → Excel tracker
-2. *Analytical:* "Analyze supplier lead times and price trends for resins and electronics" → Excel tracker
-3. *Leadership:* "Draft a supplier escalation for late deliveries" → draft email for approval
-4. *Daily:* "Summarize planner expedite requests this week" → Excel tracker
-5. *Analytical:* "Compare quotes for the [component] RFQ including change-notification terms" → Word doc
-6. *Leadership:* "Prepare a supplier business review deck" → PowerPoint deck
+- **Quick win:** "Which components are at shortage risk from supplier emails and MRP?" → Excel workbook
+- **Hand-off:** "Analyze supplier lead times and price trends for resins and electronics, compare sterilization service quotes, and draft the supplier escalation for late deliveries" → Word doc + email draft
+- **Recurring:** "Every Friday, summarize planner expedite requests" → scheduled digest
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 7. Safety/EHS
 
 **Title:** EHS Manager  
 **Duty:** Lead site safety, EtO/chemical handling, and environmental compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + EHS system (confirm)
+**Systems:** EHS system (confirm)
 
-1. *Daily:* "Gather this week's near-miss reports into a trend tracker" → Excel tracker
-2. *Analytical:* "Analyze ergonomic injury trends in assembly" → Word doc
-3. *Leadership:* "Draft a safety alert on chemical handling" → Teams post drafted for approval
-4. *Daily:* "Summarize open corrective actions from the last inspection" → Excel tracker
-5. *Analytical:* "Compare safety training completion by department" → Excel tracker
-6. *Leadership:* "Prepare the monthly EHS scorecard" → PowerPoint deck
+- **Quick win:** "Which corrective actions from the last inspection are still open?" → Excel workbook
+- **Hand-off:** "Analyze ergonomic injury trends in assembly and training completion by department, and draft the chemical handling safety alert" → Word doc + Teams post draft
+- **Recurring:** "Every Friday, update the near-miss trend tracker" → Excel workbook
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Field Service Engineer – Capital Equipment  
 **Duty:** Install, maintain, and repair imaging or surgical systems at hospitals.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + Field service mgmt (confirm); eQMS (confirm; e.g., MasterControl)
+**Systems:** Field service mgmt (confirm), eQMS (confirm; e.g., MasterControl)
 
-1. *Daily:* "Prepare my job pack for tomorrow's PM at [hospital] from emails and service history" → Word doc
-2. *Analytical:* "Analyze repeat failures on [system] in my territory" → Word doc
-3. *Leadership:* "Draft a service report summary to the biomed team" → draft email for approval
-4. *Daily:* "Summarize open service cases and parts on order" → Excel tracker
-5. *Analytical:* "Compare software versions across installed base and list upgrades" → Excel tracker
-6. *Leadership:* "Draft a lessons-learned post for the service team" → Teams post drafted for approval
+- **Quick win:** "Which service cases are open and what parts are on order?" → Excel workbook
+- **Hand-off:** "For tomorrow's PM at [hospital], gather emails, service history and software versions into a job pack" → Word doc
+- **Recurring:** "After each visit, draft the service report summary to the biomed team" → email draft
 
 ### 9. Sales/Marketing
 
 **Title:** Territory Sales Manager  
 **Duty:** Grow device sales with hospitals, IDNs, and surgeons in territory.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + CRM pipeline in Dynamics 365; GPO contract data (confirm)
+**Systems:** Dynamics 365, GPO contract data (confirm)
 
-1. *Daily:* "Prep me for today's meeting with [hospital] value analysis committee" → Word doc
-2. *Analytical:* "Analyze territory sales by account vs. quota" → Excel tracker
-3. *Leadership:* "Draft a follow-up email to the surgeon after a case" → draft email for approval
-4. *Daily:* "List contracts expiring this quarter" → Excel tracker
-5. *Analytical:* "Compare competitive conversions this half" → Word doc
-6. *Leadership:* "Build the quarterly territory business review" → PowerPoint deck
+- **Quick win:** "Which contracts expire this quarter?" → Excel workbook
+- **Hand-off:** "Analyze territory sales by account vs. quota and competitive conversions, and prepare for the [hospital] value analysis committee" → PowerPoint deck
+- **Recurring:** "After each case, draft the follow-up to the surgeon" → email draft
 
 ### 10. Customer Service
 
 **Title:** Customer Service Representative  
 **Duty:** Manage orders, backorders, and returns for hospitals and distributors.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Oracle)
+**Systems:** Dynamics 365, ERP (confirm; e.g., SAP or Oracle)
 
-1. *Daily:* "Summarize today's order inquiries and draft replies with ship dates" → draft email for approval
-2. *Analytical:* "Analyze return reasons by product family" → Excel tracker
-3. *Leadership:* "Draft a backorder notice to customers for [product]" → draft email for approval
-4. *Daily:* "Build a tracker of open backorders and promised dates" → Excel tracker
-5. *Analytical:* "Compare fill rates by key account" → Excel tracker
-6. *Leadership:* "Prepare a weekly escalation summary" → scheduled digest (drafted for approval)
+- **Quick win:** "Which open backorders have promised dates this week?" → Excel workbook
+- **Hand-off:** "Analyze return reasons by product family and fill rates by key account, and draft the backorder notice to customers for [product]" → Word doc + email drafts
+- **Recurring:** "Every morning, summarize order inquiries and draft replies with ship dates" → email drafts
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 11. Operations/Facilities
 
 **Title:** Site Operations Director  
 **Duty:** Run site production, cleanroom facilities, and validation readiness.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + MES/eDHR (confirm); CMMS (confirm)
+**Systems:** MES/eDHR (confirm), CMMS (confirm)
 
-1. *Daily:* "Build my morning brief from overnight production, quality, and facility alarms" → scheduled digest (drafted for approval)
-2. *Analytical:* "Analyze capacity vs. demand by line next quarter" → Excel tracker
-3. *Leadership:* "Prepare the site operations review deck" → PowerPoint deck
-4. *Daily:* "Summarize overdue calibrations and PMs" → Excel tracker
-5. *Analytical:* "Compare cleanroom environmental monitoring excursions by month" → Excel tracker
-6. *Leadership:* "Draft a town-hall message on the new line launch" → Word doc
+- **Quick win:** "Which calibrations and PMs are overdue?" → Excel workbook
+- **Hand-off:** "Analyze capacity vs. demand by line next quarter and cleanroom environmental monitoring results, and prepare the site operations review" → PowerPoint deck
+- **Recurring:** "Every morning, build my brief from overnight production, quality and facility alarms" → Word doc (one page)
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** R&D Design Engineer  
 **Duty:** Design devices under design controls; maintain DHF and risk files.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + PLM (confirm; e.g., Windchill); eQMS (confirm; e.g., MasterControl)
+**Systems:** PLM (confirm; e.g., Windchill), eQMS (confirm; e.g., MasterControl)
 
-1. *Daily:* "Summarize open design change orders and status" → Excel tracker
-2. *Analytical:* "Analyze verification test results and gaps against design inputs" → Word doc
-3. *Leadership:* "Draft a design review agenda and invite" → meeting invite drafted for approval
-4. *Daily:* "Pull action items from this week's project meetings" → Excel tracker
-5. *Analytical:* "Compare risk file (ISO 14971) updates needed for the change" → Word doc
-6. *Leadership:* "Prepare a project status update for the leadership team" → PowerPoint deck
+- **Quick win:** "Which design change orders are open and where are they?" → Excel workbook
+- **Hand-off:** "Analyze verification results and gaps against design inputs, find the ISO 14971 risk file updates needed, and draft the design review agenda and invite" → Word doc + meeting invite draft
+- **Recurring:** "Every Friday, pull action items from this week's project meetings" → Excel workbook
 
 ### 13. Executive
 
 **Title:** VP Operations / General Manager  
 **Duty:** Own business P&L, compliance posture, and growth.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Oracle)
+**Systems:** ERP (confirm; e.g., SAP or Oracle)
 
-1. *Daily:* "Give me today's top issues across sites" → Word doc
-2. *Analytical:* "Analyze margin and backorder trends vs. plan" → Excel tracker
-3. *Leadership:* "Prepare the quarterly business review" → PowerPoint deck
-4. *Daily:* "Summarize regulatory and quality escalations this week" → Word doc
-5. *Analytical:* "Compare site KPIs (yield, OTD, complaints)" → Excel tracker
-6. *Leadership:* "Draft an all-hands message on priorities" → draft email for approval
+- **Quick win:** "What are today's top issues across sites?" → Word doc (one page)
+- **Hand-off:** "Analyze margin and backorders vs. plan and site KPIs (yield, OTD, complaints), and prepare the quarterly business review" → PowerPoint deck
+- **Recurring:** "Every Friday, summarize regulatory and quality escalations" → scheduled digest
 
 ### 14. Industry-Specific: Regulatory Affairs
 
 **Title:** Regulatory Affairs Specialist  
 **Duty:** Prepare 510(k)/EU MDR submissions and manage regulatory changes.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + eQMS (confirm; e.g., MasterControl); RIM system (confirm)
+**Systems:** eQMS (confirm; e.g., MasterControl), RIM system (confirm)
 
-1. *Daily:* "Summarize submission milestones and open FDA/notified body questions" → Excel tracker
-2. *Analytical:* "Analyze design changes for regulatory filing impact" → Word doc
-3. *Leadership:* "Draft a response outline to an FDA additional information request" → Word doc
-4. *Daily:* "List upcoming registration renewals by country" → Excel tracker
-5. *Analytical:* "Compare requirements across EU MDR and FDA for [device]" → Word doc
-6. *Leadership:* "Prepare a regulatory status briefing for leadership" → PowerPoint deck
+- **Quick win:** "Which design changes need a regulatory filing?" → Excel workbook
+- **Hand-off:** "Gather the FDA additional information request, the relevant design history and test data, and draft the response outline" → Word doc
+- **Recurring:** "Every month, list upcoming registration renewals by country" → scheduled digest
 
 ### 15. Industry-Specific: Clinical/Field Clinical Specialist
 
 **Title:** Clinical Specialist  
 **Duty:** Support surgeons and clinical staff during device procedures.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + CRM in Dynamics 365; case-coverage scheduling (confirm)
+**Systems:** Dynamics 365, case-coverage scheduling (confirm)
 
-1. *Daily:* "Prep my case coverage brief for tomorrow's procedures" → Word doc
-2. *Analytical:* "Analyze case volume and device usage by account" → Excel tracker
-3. *Leadership:* "Draft a follow-up to the OR team after an in-service" → draft email for approval
-4. *Daily:* "List upcoming in-service trainings" → Excel tracker
-5. *Analytical:* "Compare product feedback themes from surgeons" → Word doc
-6. *Leadership:* "Draft a Teams update to sales on clinical insights" → Teams post drafted for approval
+- **Quick win:** "Which in-service trainings are coming up?" → Excel workbook
+- **Hand-off:** "Analyze case volume and device usage by account and surgeon feedback themes, and write the product feedback summary for marketing" → Word doc
+- **Recurring:** "Every afternoon, build tomorrow's case coverage brief" → Word doc (one page)
 
 ## Top 5 custom skills to build first
 
-- **capa-aging-tracker** (Quality Engineer – Design/Production): Gather NCRs/CAPAs; Age and classify; Produce tracker
-- **shift-huddle-brief** (Manufacturing Supervisor): Collect yield and DHR exceptions; Analyze vs. targets; Produce Word sheet
+- **capa-aging-tracker** (Quality Engineer – Design/Production): Gather NCRs/CAPAs; Age and classify; Produce tracker. Start from [customer-escalation-pack](../skills/customer-escalation-pack.md).
+- **shift-huddle-brief** (Manufacturing Supervisor): Collect yield and DHR exceptions; Analyze vs. targets; Produce Word sheet. Start from [shift-handover-digest](../skills/shift-handover-digest.md).
 - **submission-status-pack** (Regulatory Affairs Specialist): Gather milestones and questions; Assess risks; Produce tracker and briefing
 - **case-coverage-brief** (Clinical Specialist; Territory Sales Manager): Gather schedule and account notes; Summarize; Produce brief
 - **inspection-readiness** (Quality Engineer – Design/Production; Site Operations Director): Gather open findings; Assess gaps; Produce deck

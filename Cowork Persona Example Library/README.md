@@ -1,15 +1,18 @@
 # Cowork Industry Persona Library
 
-Plain Markdown library for Microsoft 365 Copilot Cowork adoption workshops: **15 personas × 6 example asks** for 26 industries, plus example skills and reusable prompts. Nothing to install or deploy; read it on GitHub or in any Markdown viewer.
+Plain Markdown library for Microsoft 365 Copilot Cowork adoption workshops: **15 personas × 3 example asks** for 26 industries, plus example skills and reusable prompts. Nothing to install or deploy; read it on GitHub or in any Markdown viewer.
 
 ## How to use
 
-1. Pick an industry below and open its page.
-2. Skim *Personas at a glance*, then jump to a persona for its 6 example asks (Daily, Analytical, Leadership × 2).
+1. Pick an industry below and open its page. *Top 3 demos* at the top is the quickest place to start a workshop.
+2. Skim *Personas at a glance*, then jump to a persona for its three asks:
+   - **Quick win:** a small, everyday job that pays off right away.
+   - **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+   - **Recurring:** something scheduled or ongoing that keeps working without the person.
 3. To tailor to a specific company, paste [prompts/customer-research.md](prompts/customer-research.md) into Cowork.
 4. To add an industry, paste [prompts/industry-template.md](prompts/industry-template.md) into Cowork and save the result as a new page in `industries/`.
 
-Each ask uses the format: "natural-language ask" → deliverable. Anything that sends, posts or schedules is a draft for approval. Industry systems are marked *(confirm)* because these are templates, not company data.
+Each ask uses the format: "natural-language ask" → deliverable. Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar); each persona's **Systems** line lists only the industry systems beyond those, marked *(confirm)* because these are templates, not company data. Anything that sends, posts or schedules is a draft for approval.
 
 ## Discrete
 

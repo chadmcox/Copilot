@@ -2,6 +2,24 @@
 
 **Group:** Process · [Back to index](../README.md)
 
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **Tailings / Environmental Compliance Engineer, recurring:** every morning, overnight piezometer and monitoring alerts on the tailings facility, with anything past a trigger level flagged. → [jump](#15-tailingsenvironmental-compliance-engineer-industry-specific)
+2. **Metallurgist / Grade Control Lead, hand-off:** mine vs. mill grade reconciliation for the month with recovery vs. head grade and the likely causes of the gap. → [jump](#5-quality)
+3. **Haul Truck / Plant Operator, quick win:** "Summarize my pre-start defects and last shift notes." → [jump](#3-frontline-worker)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+
 **Why the two industry personas:** Added Mine Planner/Geologist because ore-body knowledge and mine plans drive value, and Tailings/Environmental Compliance Engineer because tailings governance (e.g., GISTM) is a critical license-to-operate risk.
 
 ## Personas at a glance
@@ -30,203 +48,168 @@
 
 **Title:** Site Controller  
 **Duty:** Manage site cost reporting, unit costs, and capital project accounting.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; ERP (confirm, e.g., SAP S/4HANA); cost-modeling tool (confirm)
+**Systems:** Power BI, ERP (confirm; e.g., SAP S/4HANA), cost-modeling tool (confirm)
 
-1. *Daily:* "Summarize today's cost overruns by cost center" → Excel tracker.
-2. *Analytical:* "Analyze cost per tonne milled vs. budget" → Excel analysis.
-3. *Leadership:* "Draft the monthly site financial commentary" → Word doc.
-4. *Daily:* "List open POs pending goods receipt" → Excel tracker.
-5. *Analytical:* "Compare AISC by site for the quarter" → Excel analysis.
-6. *Leadership:* "Prepare the capital review deck" → PowerPoint deck.
+- **Quick win:** "Which cost centers overran today?" → Excel workbook
+- **Hand-off:** "Analyze cost per tonne milled vs. budget and AISC by site for the quarter, and draft the monthly site financial commentary" → Word doc
+- **Recurring:** "Every Monday, list open POs pending goods receipt" → scheduled digest
 
 ### 2. HR
 
 **Title:** HR Business Partner – Site  
 **Duty:** Support FIFO rosters, training, and labor relations.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; HCM (confirm, e.g., Workday/SuccessFactors); training records system (confirm)
+**Systems:** HCM (confirm; e.g., Workday/SuccessFactors), training records system (confirm)
 
-1. *Daily:* "Which workers have expiring tickets or inductions?" → Excel tracker.
-2. *Analytical:* "Analyze absenteeism by roster and crew" → Excel analysis.
-3. *Leadership:* "Draft a roster change announcement" → Teams post drafted for approval.
-4. *Daily:* "Summarize recruitment pipeline for haul-truck operators" → Excel tracker.
-5. *Analytical:* "Compare turnover vs. last year by role" → Word brief.
-6. *Leadership:* "Prepare talking points for enterprise agreement talks" → Word doc.
+- **Quick win:** "Which workers have tickets or inductions expiring?" → Excel workbook
+- **Hand-off:** "Analyze absenteeism by roster and crew and turnover vs. last year by role, and prepare talking points for the labor relations meeting" → Word doc
+- **Recurring:** "Every Friday, summarize the haul-truck operator recruitment pipeline" → scheduled digest
 
 ### 3. Frontline Worker
 
 **Title:** Haul Truck / Plant Operator  
 **Duty:** Operate mobile equipment or processing plant safely and productively.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; Fleet management system (confirm, e.g., Modular/Wenco); pre-start checklist app (confirm)
+**Systems:** Fleet management system (confirm; e.g., Modular/Wenco), pre-start checklist app (confirm)
 
-1. *Daily:* "Summarize my pre-start defects and last shift notes" → Word brief.
-2. *Analytical:* "Which trucks have repeated faults this week?" → Excel tracker.
-3. *Leadership:* "Draft a hazard report from my notes" → Word doc.
-4. *Daily:* "What are today's dig and dump assignments?" → Excel list.
-5. *Analytical:* "Compare my cycle times vs. crew average" → Excel summary.
-6. *Leadership:* "Draft a message to my supervisor about a road hazard" → draft email for approval.
+- **Quick win:** "Summarize my pre-start defects and last shift notes" → Word doc (one page)
+- **Hand-off:** "Pull today's dig and dump assignments, my truck's repeat faults this week and hazard notes into one page" → Word doc (one page)
+- **Recurring:** "At the end of each shift, draft my hazard report and handover from my notes" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 4. Frontline Supervisor
 
 **Title:** Shift Supervisor / Pit Supervisor  
 **Duty:** Lead crews, manage production targets, and safety on shift.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; Fleet management system (confirm); CMMS (confirm, e.g., SAP PM)
+**Systems:** Fleet management system (confirm), CMMS (confirm; e.g., SAP PM)
 
-1. *Daily:* "Build my shift handover from logs, chats, and fleet data" → Word handover.
-2. *Analytical:* "Analyze tonnes moved vs. plan by shift" → Excel analysis.
-3. *Leadership:* "Draft the pre-shift safety talk" → Teams post drafted for approval.
-4. *Daily:* "List equipment down and expected return" → Excel tracker.
-5. *Analytical:* "Compare crew productivity and delays" → Excel scorecard.
-6. *Leadership:* "Prepare the production meeting update" → PowerPoint slides.
+- **Quick win:** "Which equipment is down and when is it expected back?" → Excel workbook
+- **Hand-off:** "Analyze tonnes moved vs. plan by shift and crew delays, and prepare the production meeting update" → PowerPoint deck
+- **Recurring:** "At every shift change, build the handover from logs, chats and fleet data" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 5. Quality
 
 **Title:** Metallurgist / Grade Control Lead  
 **Duty:** Manage ore grade, recovery, and product specs.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; LIMS (confirm); metallurgical accounting system (confirm)
+**Systems:** LIMS (confirm), metallurgical accounting system (confirm)
 
-1. *Daily:* "Which assays are outstanding or out of spec?" → Excel tracker.
-2. *Analytical:* "Analyze recovery vs. head grade for the month" → Excel analysis.
-3. *Leadership:* "Draft a customer note on concentrate spec" → draft email for approval.
-4. *Daily:* "Summarize reconciliation of mine vs. mill grade" → Excel summary.
-5. *Analytical:* "Compare reagent consumption vs. recovery" → Word report.
-6. *Leadership:* "Prepare the metallurgy review deck" → PowerPoint deck.
+- **Quick win:** "Which assays are outstanding or out of spec?" → Excel workbook
+- **Hand-off:** "Reconcile mine vs. mill grade for the month, analyze recovery vs. head grade and reagent use, and prepare the metallurgy review" → PowerPoint deck
+- **Recurring:** "Every week, draft the concentrate spec note to customers" → email draft
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Supply Chain / Procurement Manager  
 **Duty:** Source consumables, spares, and manage logistics to site.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; ERP (confirm); inventory system (confirm)
+**Systems:** ERP (confirm), inventory system (confirm)
 
-1. *Daily:* "List critical spares below reorder point" → Excel tracker.
-2. *Analytical:* "Analyze supplier lead times for tyres and GET" → Excel analysis.
-3. *Leadership:* "Draft a supplier escalation on late deliveries" → draft email for approval.
-4. *Daily:* "Summarize inbound shipments to [site] this week" → Excel schedule.
-5. *Analytical:* "Compare spend by category vs. budget" → Word report.
-6. *Leadership:* "Prepare the category strategy deck" → PowerPoint deck.
+- **Quick win:** "Which critical spares are below reorder point?" → Excel workbook
+- **Hand-off:** "Analyze supplier lead times for tyres and GET and spend by category vs. budget, and prepare the category strategy deck" → PowerPoint deck
+- **Recurring:** "Every Monday, summarize inbound shipments to [site] this week" → scheduled digest
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 7. Safety/EHS
 
 **Title:** HSE Manager  
 **Duty:** Lead critical risk controls, incident investigation, and compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; EHS system (confirm, e.g., Enablon/Cority); critical control verification app (confirm)
+**Systems:** EHS system (confirm; e.g., Enablon/Cority), critical control verification app (confirm)
 
-1. *Daily:* "Summarize yesterday's incidents and HPIs" → Word daily brief.
-2. *Analytical:* "Trend critical control verification failures" → Excel analysis.
-3. *Leadership:* "Draft the safety alert on the vehicle interaction" → Teams post drafted for approval.
-4. *Daily:* "List overdue corrective actions" → Excel tracker.
-5. *Analytical:* "Compare TRIFR by site and contractor" → Excel analysis.
-6. *Leadership:* "Prepare the monthly HSE deck" → PowerPoint deck.
+- **Quick win:** "Which corrective actions are overdue?" → Excel workbook
+- **Hand-off:** "Trend critical control verification failures, compare TRIFR by site and contractor, and prepare the monthly HSE deck" → PowerPoint deck
+- **Recurring:** "Every morning, summarize yesterday's incidents and HPIs" → scheduled digest
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Heavy Diesel Fitter / Maintenance Technician  
 **Duty:** Maintain mobile and fixed plant equipment.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; CMMS (confirm, e.g., SAP PM/Pronto); OEM telematics (confirm)
+**Systems:** CMMS (confirm; e.g., SAP PM/Pronto), OEM telematics (confirm)
 
-1. *Daily:* "What are my work orders today?" → Excel work list.
-2. *Analytical:* "Analyze failure history for [shovel]" → Word failure summary.
-3. *Leadership:* "Draft a parts request" → draft email for approval.
-4. *Daily:* "Summarize telematics alerts for my fleet" → Excel tracker.
-5. *Analytical:* "Compare component life vs. OEM expectation" → Excel analysis.
-6. *Leadership:* "Write the job completion report from my notes" → Word doc.
+- **Quick win:** "What are my work orders today?" → Excel workbook
+- **Hand-off:** "Pull the failure history for [shovel], telematics alerts and component life vs. OEM expectation, and write the reliability summary" → Word doc
+- **Recurring:** "After each job, write the completion report from my notes" → Word doc (one page)
 
 ### 9. Sales/Marketing
 
 **Title:** Marketing / Concentrate Sales Manager  
 **Duty:** Manage offtake contracts, pricing, and customer relationships.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; CRM (Dynamics 365); commodity pricing feeds (confirm)
+**Systems:** Dynamics 365, commodity pricing feeds (confirm)
 
-1. *Daily:* "Summarize today's price moves and customer emails" → Word brief.
-2. *Analytical:* "Analyze realized price vs. benchmark" → Excel analysis.
-3. *Leadership:* "Draft a contract renewal email" → draft email for approval.
-4. *Daily:* "List shipments pending provisional invoicing" → Excel tracker.
-5. *Analytical:* "Compare TC/RC terms across customers" → Excel analysis.
-6. *Leadership:* "Prepare the customer review deck" → PowerPoint deck.
+- **Quick win:** "What price moves and customer emails came in today?" → Word doc (one page)
+- **Hand-off:** "Analyze realized price vs. benchmark and TC/RC terms across customers, and prepare the customer review deck" → PowerPoint deck
+- **Recurring:** "Every Monday, list shipments pending provisional invoicing" → scheduled digest
 
 ### 10. Customer Service
 
 **Title:** Shipping / Customer Service Coordinator  
 **Duty:** Coordinate shipments, documentation, and customer queries.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; Dynamics 365 Customer Service; port/logistics system (confirm)
+**Systems:** Dynamics 365 Customer Service, port/logistics system (confirm)
 
-1. *Daily:* "Summarize open customer queries and shipments" → Excel tracker.
-2. *Analytical:* "Analyze demurrage by port" → Excel analysis.
-3. *Leadership:* "Draft a shipment delay notice" → draft email for approval.
-4. *Daily:* "List missing shipping documents" → Excel list.
-5. *Analytical:* "Compare query resolution times" → Excel scorecard.
-6. *Leadership:* "Draft a customer advisory on schedule changes" → draft email for approval.
+- **Quick win:** "Which shipments are missing documents?" → Excel workbook
+- **Hand-off:** "Analyze demurrage by port and query resolution times, and draft delay notices for affected customers" → Word doc + email drafts
+- **Recurring:** "Every morning, summarize open customer queries and shipments" → scheduled digest
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 11. Operations/Facilities
 
 **Title:** Mine / Processing Plant Manager  
 **Duty:** Deliver safe production, recovery, and cost targets.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; Mine production system (confirm); historian (confirm, e.g., AVEVA PI)
+**Systems:** Mine production system (confirm), historian (confirm; e.g., AVEVA PI)
 
-1. *Daily:* "Give me the morning production report" → Word brief.
-2. *Analytical:* "Analyze plant availability and throughput" → Excel analysis.
-3. *Leadership:* "Draft a site-wide update" → Teams post drafted for approval.
-4. *Daily:* "List bottlenecks and actions" → Excel tracker.
-5. *Analytical:* "Compare actual vs. plan by area" → Excel scorecard.
-6. *Leadership:* "Prepare the monthly ops review" → PowerPoint deck.
+- **Quick win:** "Give me the morning production report" → Word doc (one page)
+- **Hand-off:** "Analyze plant availability, throughput and actual vs. plan by area, find the bottlenecks, and prepare the monthly ops review" → PowerPoint deck
+- **Recurring:** "Every Friday, list bottlenecks and the status of actions" → scheduled digest
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** Process / Mining Engineer  
 **Duty:** Optimize processes, design improvements, and support projects.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; Process simulation/mine design (confirm, e.g., Deswik); historian (confirm)
+**Systems:** Process simulation/mine design (confirm; e.g., Deswik), historian (confirm)
 
-1. *Daily:* "Summarize process anomalies from yesterday" → Word note.
-2. *Analytical:* "Analyze crusher throughput constraints" → Excel analysis.
-3. *Leadership:* "Draft a change proposal" → Word doc.
-4. *Daily:* "List engineering requests and status" → Excel tracker.
-5. *Analytical:* "Compare energy use per tonne" → Excel analysis.
-6. *Leadership:* "Prepare a technical study deck" → PowerPoint deck.
+- **Quick win:** "What process anomalies happened yesterday?" → Word doc (one page)
+- **Hand-off:** "Analyze crusher throughput constraints and energy per tonne, and draft the change proposal" → Word doc
+- **Recurring:** "Every Monday, list engineering requests and status" → scheduled digest
 
 ### 13. Executive
 
 **Title:** General Manager / COO  
 **Duty:** Set strategy, safety culture, and site performance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; ERP (confirm); enterprise Power BI dashboards
+**Systems:** Power BI, ERP (confirm), enterprise Power BI dashboards
 
-1. *Daily:* "Brief me on today's risks across sites" → Word brief.
-2. *Analytical:* "Analyze production and cost vs. guidance" → Excel analysis.
-3. *Leadership:* "Draft my town-hall message" → Word doc and Teams post drafted for approval.
-4. *Daily:* "Summarize leadership decisions this week" → Word summary.
-5. *Analytical:* "Compare ESG metrics vs. targets" → Word report.
-6. *Leadership:* "Prepare the board update deck" → PowerPoint deck.
+- **Quick win:** "Brief me on today's risks across sites" → Word doc (one page)
+- **Hand-off:** "Analyze production and cost vs. guidance and ESG metrics vs. targets, and prepare the board update deck" → PowerPoint deck
+- **Recurring:** "Every Friday, summarize leadership decisions from the week" → scheduled digest
 
 ### 14. Mine Planner/Geologist (industry-specific)
 
 **Title:** Mine Planner / Geologist  
 **Duty:** Develop mine plans, schedules, and resource models.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; Geological modeling (confirm, e.g., Leapfrog/Vulcan); mine scheduling (confirm)
+**Systems:** Geological modeling (confirm; e.g., Leapfrog/Vulcan), mine scheduling (confirm)
 
-1. *Daily:* "Summarize plan vs. actual for this week" → Excel tracker.
-2. *Analytical:* "Analyze reconciliation of model vs. mill" → Excel analysis.
-3. *Leadership:* "Draft a plan change memo" → Word doc.
-4. *Daily:* "List drill program status" → Excel tracker.
-5. *Analytical:* "Compare dilution by area" → Word report.
-6. *Leadership:* "Prepare the quarterly plan review deck" → PowerPoint deck.
+- **Quick win:** "What's the status of the drill program?" → Excel workbook
+- **Hand-off:** "Reconcile the model vs. mill, compare dilution by area and plan vs. actual, and prepare the quarterly plan review deck" → PowerPoint deck
+- **Recurring:** "Every Friday, summarize plan vs. actual for the week" → scheduled digest
 
 ### 15. Tailings/Environmental Compliance Engineer (industry-specific)
 
 **Title:** Tailings / Environmental Compliance Engineer  
 **Duty:** Monitor TSF performance and environmental permit compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; Geotechnical monitoring (confirm); environmental data management (confirm)
+**Systems:** Geotechnical monitoring (confirm), environmental data management (confirm)
 
-1. *Daily:* "Summarize piezometer and monitoring alerts" → Excel tracker.
-2. *Analytical:* "Analyze water balance trends" → Excel analysis.
-3. *Leadership:* "Draft the regulator update" → draft email for approval.
-4. *Daily:* "List overdue inspection actions" → Excel tracker.
-5. *Analytical:* "Compare compliance vs. permit limits" → Word report.
-6. *Leadership:* "Prepare the tailings governance review deck" → PowerPoint deck.
+- **Quick win:** "Which inspection actions are overdue?" → Excel workbook
+- **Hand-off:** "Analyze water balance trends and compliance vs. permit limits, and draft the regulator update" → Word doc
+- **Recurring:** "Every morning, summarize piezometer and monitoring alerts and flag anything past a trigger level" → scheduled digest
 
 ## Top 5 custom skills to build first
 
-- **shift-handover-brief** (Frontline Supervisor; Frontline Worker): Gather logs and chats → flag issues → produce Word handover.
-- **critical-control-review** (Safety/EHS): Gather verifications → trend failures → produce Excel and alert draft.
+- **shift-handover-brief** (Frontline Supervisor; Frontline Worker): Gather logs and chats → flag issues → produce Word handover. Start from [shift-handover-digest](../skills/shift-handover-digest.md).
+- **critical-control-review** (Safety/EHS): Gather verifications → trend failures → produce Excel and alert draft. Start from [safety-incident-brief](../skills/safety-incident-brief.md).
 - **grade-reconciliation** (Quality; Mine Planner): Gather assays and plan → compare → produce Excel analysis.
-- **tsf-monitoring-digest** (Tailings Engineer): Collect alerts → assess thresholds → produce scheduled digest drafted for approval.
+- **tsf-monitoring-digest** (Tailings Engineer): Collect alerts → assess thresholds → produce scheduled digest.
 - **cost-per-tonne-review** (Finance; Operations): Pull costs and tonnes → compute variance → produce Excel and deck.
 
 ## Top 5 connectors to demo

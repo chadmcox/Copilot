@@ -2,6 +2,24 @@
 
 **Group:** Discrete · [Back to index](../README.md)
 
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **Program Manager, recurring:** on the 1st of each month, the CDRLs due that month with status and owners, plus a draft status report to the customer. → [jump](#14-industry-specific-program-manager)
+2. **Quality Engineer – AS9100, hand-off:** open NCRs, MRB transcripts and supplier emails pulled into one disposition tracker with a Pareto of causes. → [jump](#5-quality)
+3. **Export Compliance Specialist (ITAR/EAR), quick win:** "Does this tech data request raise ITAR concerns?" answered from the request, the drawing markings and the license list. → [jump](#15-industry-specific-export-compliance)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+
 **Why the two industry personas:** Program Manager chosen because A&D work runs through contract programs with CDRLs and EVM; Export Compliance Specialist chosen because ITAR/EAR controls gate technical data and shipments.
 
 ## Personas at a glance
@@ -30,202 +48,165 @@
 
 **Title:** Program Finance Manager  
 **Duty:** Manage program EAC, EVM reporting, and contract cost compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Deltek Costpoint); EVM tool (confirm)
+**Systems:** ERP (confirm; e.g., SAP or Deltek Costpoint), EVM tool (confirm)
 
-1. *Daily:* "Gather this week's CPI/SPI variances for [program] and list control accounts over threshold" → Excel tracker
-2. *Analytical:* "Analyze EAC drift vs. baseline over three months and explain drivers by WBS" → Word doc
-3. *Leadership:* "Prepare the monthly program financial review deck" → PowerPoint deck
-4. *Daily:* "Summarize open charge-number questions from Teams and email into an action list" → Excel tracker
-5. *Analytical:* "Compare indirect rates actual vs. forward pricing rate proposal" → Excel tracker
-6. *Leadership:* "Draft a variance-at-completion explanation for the program manager" → draft email for approval
+- **Quick win:** "Which control accounts on [program] are over the CPI/SPI threshold this week?" → Excel workbook
+- **Hand-off:** "Pull three months of EVM data from the EVM tool, compare EAC to baseline by WBS, read the PM's variance notes in Teams, and build the monthly program financial review" → PowerPoint deck
+- **Recurring:** "Every Monday, list open charge-number questions from email and Teams with who's waiting on an answer" → scheduled digest
 
 ### 2. HR
 
 **Title:** HR Business Partner – Cleared Workforce  
 **Duty:** Support hiring, retention, and clearance-dependent staffing for programs.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + HCM (confirm); security clearance tracking (confirm)
+**Systems:** HCM (confirm), security clearance tracking (confirm)
 
-1. *Daily:* "List open reqs for [program] with clearance status and aging" → Excel tracker
-2. *Analytical:* "Analyze attrition among A&P mechanics and engineers by site" → Word doc
-3. *Leadership:* "Prepare a workforce readiness update for program leadership" → PowerPoint deck
-4. *Daily:* "Summarize onboarding blockers for next week's starts" → Excel tracker
-5. *Analytical:* "Compare time-to-fill for cleared vs. uncleared roles" → Excel tracker
-6. *Leadership:* "Draft a recruiting announcement for the internal referral program" → Teams post drafted for approval
+- **Quick win:** "List open reqs for [program] with clearance status and days open" → Excel workbook
+- **Hand-off:** "Gather open reqs, clearance processing times and hiring-manager notes, compare cleared vs. uncleared time-to-fill, and write the workforce readiness update for program leadership" → Word doc
+- **Recurring:** "Every Thursday, check next week's new starts for missing clearance or onboarding steps and draft reminders to the owners" → email drafts
 
 ### 3. Frontline Worker
 
 **Title:** Aircraft Structures Assembler  
 **Duty:** Perform structural assembly, drilling, and fastening per planning documents.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + MES (confirm); PLM (confirm; e.g., Siemens Teamcenter)
+**Systems:** MES (confirm), PLM (confirm; e.g., Siemens Teamcenter)
 
-1. *Daily:* "Summarize my open work orders and shop-floor planning changes from shift handoff" → Word doc
-2. *Analytical:* "Compare recent nonconformances on my station and list recurring causes" → Word doc
-3. *Leadership:* "Draft a note to my lead about missing fasteners for [work order]" → Teams post drafted for approval
-4. *Daily:* "Gather the latest engineering changes affecting my job into a checklist" → Excel tracker
-5. *Analytical:* "List my certifications (e.g., sealant, FOD) expiring soon" → Excel tracker
-6. *Leadership:* "Draft an improvement idea for the shift huddle on drill template staging" → Teams post drafted for approval
+- **Quick win:** "What engineering changes since my last shift affect the jobs at my station?" → Word doc (one page)
+- **Hand-off:** "Gather my open work orders, the shift handoff notes and the nonconformances on my station into one checklist for today" → Word doc
+- **Recurring:** "Each month, check which of my certifications (sealant, FOD, drilling) expire in the next 60 days" → scheduled digest
 
 ### 4. Frontline Supervisor
 
 **Title:** Production Supervisor – Final Assembly  
 **Duty:** Lead assembly crew to meet schedule, quality, FOD, and safety targets.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + MES (confirm); ERP (confirm; e.g., SAP or Deltek Costpoint)
+**Systems:** MES (confirm), ERP (confirm; e.g., SAP or Deltek Costpoint)
 
-1. *Daily:* "Build my shift brief from line position status, travelled work, and safety notes" → Word doc
-2. *Analytical:* "Analyze behind-schedule jobs by position over two weeks" → Excel tracker
-3. *Leadership:* "Summarize line rate performance for the operations manager" → PowerPoint deck
-4. *Daily:* "Pull absences and open jobs to plan second shift coverage" → Excel tracker
-5. *Analytical:* "Compare FOD findings by crew and highlight coaching needs" → Excel tracker
-6. *Leadership:* "Draft a recognition post for the crew that closed a line move on time" → Teams post drafted for approval
+- **Quick win:** "Who's out tomorrow and which positions will be short on second shift?" → Excel workbook
+- **Hand-off:** "Pull line position status, travelled work, FOD findings and safety notes from the last two weeks, find the jobs falling behind and why, and build my update for the operations manager" → PowerPoint deck
+- **Recurring:** "At the start of each shift, build my shift brief from the handoff, line status and safety notes" → Word doc (one page)
 
 ### 5. Quality
 
 **Title:** Quality Engineer – AS9100  
 **Duty:** Drive nonconformance, FAI, and AS9100 compliance across production.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + QMS (confirm); PLM (confirm; e.g., Siemens Teamcenter)
+**Systems:** QMS (confirm), PLM (confirm; e.g., Siemens Teamcenter)
 
-1. *Daily:* "Gather open NCRs and MRB items into a disposition tracker" → Excel tracker
-2. *Analytical:* "Analyze escapes on [part] and Pareto root causes" → Excel tracker
-3. *Leadership:* "Prepare a corrective action response for the customer quality notice" → Word doc
-4. *Daily:* "Summarize today's MRB meeting transcript into decisions and owners" → Word doc
-5. *Analytical:* "Compare FAI (AS9102) completion status across new parts" → Excel tracker
-6. *Leadership:* "Draft an AS9100 audit readiness brief for leadership" → PowerPoint deck
+- **Quick win:** "Summarize today's MRB meeting into decisions and owners" → Word doc (one page)
+- **Hand-off:** "Pull open NCRs, MRB transcripts and supplier emails on [part], Pareto the root causes, and prepare the corrective action response for the customer quality notice" → Word doc + Excel workbook
+- **Recurring:** "Every Friday, report FAI (AS9102) status for new parts and flag any that will miss their first article date" → scheduled digest
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Subcontract Administrator / Buyer  
 **Duty:** Manage suppliers, flowdowns, and delivery of flight-critical parts.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Deltek Costpoint); supplier portal (confirm)
+**Systems:** ERP (confirm; e.g., SAP or Deltek Costpoint), supplier portal (confirm)
 
-1. *Daily:* "List late supplier deliveries affecting [program] from emails and MRP" → Excel tracker
-2. *Analytical:* "Analyze supplier OTD and quality scores over two quarters" → Excel tracker
-3. *Leadership:* "Draft a supplier escalation letter for past-due castings" → draft email for approval
-4. *Daily:* "Summarize this week's expedite requests from planners" → Excel tracker
-5. *Analytical:* "Compare bids for the [part] machining RFQ including DFARS compliance notes" → Word doc
-6. *Leadership:* "Prepare a supplier performance review deck" → PowerPoint deck
+- **Quick win:** "Which late supplier deliveries are hitting [program] this week?" → Excel workbook
+- **Hand-off:** "Gather supplier OTD and quality data for two quarters, read the escalation emails, and build the supplier performance review with the three suppliers at most risk" → PowerPoint deck
+- **Recurring:** "Every Monday, compile the planners' expedite requests and draft follow-ups to each supplier" → email drafts
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 7. Safety/EHS
 
 **Title:** EHS Manager  
 **Duty:** Lead site safety, hazardous materials, and environmental compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + EHS system (confirm)
+**Systems:** EHS system (confirm)
 
-1. *Daily:* "Gather this week's incident and near-miss reports into a tracker" → Excel tracker
-2. *Analytical:* "Analyze ergonomic injuries in assembly areas for root causes" → Word doc
-3. *Leadership:* "Draft a safety alert on working-at-heights for hangar staff" → Teams post drafted for approval
-4. *Daily:* "Summarize open corrective actions from the last inspection" → Excel tracker
-5. *Analytical:* "Compare hazmat training completion by department" → Excel tracker
-6. *Leadership:* "Prepare the monthly EHS scorecard" → PowerPoint deck
+- **Quick win:** "List this week's incidents and near misses by area" → Excel workbook
+- **Hand-off:** "Pull a year of ergonomic injury reports, the assembly-area inspection notes and job hazard analyses, find the common causes, and draft the improvement plan for site leadership" → Word doc
+- **Recurring:** "On the first business day of each month, build the EHS scorecard from incidents, open corrective actions and training completion" → PowerPoint deck
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Field Service Representative / A&P Technician  
 **Duty:** Support customer aircraft maintenance, AOG events, and repairs.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + MRO system (confirm; e.g., IFS or AMOS); PLM (confirm; e.g., Siemens Teamcenter)
+**Systems:** MRO system (confirm; e.g., IFS or AMOS), PLM (confirm; e.g., Siemens Teamcenter)
 
-1. *Daily:* "Prepare my brief for the AOG support at [site] from emails and tech data" → Word doc
-2. *Analytical:* "Analyze repeat squawks on [aircraft type] in my fleet" → Word doc
-3. *Leadership:* "Draft a service report to the customer after the repair" → draft email for approval
-4. *Daily:* "Summarize open service bulletins and parts on order" → Excel tracker
-5. *Analytical:* "Compare compliance status of SBs across my customer's tails" → Excel tracker
-6. *Leadership:* "Draft a lessons-learned post for the field team" → Teams post drafted for approval
+- **Quick win:** "Which service bulletins are still open on [customer]'s tails?" → Excel workbook
+- **Hand-off:** "For the AOG at [site], gather the customer's emails, the tech data, past squawks on this tail and parts on order into one support brief" → Word doc
+- **Recurring:** "After each repair visit, draft the service report to the customer from my notes and photos" → email draft
 
 ### 9. Sales/Marketing
 
 **Title:** Business Development / Capture Manager  
 **Duty:** Pursue contracts and lead capture strategy for programs.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + CRM pipeline in Dynamics 365; proposal library (confirm)
+**Systems:** Dynamics 365 Sales, proposal library (confirm)
 
-1. *Daily:* "Prep me for today's customer meeting with [customer] from emails and opportunities" → Word doc
-2. *Analytical:* "Analyze our pipeline by Pwin and contract vehicle" → Excel tracker
-3. *Leadership:* "Draft a follow-up email after the industry day" → draft email for approval
-4. *Daily:* "List upcoming RFP milestones and color-team reviews" → Excel tracker
-5. *Analytical:* "Compare our capture position against known competitors" → Word doc
-6. *Leadership:* "Build the gate review deck for the bid/no-bid decision" → PowerPoint deck
+- **Quick win:** "Prep me for today's meeting with [customer]: open opportunities, last emails and their priorities" → Word doc (one page)
+- **Hand-off:** "Pull the opportunity in Dynamics 365, competitor notes, past proposals on the same vehicle and the customer's RFP, and build the bid/no-bid gate review" → PowerPoint deck
+- **Recurring:** "Every Monday, list RFP milestones and color-team reviews due in the next 30 days" → scheduled digest
 
 ### 10. Customer Service
 
 **Title:** Customer Support Manager – Spares  
 **Duty:** Manage spares orders, AOG requests, and customer commitments.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Deltek Costpoint)
+**Systems:** Dynamics 365, ERP (confirm; e.g., SAP or Deltek Costpoint)
 
-1. *Daily:* "Summarize today's spares inquiries and draft replies with ship dates" → draft email for approval
-2. *Analytical:* "Analyze AOG response times over the quarter" → Excel tracker
-3. *Leadership:* "Draft a customer notice on delayed spares for [order]" → draft email for approval
-4. *Daily:* "Build a tracker of open AOG and critical orders" → Excel tracker
-5. *Analytical:* "Compare fill rates by customer" → Excel tracker
-6. *Leadership:* "Prepare a weekly customer escalation summary" → scheduled digest (drafted for approval)
+- **Quick win:** "Draft replies to today's spares inquiries with current ship dates" → email drafts
+- **Hand-off:** "Pull this quarter's AOG and critical orders, response times and customer emails, find where we missed commitments and why, and write the customer support review" → Word doc + Excel workbook
+- **Recurring:** "Every Friday, summarize open customer escalations with status and next step" → scheduled digest
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 11. Operations/Facilities
 
 **Title:** Site Operations Director  
 **Duty:** Run site operations, capacity, facilities, and production rate.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + MES (confirm); CMMS (confirm)
+**Systems:** MES (confirm), CMMS (confirm)
 
-1. *Daily:* "Build my morning brief from overnight production, quality, and safety updates" → scheduled digest (drafted for approval)
-2. *Analytical:* "Analyze capacity vs. rate plan for next year" → Excel tracker
-3. *Leadership:* "Prepare the site operations review deck" → PowerPoint deck
-4. *Daily:* "Summarize overdue tooling and facility maintenance" → Excel tracker
-5. *Analytical:* "Compare cost reduction initiatives against plan" → Excel tracker
-6. *Leadership:* "Draft a town-hall message on rate increase readiness" → Word doc
+- **Quick win:** "What happened overnight in production, quality and safety?" → Word doc (one page)
+- **Hand-off:** "Gather the rate plan, capacity data, tooling maintenance backlog and staffing plans, find the constraints to next year's rate, and build the site operations review" → PowerPoint deck
+- **Recurring:** "Every Monday, list overdue tooling and facility maintenance with impact on production" → scheduled digest
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** Systems Engineer  
 **Duty:** Define requirements, interfaces, and verification for aircraft systems.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + PLM (confirm; e.g., Siemens Teamcenter); requirements tool (confirm; e.g., DOORS)
+**Systems:** PLM (confirm; e.g., Siemens Teamcenter), requirements tool (confirm; e.g., DOORS)
 
-1. *Daily:* "Summarize open change requests and their CCB status" → Excel tracker
-2. *Analytical:* "Analyze verification test results and requirement coverage gaps" → Word doc
-3. *Leadership:* "Draft a design review agenda and invite for PDR/CDR prep" → meeting invite drafted for approval
-4. *Daily:* "Pull this week's action items from engineering meetings" → Excel tracker
-5. *Analytical:* "Compare trade study options for [subsystem]" → Word doc
-6. *Leadership:* "Prepare a technical status update for the chief engineer" → PowerPoint deck
+- **Quick win:** "Which change requests are waiting on the CCB and since when?" → Excel workbook
+- **Hand-off:** "Pull verification test results, the requirements in DOORS and open change requests for [subsystem], find coverage gaps, and prepare the CDR readiness summary" → Word doc + Excel workbook
+- **Recurring:** "After each engineering meeting, pull action items with owners and due dates into the tracker" → Excel workbook
 
 ### 13. Executive
 
 **Title:** Program Director / VP Programs  
 **Duty:** Own program cost, schedule, technical performance, and customer relationships.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Deltek Costpoint); EVM tool (confirm)
+**Systems:** ERP (confirm; e.g., SAP or Deltek Costpoint), EVM tool (confirm)
 
-1. *Daily:* "Give me today's top program issues from emails and chats" → Word doc
-2. *Analytical:* "Analyze program health (EVM, risks, milestones) across portfolio" → Excel tracker
-3. *Leadership:* "Prepare the program management review deck" → PowerPoint deck
-4. *Daily:* "Summarize customer commitments due this week" → Word doc
-5. *Analytical:* "Compare risk burn-down across programs" → Excel tracker
-6. *Leadership:* "Draft a message to the customer on schedule recovery" → draft email for approval
+- **Quick win:** "What are today's top program issues from my email and chats?" → Word doc (one page)
+- **Hand-off:** "Gather EVM, risk registers and milestone status across the portfolio, compare risk burn-down by program, and build the program management review" → PowerPoint deck
+- **Recurring:** "Every Friday, list customer commitments due next week across all programs" → scheduled digest
 
 ### 14. Industry-Specific: Program Manager
 
 **Title:** Program Manager  
 **Duty:** Lead integrated program schedule, risk, and customer deliverables (CDRLs).  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Deltek Costpoint); scheduling tool (confirm; e.g., Primavera)
+**Systems:** ERP (confirm; e.g., SAP or Deltek Costpoint), scheduling tool (confirm; e.g., Primavera)
 
-1. *Daily:* "Summarize CDRL deliverables due this month and status" → Excel tracker
-2. *Analytical:* "Analyze critical path slips in the IMS" → Word doc
-3. *Leadership:* "Draft the monthly status report to the customer" → Word doc
-4. *Daily:* "List open risks and opportunities with owners" → Excel tracker
-5. *Analytical:* "Compare actuals vs. baseline milestones" → Excel tracker
-6. *Leadership:* "Prepare the program review deck" → PowerPoint deck
+- **Quick win:** "Which risks and opportunities on [program] have no owner or are past due?" → Excel workbook
+- **Hand-off:** "Pull the IMS, baseline milestones and this month's team updates, find critical path slips and their causes, and draft the monthly status report to the customer" → Word doc
+- **Recurring:** "On the 1st of each month, list CDRLs due that month with status and owner, and draft the customer status report" → scheduled digest + Word doc
 
 ### 15. Industry-Specific: Export Compliance
 
 **Title:** Export Compliance Specialist (ITAR/EAR)  
 **Duty:** Ensure technical data and shipments meet ITAR/EAR requirements.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI + ERP (confirm; e.g., SAP or Deltek Costpoint); trade compliance system (confirm)
+**Systems:** ERP (confirm; e.g., SAP or Deltek Costpoint), trade compliance system (confirm)
 
-1. *Daily:* "Gather pending export license requests and status into a tracker" → Excel tracker
-2. *Analytical:* "Analyze technical data sharing requests for jurisdiction concerns" → Word doc
-3. *Leadership:* "Draft a reminder to engineering on ITAR marking rules" → draft email for approval
-4. *Daily:* "Summarize today's compliance inquiries" → Word doc
-5. *Analytical:* "Compare license utilization against authorized limits" → Excel tracker
-6. *Leadership:* "Prepare a compliance briefing for leadership" → PowerPoint deck
+- **Quick win:** "Does this tech data request raise ITAR or EAR jurisdiction concerns?" → Word doc (one page)
+- **Hand-off:** "Gather pending export license requests, license utilization and the shipment schedule, find licenses near their limits or expiry, and prepare the compliance briefing for leadership" → Word doc + Excel workbook
+- **Recurring:** "Each quarter, draft a reminder to engineering on ITAR marking rules with examples from recent findings" → email draft
 
 ## Top 5 custom skills to build first
 
-- **evm-variance-pack** (Program Finance Manager; Program Manager): Gather CPI/SPI data; Explain variances; Produce Excel tracker and deck
+- **evm-variance-pack** (Program Finance Manager; Program Manager): Gather CPI/SPI data; Explain variances; Produce Excel workbook and deck
 - **mrb-disposition-tracker** (Quality Engineer – AS9100): Collect NCRs/MRB notes; Classify and age; Produce tracker
-- **aog-response-brief** (Field Service Representative / A&P Technician; Customer Support Manager – Spares): Gather AOG emails and parts status; Summarize actions; Produce brief and draft customer email
+- **aog-response-brief** (Field Service Representative / A&P Technician; Customer Support Manager – Spares): Gather AOG emails and parts status; Summarize actions; Produce brief and draft customer email. Start from [customer-escalation-pack](../skills/customer-escalation-pack.md).
 - **cdrl-status-report** (Program Manager): Collect deliverables; Assess status; Produce Word report
 - **export-review-checklist** (Export Compliance Specialist (ITAR/EAR); Systems Engineer): Gather data-sharing requests; Flag jurisdiction issues; Produce tracker
 

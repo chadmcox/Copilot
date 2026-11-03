@@ -2,6 +2,24 @@
 
 **Group:** Process · [Back to index](../README.md)
 
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **Sanitation Supervisor, recurring:** before each night shift, the master sanitation schedule with assignments, open zone 1 swab follow-ups and chemical changes. → [jump](#14-sanitation-lead-industry-specific)
+2. **Food Safety & Quality Manager, hand-off:** 90 days of Listeria swab results, holds and complaints pulled into the SQF audit-readiness deck. → [jump](#5-quality)
+3. **Production Line Operator, quick win:** "Give me the allergen changeover checklist for switching to the [peanut] SKU." → [jump](#3-frontline-worker)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+
 **Why the two industry personas:** Sanitation Supervisor: sanitation drives food safety and downtime in F&B plants. Demand & S&OP Planner: short shelf life and promotions make planning critical.
 
 ## Personas at a glance
@@ -30,203 +48,170 @@
 
 **Title:** Plant Controller  
 **Duty:** Manage plant cost accounting, variances, and month-end close.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; ERP (confirm; e.g., SAP S/4HANA)
+**Systems:** Power BI, ERP (confirm; e.g., SAP S/4HANA)
 
-1. *Daily:* "Pull yesterday's yield and giveaway variances for [plant] lines and flag anything over standard." → Excel tracker
-2. *Analytical:* "Compare standard vs. actual cost per case by SKU this quarter and explain top 5 drivers." → Word doc
-3. *Leadership:* "Build a month-end variance review for the GM with commodity and labor impacts." → PowerPoint deck
-4. *Daily:* "Summarize open AP holds on ingredient suppliers from email and ERP and list next steps." → Excel tracker
-5. *Analytical:* "Analyze trade-off of overtime vs. a third shift using labor and throughput data." → Word doc
-6. *Leadership:* "Draft a note to plant leads explaining Q3 conversion cost overrun and asks." → draft email for approval
+- **Quick win:** "Which lines at [plant] had yield or giveaway over standard yesterday?" → Excel workbook
+- **Hand-off:** "Compare standard vs. actual cost per case by SKU, find the top five drivers including commodity and labor, and build the month-end variance review for the GM" → PowerPoint deck
+- **Recurring:** "Before close each month, summarize open AP holds and accrual questions" → scheduled digest
 
 ### 2. HR
 
 **Title:** HR Business Partner – Plant  
 **Duty:** Support plant workforce, staffing, labor relations, and retention.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; HRIS (confirm; e.g., Workday); timekeeping (confirm; e.g., Kronos/UKG)
+**Systems:** HRIS (confirm; e.g., Workday), timekeeping (confirm; e.g., Kronos/UKG)
 
-1. *Daily:* "List seasonal hires starting next week at [plant] with missing GMP or allergen training." → Excel tracker
-2. *Analytical:* "Analyze line-operator turnover by shift and tenure over 12 months and name hotspots." → Word doc
-3. *Leadership:* "Prepare a staffing-readiness brief for peak season for the plant leadership meeting." → PowerPoint deck
-4. *Daily:* "Summarize open grievances from Teams and email and propose response owners." → Excel tracker
-5. *Analytical:* "Compare absenteeism against overtime by department and flag fatigue risk." → Excel tracker
-6. *Leadership:* "Draft a plant-wide shift-bid announcement in plain language." → Teams post drafted for approval
+- **Quick win:** "Which seasonal hires starting next week are missing GMP or allergen training?" → Excel workbook
+- **Hand-off:** "Analyze 12 months of line-operator turnover by shift and tenure, add open grievances, and prepare the peak-season staffing-readiness brief" → Word doc
+- **Recurring:** "Every Friday, summarize open grievances and ER cases" → scheduled digest
 
 ### 3. Frontline Worker
 
 **Title:** Production Line Operator  
 **Duty:** Operate filling/packaging lines, perform checks, record batch data.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; MES (confirm)
+**Systems:** MES (confirm)
 
-1. *Daily:* "What changed in the sanitation and changeover SOP for Line [3] since last week?" → Word doc
-2. *Analytical:* "Summarize the last 5 downtime events on my line and what fixed them." → Excel tracker
-3. *Leadership:* "Draft my shift handover note with checks, holds, and open issues." → Teams post drafted for approval
-4. *Daily:* "Give me the allergen changeover checklist for switching to the [peanut] SKU." → Word doc
-5. *Analytical:* "Compare my line's case rate today vs. target and note likely causes." → Excel tracker
-6. *Leadership:* "Draft a suggestion to my supervisor to reduce label jams, with evidence." → draft email for approval
+- **Quick win:** "Give me the allergen changeover checklist for switching to the [peanut] SKU" → Word doc (one page)
+- **Hand-off:** "Summarize the last five downtime events on my line, what fixed them and this week's SOP changes into one page" → Word doc (one page)
+- **Recurring:** "At the end of each shift, draft my handover with checks, holds and open issues" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 4. Frontline Supervisor
 
 **Title:** Production Shift Supervisor  
 **Duty:** Lead shift crew to hit OEE, safety, and food safety targets.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; MES (confirm); ERP (confirm; e.g., SAP S/4HANA)
+**Systems:** MES (confirm), ERP (confirm; e.g., SAP S/4HANA)
 
-1. *Daily:* "Build my pre-shift huddle: yesterday's OEE, holds, staffing gaps, and safety notes." → Word doc
-2. *Analytical:* "Analyze OEE losses by line this week (availability, performance, quality)." → Excel tracker
-3. *Leadership:* "Draft a Teams recognition post for the crew that beat the changeover target." → Teams post drafted for approval
-4. *Daily:* "Summarize open maintenance work orders affecting my lines this shift." → Excel tracker
-5. *Analytical:* "Compare crew performance across shifts and find coaching opportunities." → Word doc
-6. *Leadership:* "Draft a schedule-change notice for Saturday's production run." → meeting invite drafted for approval
+- **Quick win:** "Which maintenance work orders are affecting my lines?" → Excel workbook
+- **Hand-off:** "Analyze this week's OEE losses by line (availability, performance, quality) and find the top three fixes" → Excel workbook + Word doc
+- **Recurring:** "Before each shift, build my huddle with yesterday's OEE, holds, staffing gaps and safety notes" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 5. Quality
 
 **Title:** Food Safety & Quality Manager  
 **Duty:** Own HACCP, SQF/BRCGS compliance, holds, and audits.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; QMS/LIMS (confirm)
+**Systems:** QMS/LIMS (confirm)
 
-1. *Daily:* "List product on hold at [plant] with root cause and disposition owner." → Excel tracker
-2. *Analytical:* "Trend environmental monitoring Listeria swab positives by zone for 90 days." → Word doc
-3. *Leadership:* "Build an SQF audit-readiness deck with gaps and corrective actions." → PowerPoint deck
-4. *Daily:* "Summarize consumer complaints from Dynamics 365 this week by SKU and defect." → Excel tracker
-5. *Analytical:* "Analyze CCP deviations vs. sanitation crew and shift to find patterns." → Word doc
-6. *Leadership:* "Draft a mock-recall exercise invite with roles and timeline for the team." → meeting invite drafted for approval
+- **Quick win:** "What's on hold at [plant], with root cause and disposition owner?" → Excel workbook
+- **Hand-off:** "Trend 90 days of Listeria swab positives by zone, add holds and this week's consumer complaints, and build the SQF audit-readiness deck" → PowerPoint deck
+- **Recurring:** "Every Monday, summarize consumer complaints by SKU and defect" → scheduled digest
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Ingredients & Packaging Buyer  
 **Duty:** Source ingredients and packaging, manage suppliers and contracts.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; ERP (confirm; e.g., SAP S/4HANA); supplier portal (confirm)
+**Systems:** ERP (confirm; e.g., SAP S/4HANA), supplier portal (confirm)
 
-1. *Daily:* "Which ingredients fall below safety stock in 10 days given the production plan?" → Excel tracker
-2. *Analytical:* "Compare supplier OTIF and COA nonconformances for [cocoa] suppliers this year." → Word doc
-3. *Leadership:* "Prepare a supplier business review deck for our top packaging vendor." → PowerPoint deck
-4. *Daily:* "Summarize supplier emails about delayed shipments and expected recovery dates." → Excel tracker
-5. *Analytical:* "Analyze contract price vs. market for sugar and dairy and flag renegotiation risks." → Word doc
-6. *Leadership:* "Draft an email asking [supplier] for a corrective action on late deliveries." → draft email for approval
+- **Quick win:** "Which ingredients fall below safety stock in 10 days given the plan?" → Excel workbook
+- **Hand-off:** "Compare supplier OTIF and COA nonconformances for [cocoa] suppliers, and prepare the business review deck for our top packaging vendor" → PowerPoint deck
+- **Recurring:** "Every Friday, summarize supplier delay emails with expected dates" → scheduled digest
+
+Related example skill: [supplier-risk-tracker](../skills/supplier-risk-tracker.md)
 
 ### 7. Safety/EHS
 
 **Title:** Plant EHS Manager  
 **Duty:** Drive worker safety, environmental permits, and OSHA compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; EHS system (confirm; e.g., Intelex, Enablon)
+**Systems:** EHS system (confirm; e.g., Intelex, Enablon)
 
-1. *Daily:* "List open safety corrective actions at [plant] past due with owners." → Excel tracker
-2. *Analytical:* "Trend recordables, near misses, and lockout/tagout findings by department." → Word doc
-3. *Leadership:* "Build a monthly safety review deck for plant leadership." → PowerPoint deck
-4. *Daily:* "Summarize this week's ammonia refrigeration inspection notes and follow-ups." → Word doc
-5. *Analytical:* "Analyze wastewater BOD exceedances against production mix." → Excel tracker
-6. *Leadership:* "Draft a safety alert about forklift-pedestrian near misses for all shifts." → Teams post drafted for approval
+- **Quick win:** "List open safety corrective actions past due, with owners" → Excel workbook
+- **Hand-off:** "Trend recordables, near misses and lockout/tagout findings by department, and build the monthly safety review for plant leadership" → PowerPoint deck
+- **Recurring:** "Every Friday, summarize ammonia refrigeration inspection notes and follow-ups" → scheduled digest
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Maintenance Technician  
 **Duty:** Maintain and repair processing and packaging equipment.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; CMMS (confirm; e.g., SAP PM, Maximo)
+**Systems:** CMMS (confirm; e.g., SAP PM, Maximo)
 
-1. *Daily:* "Show my open work orders today ranked by line impact." → Excel tracker
-2. *Analytical:* "Find past fixes for the [filler] seal failure across all plants." → Word doc
-3. *Leadership:* "Draft a handover to the next tech on the unresolved retort issue." → Teams post drafted for approval
-4. *Daily:* "List PMs due this week and spare parts I need to pull." → Excel tracker
-5. *Analytical:* "Analyze mean time between failures for Line [2] wrapper." → Excel tracker
-6. *Leadership:* "Draft an email to OEM support with failure details and photos list." → draft email for approval
+- **Quick win:** "Show my open work orders ranked by line impact" → Excel workbook
+- **Hand-off:** "Find past fixes for the [filler] seal failure across all plants and the MTBF on Line 2, and pull them into a troubleshooting guide" → Word doc
+- **Recurring:** "At the end of each shift, draft my handover on unresolved equipment issues" → Word doc (one page)
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 9. Sales/Marketing
 
 **Title:** Key Account Manager – Retail  
 **Duty:** Manage retail and foodservice accounts, promotions, and volume.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; Retail POS/syndicated data (confirm; e.g., Nielsen, Circana); TPM (confirm)
+**Systems:** Dynamics 365, Retail POS/syndicated data (confirm; e.g., Nielsen, Circana), TPM (confirm)
 
-1. *Daily:* "Summarize this week's orders and fill rate for [retailer] with any shorts." → Excel tracker
-2. *Analytical:* "Analyze last promotion lift and ROI for [retailer] using POS data." → Word doc
-3. *Leadership:* "Build the joint business plan deck for [retailer]'s category review." → PowerPoint deck
-4. *Daily:* "Pull open customer deductions and their status." → Excel tracker
-5. *Analytical:* "Compare velocity of new SKU vs. competitor set by region." → Word doc
-6. *Leadership:* "Draft a reply to the buyer about a short-ship with recovery plan." → draft email for approval
+- **Quick win:** "What were this week's orders and fill rate for [retailer], and any shorts?" → Word doc (one page)
+- **Hand-off:** "Analyze the last promotion's lift and ROI with POS data, compare new SKU velocity, and build the joint business plan deck for [retailer]" → PowerPoint deck
+- **Recurring:** "Every Monday, list open customer deductions and status" → scheduled digest
 
 ### 10. Customer Service
 
 **Title:** Customer Service & Order Desk Rep  
 **Duty:** Process orders, resolve shortages, deductions, and customer inquiries.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; ERP (confirm; e.g., SAP S/4HANA)
+**Systems:** Dynamics 365, ERP (confirm; e.g., SAP S/4HANA)
 
-1. *Daily:* "List today's orders at risk of short-ship and suggested substitutions." → Excel tracker
-2. *Analytical:* "Analyze case reasons from Dynamics 365 this month and top root causes." → Word doc
-3. *Leadership:* "Draft a customer notice about a product allocation for [SKU]." → draft email for approval
-4. *Daily:* "Summarize the case history for [customer] before my call." → Word doc
-5. *Analytical:* "Compare order-to-ship cycle time by DC and flag delays." → Excel tracker
-6. *Leadership:* "Draft a weekly service-level update for the sales team." → Teams post drafted for approval
+- **Quick win:** "Summarize the case history for [customer] before my call" → Word doc (one page)
+- **Hand-off:** "Find this month's top case reasons in Dynamics 365, and draft allocation notices for customers affected by [SKU] shortages" → Word doc + email drafts
+- **Recurring:** "Every morning, list orders at risk of short-ship with suggested substitutions" → scheduled digest
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 11. Operations/Facilities
 
 **Title:** Plant Manager  
 **Duty:** Run plant operations, output, cost, safety, and food safety.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; MES (confirm); ERP (confirm; e.g., SAP S/4HANA)
+**Systems:** MES (confirm), ERP (confirm; e.g., SAP S/4HANA)
 
-1. *Daily:* "Give me a morning plant brief: output vs plan, holds, safety, staffing." → scheduled digest
-2. *Analytical:* "Analyze OEE, waste, and labor by line vs. last quarter." → Word doc
-3. *Leadership:* "Build the monthly plant operations review for the COO." → PowerPoint deck
-4. *Daily:* "Summarize decisions and actions from yesterday's production meeting." → Word doc
-5. *Analytical:* "Compare utility cost per ton across months and flag spikes." → Excel tracker
-6. *Leadership:* "Draft a town-hall message on peak-season priorities." → Teams post drafted for approval
+- **Quick win:** "Give me a morning plant brief: output vs. plan, holds, safety, staffing" → Word doc (one page)
+- **Hand-off:** "Analyze OEE, waste and labor by line vs. last quarter and utility cost per ton, and build the monthly plant operations review for the COO" → PowerPoint deck
+- **Recurring:** "After each production meeting, summarize decisions and actions" → Word doc (one page)
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** Product Development Scientist  
 **Duty:** Develop formulations, run pilot trials, and scale to plant.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; PLM/specification system (confirm; e.g., Trace One, Infor Optiva)
+**Systems:** PLM/specification system (confirm; e.g., Trace One, Infor Optiva)
 
-1. *Daily:* "Summarize pilot plant trial results for the reduced-sugar formula." → Word doc
-2. *Analytical:* "Compare sensory scores and cost per kg across three formula versions." → Excel tracker
-3. *Leadership:* "Build a stage-gate deck for the new SKU launch." → PowerPoint deck
-4. *Daily:* "List open spec changes waiting on regulatory or label review." → Excel tracker
-5. *Analytical:* "Analyze shelf-life study data and flag stability risks." → Word doc
-6. *Leadership:* "Draft an email to the plant on first production trial plan." → draft email for approval
+- **Quick win:** "Which spec changes are waiting on regulatory or label review?" → Excel workbook
+- **Hand-off:** "Compare sensory scores, cost per kg and shelf-life data across three formula versions, and build the stage-gate deck for the new SKU" → PowerPoint deck
+- **Recurring:** "After each pilot trial, summarize results against targets" → Word doc (one page)
 
 ### 13. Executive
 
 **Title:** VP Manufacturing Operations  
 **Duty:** Lead network manufacturing performance, capital, and strategy.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; ERP (confirm; e.g., SAP S/4HANA)
+**Systems:** Power BI, ERP (confirm; e.g., SAP S/4HANA)
 
-1. *Daily:* "Give me a weekly network digest: output, service, safety, quality incidents." → scheduled digest
-2. *Analytical:* "Analyze cost per case and OEE across plants and rank improvement gaps." → Word doc
-3. *Leadership:* "Build a capital-investment board deck for the new line at [plant]." → PowerPoint deck
-4. *Daily:* "Summarize this week's escalations from plant managers." → Word doc
-5. *Analytical:* "Compare network capacity vs. demand forecast for next 2 quarters." → Excel tracker
-6. *Leadership:* "Draft a leadership message on the food safety culture initiative." → draft email for approval
+- **Quick win:** "What did plant managers escalate this week?" → Word doc (one page)
+- **Hand-off:** "Analyze cost per case and OEE across plants, rank the gaps, and build the capital-investment board deck for the new line at [plant]" → PowerPoint deck
+- **Recurring:** "Every Friday, send the network digest: output, service, safety, quality incidents" → scheduled digest
 
 ### 14. Sanitation Lead (industry-specific)
 
 **Title:** Sanitation Supervisor  
 **Duty:** Lead sanitation crews, master sanitation schedule, pre-op inspection.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; QMS/LIMS (confirm)
+**Systems:** QMS/LIMS (confirm)
 
-1. *Daily:* "What is tonight's master sanitation schedule and who is assigned?" → Excel tracker
-2. *Analytical:* "Trend pre-op inspection failures and ATP results by area." → Word doc
-3. *Leadership:* "Draft a crew briefing on new chemical concentration requirements." → Teams post drafted for approval
-4. *Daily:* "List zone 1 swab follow-ups still open." → Excel tracker
-5. *Analytical:* "Analyze sanitation duration vs. downtime to find time savings." → Excel tracker
-6. *Leadership:* "Draft an invite for a sanitation validation review with QA." → meeting invite drafted for approval
+- **Quick win:** "Which zone 1 swab follow-ups are still open?" → Excel workbook
+- **Hand-off:** "Trend pre-op inspection failures and ATP results by area, compare sanitation duration to downtime, and draft the crew briefing on where to save time" → Word doc
+- **Recurring:** "Before each night shift, send the master sanitation schedule with assignments and open follow-ups" → scheduled digest
 
 ### 15. Demand Planner (industry-specific)
 
 **Title:** Demand & S&OP Planner  
 **Duty:** Forecast demand, run S&OP, and balance production plans.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI; APS/demand planning (confirm; e.g., SAP IBP, Kinaxis)
+**Systems:** APS/demand planning (confirm; e.g., SAP IBP, Kinaxis)
 
-1. *Daily:* "Flag SKUs with forecast error over 30% last week." → Excel tracker
-2. *Analytical:* "Analyze seasonality and promo impact on forecast bias by category." → Word doc
-3. *Leadership:* "Build the monthly S&OP deck with demand, supply, and gaps." → PowerPoint deck
-4. *Daily:* "Summarize sales input on upcoming promotions from emails." → Excel tracker
-5. *Analytical:* "Compare shelf-life risk for slow-moving inventory and suggest actions." → Excel tracker
-6. *Leadership:* "Draft the S&OP pre-meeting invite with agenda." → meeting invite drafted for approval
+- **Quick win:** "Which SKUs had forecast error over 30% last week?" → Excel workbook
+- **Hand-off:** "Analyze promo impact on forecast bias by category, add sales input on upcoming promotions, and build the monthly S&OP deck" → PowerPoint deck
+- **Recurring:** "Every Monday, flag slow-moving inventory at shelf-life risk" → scheduled digest
 
 ## Top 5 custom skills to build first
 
-- **shift-handover-brief** (Shift Supervisor, Line Operator): Gather MES events and Teams notes → summarize holds and downtime → draft handover post for approval.
-- **hold-and-release-tracker** (FSQ Manager): Pull holds from QMS exports and email → group by cause → produce Excel tracker.
+- **shift-handover-brief** (Shift Supervisor, Line Operator): Gather MES events and Teams notes → summarize holds and downtime → draft handover post for approval. Start from [shift-handover-digest](../skills/shift-handover-digest.md).
+- **hold-and-release-tracker** (FSQ Manager): Pull holds from QMS exports and email → group by cause → produce Excel workbook.
 - **audit-readiness-pack** (FSQ Manager, Sanitation Supervisor): Collect SOPs and records from SharePoint → map to SQF/BRCGS clauses → produce gap deck.
-- **supplier-risk-review** (Buyer): Gather OTIF and COA issues → score suppliers → draft review deck and email.
+- **supplier-risk-review** (Buyer): Gather OTIF and COA issues → score suppliers → draft review deck and email. Start from [supplier-risk-tracker](../skills/supplier-risk-tracker.md).
 - **sop-pre-meeting** (Demand Planner, VP Manufacturing): Gather forecast and capacity data → identify gaps → produce S&OP deck and invite.
 
 ## Top 5 connectors to demo
