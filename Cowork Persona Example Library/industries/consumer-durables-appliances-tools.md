@@ -1,6 +1,6 @@
 # Consumer Durables, Appliances & Tools
 
-**Group:** Discrete · [Back to index](../README.md)
+[Back to index](../README.md)
 
 ## Top 3 demos
 

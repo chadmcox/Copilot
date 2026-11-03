@@ -1,6 +1,6 @@
 # Medical Devices
 
-**Group:** Discrete · [Back to index](../README.md)
+[Back to index](../README.md)
 
 ## Top 3 demos
 

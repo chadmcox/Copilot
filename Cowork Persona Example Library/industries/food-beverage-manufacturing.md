@@ -1,6 +1,6 @@
 # Food & Beverage Manufacturing
 
-**Group:** Process · [Back to index](../README.md)
+[Back to index](../README.md)
 
 ## Top 3 demos
 

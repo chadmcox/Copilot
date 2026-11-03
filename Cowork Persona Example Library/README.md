@@ -14,40 +14,34 @@ Plain Markdown library for Microsoft 365 Copilot Cowork adoption workshops: **15
 
 Each ask uses the format: "natural-language ask" → deliverable. Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar); each persona's **Systems** line lists only the industry systems beyond those, marked *(confirm)* because these are templates, not company data. Anything that sends, posts or schedules is a draft for approval.
 
-## Discrete
+## Industries
 
-- [Semiconductors](industries/semiconductors.md)
-- [High Tech & Electronics Manufacturing](industries/high-tech-electronics-manufacturing.md)
-- [Industrial Machinery & Heavy Equipment](industries/industrial-machinery-heavy-equipment.md)
-- [Industrial Automation & Electrical Equipment](industries/industrial-automation-electrical-equipment.md)
 - [Aerospace & Defense](industries/aerospace-defense.md)
-- [Medical Devices](industries/medical-devices.md)
-- [Building Products & Construction Materials](industries/building-products-construction-materials.md)
-- [Consumer Durables, Appliances & Tools](industries/consumer-durables-appliances-tools.md)
-
-## Process
-
-- [Chemicals & Specialty Materials](industries/chemicals-specialty-materials.md)
-- [Oil, Gas & Refining](industries/oil-gas-refining.md)
-- [Metals & Mining](industries/metals-mining.md)
-- [Paper, Packaging & Forest Products](industries/paper-packaging-forest-products.md)
-- [Food & Beverage Manufacturing](industries/food-beverage-manufacturing.md)
 - [Agribusiness & Commodities](industries/agribusiness-commodities.md)
-- [Consumer Packaged Goods](industries/consumer-packaged-goods.md)
-- [Life Sciences, Pharma & Diagnostics](industries/life-sciences-pharma-diagnostics.md)
-
-## Mobility
-
+- [Airlines](industries/airlines.md)
 - [Automotive OEM](industries/automotive-oem.md)
 - [Automotive Suppliers & Aftermarket](industries/automotive-suppliers-aftermarket.md)
-- [Trucking, Freight & Logistics](industries/trucking-freight-logistics.md)
-- [Railroads](industries/railroads.md)
-- [Airlines](industries/airlines.md)
-- [Cruise Lines](industries/cruise-lines.md)
-- [Hotels & Hospitality](industries/hotels-hospitality.md)
-- [Travel Management & Services](industries/travel-management-services.md)
+- [Building Products & Construction Materials](industries/building-products-construction-materials.md)
 - [Car Rental, Leasing & Fleet](industries/car-rental-leasing-fleet.md)
+- [Chemicals & Specialty Materials](industries/chemicals-specialty-materials.md)
+- [Consumer Durables, Appliances & Tools](industries/consumer-durables-appliances-tools.md)
+- [Consumer Packaged Goods](industries/consumer-packaged-goods.md)
+- [Cruise Lines](industries/cruise-lines.md)
+- [Food & Beverage Manufacturing](industries/food-beverage-manufacturing.md)
+- [High Tech & Electronics Manufacturing](industries/high-tech-electronics-manufacturing.md)
+- [Hotels & Hospitality](industries/hotels-hospitality.md)
+- [Industrial Automation & Electrical Equipment](industries/industrial-automation-electrical-equipment.md)
 - [Industrial Distribution & Wholesale](industries/industrial-distribution-wholesale.md)
+- [Industrial Machinery & Heavy Equipment](industries/industrial-machinery-heavy-equipment.md)
+- [Life Sciences, Pharma & Diagnostics](industries/life-sciences-pharma-diagnostics.md)
+- [Medical Devices](industries/medical-devices.md)
+- [Metals & Mining](industries/metals-mining.md)
+- [Oil, Gas & Refining](industries/oil-gas-refining.md)
+- [Paper, Packaging & Forest Products](industries/paper-packaging-forest-products.md)
+- [Railroads](industries/railroads.md)
+- [Semiconductors](industries/semiconductors.md)
+- [Travel Management & Services](industries/travel-management-services.md)
+- [Trucking, Freight & Logistics](industries/trucking-freight-logistics.md)
 
 ## Example skills
 

@@ -1,6 +1,6 @@
 # Oil, Gas & Refining
 
-**Group:** Process · [Back to index](../README.md)
+[Back to index](../README.md)
 
 ## Top 3 demos
 
