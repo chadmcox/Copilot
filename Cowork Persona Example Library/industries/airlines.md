@@ -2,7 +2,25 @@
 
 **Group:** Mobility · [Back to index](../README.md)
 
-**Why the two industry personas:** OCC duty managers and pilots run distinct airline-specific workflows (irregular operations and flight deck operations) critical to reliability and safety.
+## Top 3 demos
+
+Start a workshop with these. Each shows something different Cowork does well.
+
+1. **OCC Duty Manager, recurring:** a 5:30am IROPS handover drafted overnight and waiting for approval. → [jump](#14-operations-control)
+2. **Aircraft Maintenance Technician, hand-off:** a repeat-defect history for a tail, pulled from logbook notes, emails and shift handovers into one view before troubleshooting. → [jump](#8-field-servicerepair)
+3. **Customer Care Manager, hand-off:** the week's complaint themes matched to DOT refund rules, with reply drafts for the top cases. → [jump](#10-customer-service)
+
+## How to read this page
+
+Each persona has three asks:
+
+- **Quick win:** a small, everyday job that pays off right away.
+- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
+- **Recurring:** something scheduled or ongoing that keeps working without the person.
+
+Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the airline systems that persona uses beyond those, marked *(confirm)* because they vary by airline. Anything that sends, posts or schedules is a draft for the person's approval.
+
+**Why the two industry personas:** OCC duty managers and pilots run workflows that only airlines have (irregular operations and flight deck operations), and both are central to reliability and safety.
 
 ## Personas at a glance
 
@@ -30,208 +48,169 @@
 
 **Title:** Revenue Accounting Manager  
 **Duty:** Manage ticket revenue, interline billing, and financial close.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Revenue accounting system (confirm), ERP (confirm)
+**Systems:** Revenue accounting system (confirm), ERP (confirm), Power BI
 
-1. *Daily:* "List interline billing disputes from email with amounts and partner airline" → Excel tracker
-2. *Analytical:* "Analyze RASM and CASM by route versus plan this quarter" → Excel tracker
-3. *Leadership:* "Prepare the monthly financial review deck for the CFO" → PowerPoint deck
-4. *Daily:* "Gather unflown ticket liability questions and draft answers" → draft email for approval
-5. *Analytical:* "Compare fuel hedge results against spot fuel cost" → Word doc
-6. *Leadership:* "Draft a reminder to station managers on expense submission deadlines" → Teams post drafted for approval
+- **Quick win:** "List the interline billing disputes in my inbox with partner airline, amount and age" → Excel workbook
+- **Hand-off:** "Pull this quarter's RASM and CASM by route from the Power BI report, compare to plan, find the five routes driving the gap, and build the variance slides for the CFO review" → PowerPoint deck
+- **Recurring:** "Every Monday during close, check which stations haven't submitted expenses and draft a reminder to their managers" → email draft
 
 ### 2. HR
 
 **Title:** Crew Scheduling & HR Manager  
 **Duty:** Manage crew hiring, training, and labor agreement compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, HRIS (confirm), crew scheduling system (confirm; e.g., Sabre, Jeppesen)
+**Systems:** HRIS (confirm), crew scheduling system (confirm; e.g., Sabre, Jeppesen)
 
-1. *Daily:* "Summarize pilot and flight attendant training expirations this month" → Excel tracker
-2. *Analytical:* "Analyze crew attrition by base over 12 months" → Excel tracker
-3. *Leadership:* "Draft a briefing for leadership on staffing for summer schedule" → Word doc
-4. *Daily:* "Gather new-hire class logistics and draft welcome emails" → draft email for approval
-5. *Analytical:* "Compare reserve utilization by base" → Excel tracker
-6. *Leadership:* "Draft a Teams post on updated crew rest policies" → Teams post drafted for approval
+- **Quick win:** "Which pilots and flight attendants have recurrent training expiring in the next 60 days?" → Excel workbook
+- **Hand-off:** "Look at crew attrition by base over 12 months, read the exit-interview themes in the HR folder, compare against summer schedule needs, and write the staffing briefing for leadership" → Word doc
+- **Recurring:** "On the first of each month, list new-hire class dates and draft the welcome emails with logistics for each class" → email drafts
 
 ### 3. Frontline Worker
 
 **Title:** Flight Attendant  
 **Duty:** Ensure passenger safety, deliver cabin service, follow FAA procedures.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Crew scheduling app (confirm), cabin reporting (confirm)
+**Systems:** Crew scheduling app (confirm), cabin reporting (confirm)
 
-1. *Daily:* "Gather my trip pairing, layover hotel, and service notes for next week" → Word doc
-2. *Analytical:* "Summarize my recent cabin incident reports" → Excel tracker
-3. *Leadership:* "Draft a report to my base manager on the inoperative galley equipment" → draft email for approval
-4. *Daily:* "Collect bulletins on new service procedures this week" → Word doc
-5. *Analytical:* "Compare my duty hours against rest requirements this month" → Excel tracker
-6. *Leadership:* "Write a short post to my base channel about the uniform update" → Teams post drafted for approval
+- **Quick win:** "What changed in service procedures or bulletins since my last trip?" → Word doc (one page)
+- **Hand-off:** "Gather my pairing for next week, the layover hotel details and any service notes for those flights into one trip sheet" → Word doc
+- **Recurring:** "Before each trip, send me a summary of new bulletins and my duty hours against rest limits" → scheduled digest
 
 ### 4. Frontline Supervisor
 
 **Title:** Station Manager / Ramp Supervisor  
 **Duty:** Lead airport station operations, ground handling, and turn times.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Departure control system (confirm), ramp/turn management (confirm)
+**Systems:** Departure control system (confirm), ramp/turn management (confirm)
 
-1. *Daily:* "Summarize today's delayed departures by cause code at [station]" → Excel tracker
-2. *Analytical:* "Analyze turn time and baggage performance over four weeks" → Excel tracker
-3. *Leadership:* "Prepare the station monthly review deck" → PowerPoint deck
-4. *Daily:* "Gather staffing gaps for the weekend and propose coverage" → Excel tracker
-5. *Analytical:* "Review ramp damage incidents and find patterns" → Word doc
-6. *Leadership:* "Draft a shift briefing meeting invite" → meeting invite drafted for approval
+- **Quick win:** "Where am I short on ramp staff this weekend, and who's available to cover?" → Excel workbook
+- **Hand-off:** "Pull four weeks of delay codes, turn times and ramp damage reports for [station], find the patterns, and build the monthly station review" → PowerPoint deck
+- **Recurring:** "Each morning, summarize yesterday's delayed departures at [station] by cause code" → scheduled digest
 
 ### 5. Quality
 
 **Title:** Quality Assurance Manager (Maintenance)  
 **Duty:** Audit maintenance quality, SMS, and FAA compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Maintenance tracking system (confirm; e.g., AMOS, TRAX), SMS (confirm)
+**Systems:** Maintenance tracking system (confirm; e.g., AMOS, TRAX), QMS (confirm)
 
-1. *Daily:* "List open audit findings and corrective actions due this month" → Excel tracker
-2. *Analytical:* "Analyze repeat discrepancy trends by fleet type" → Excel tracker
-3. *Leadership:* "Prepare a quality summary deck for the Director of Maintenance" → PowerPoint deck
-4. *Daily:* "Gather this week's FAA correspondence and track responses" → Excel tracker
-5. *Analytical:* "Compare vendor repair station audit results" → Word doc
-6. *Leadership:* "Draft a notice to technicians on new documentation requirements" → draft email for approval
+- **Quick win:** "List open audit findings past their due date, with owner" → Excel workbook
+- **Hand-off:** "Gather last year's audit findings, this year's maintenance records sample and the FAA inspection letters, map them to the audit checklist, and prepare a readiness summary for the upcoming FAA audit" → Word doc
+- **Recurring:** "Every Friday, check which corrective actions closed this week and draft a status update to department heads" → email draft
 
 ### 6. Supply Chain/Procurement
 
 **Title:** Procurement & Fuel Manager  
 **Duty:** Source aircraft parts, fuel, catering, and ground services.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, ERP/procurement (confirm), fuel management system (confirm)
+**Systems:** ERP / procurement (confirm), fuel management system (confirm)
 
-1. *Daily:* "Summarize open AOG parts orders with expected delivery" → Excel tracker
-2. *Analytical:* "Analyze fuel cost per block hour by station" → Excel tracker
-3. *Leadership:* "Prepare a supplier review deck for the catering vendor" → PowerPoint deck
-4. *Daily:* "Gather supplier delay notices and affected aircraft" → Excel tracker
-5. *Analytical:* "Compare rotable repair costs across vendors" → Word doc
-6. *Leadership:* "Draft a renewal email to the ground handling vendor" → draft email for approval
+- **Quick win:** "Which AOG parts orders are still open and who's the vendor?" → Excel workbook
+- **Hand-off:** "Compare this quarter's fuel hedge results to spot prices, pull catering vendor on-time and cost data, and build the procurement review with the top three savings options" → PowerPoint deck
+- **Recurring:** "Every week, flag supplier contracts expiring in the next 90 days and draft renewal reminders to the contract owners" → email drafts
 
 ### 7. Safety/EHS
 
 **Title:** Director of Safety (SMS)  
 **Duty:** Lead safety management system, hazard reporting, and risk assessment.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, SMS/safety reporting system (confirm), FOQA data (confirm)
+**Systems:** SMS hazard reporting (confirm), FOQA/ASAP programs (confirm)
 
-1. *Daily:* "Compile last week's ASAP reports and open hazards" → Excel tracker
-2. *Analytical:* "Analyze unstable approach events by fleet and airport" → Excel tracker
-3. *Leadership:* "Build the quarterly safety review board deck" → PowerPoint deck
-4. *Daily:* "Gather ramp injury reports and track corrective actions" → Excel tracker
-5. *Analytical:* "Review safety report narratives to find emerging risks" → Word doc
-6. *Leadership:* "Draft a safety bulletin for all employees" → Teams post drafted for approval
+- **Quick win:** "Summarize this week's hazard reports by category and severity" → Word doc (one page)
+- **Hand-off:** "Pull six months of hazard reports, ASAP summaries and safety meeting notes, find emerging risks, and draft the safety review board package" → Word doc + PowerPoint deck
+- **Recurring:** "Every Monday, list new safety reports and open risk mitigations past due" → scheduled digest
+
+Related example skill: [safety-incident-brief](../skills/safety-incident-brief.md)
 
 ### 8. Field Service/Repair
 
 **Title:** Aircraft Maintenance Technician  
 **Duty:** Inspect, troubleshoot, and repair aircraft per maintenance programs.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Maintenance tracking system (confirm), electronic logbook (confirm)
+**Systems:** Maintenance tracking system (confirm), electronic logbook (confirm)
 
-1. *Daily:* "List aircraft with open MEL items and deferral expiration dates" → Excel tracker
-2. *Analytical:* "Analyze repeat write-ups by ATA chapter over 90 days" → Excel tracker
-3. *Leadership:* "Draft a shift turnover summary for the maintenance controller" → Word doc
-4. *Daily:* "Gather overnight check work packages and parts status" → Excel tracker
-5. *Analytical:* "Compare unscheduled removals by component" → Excel tracker
-6. *Leadership:* "Draft a parts request email for AOG aircraft" → draft email for approval
+- **Quick win:** "Which MEL deferrals on my aircraft expire in the next 3 days?" → Excel workbook
+- **Hand-off:** "For [tail number], gather the last 90 days of write-ups, logbook notes, shift handovers and engineering emails about this defect, and lay out the repeat-defect history before I start troubleshooting" → Word doc
+- **Recurring:** "At the end of each shift, draft my handover from today's work notes and open items" → Word doc
+
+Related example skill: [shift-handover-digest](../skills/shift-handover-digest.md)
 
 ### 9. Sales/Marketing
 
 **Title:** Network & Revenue Marketing Manager  
 **Duty:** Plan routes, market fares, and grow loyalty and corporate sales.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Revenue management system (confirm), CRM in Dynamics 365
+**Systems:** Revenue management system (confirm), Dynamics 365 Sales, Power BI
 
-1. *Daily:* "Gather corporate account RFP deadlines from email" → Excel tracker
-2. *Analytical:* "Analyze load factor and yield by route versus last year" → Excel tracker
-3. *Leadership:* "Build a corporate client review deck for [account]" → PowerPoint deck
-4. *Daily:* "Summarize competitor fare changes on key markets this week" → Word doc
-5. *Analytical:* "Compare loyalty program engagement by tier" → Excel tracker
-6. *Leadership:* "Draft a follow-up email to [account] after the contract review" → draft email for approval
+- **Quick win:** "Summarize what [corporate account] asked for in our last three meetings" → Word doc (one page)
+- **Hand-off:** "Pull load factor and yield for the new routes since launch, compare to the business case, read the sales team's notes, and build the route performance review" → PowerPoint deck
+- **Recurring:** "Before each corporate account review, gather spend, open issues and contract terms into a briefing" → Word doc
 
 ### 10. Customer Service
 
 **Title:** Customer Care Manager  
 **Duty:** Resolve passenger complaints, refunds, and DOT consumer compliance.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Customer service platform (confirm), reservations system (confirm; e.g., Amadeus, Sabre)
+**Systems:** Customer case system (confirm), reservations system (confirm)
 
-1. *Daily:* "Summarize today's top complaint themes and draft response templates" → draft email for approval
-2. *Analytical:* "Analyze refund requests and DOT complaints by cause this month" → Excel tracker
-3. *Leadership:* "Prepare a customer experience summary for leadership" → PowerPoint deck
-4. *Daily:* "Gather mishandled baggage claims and track resolution" → Excel tracker
-5. *Analytical:* "Compare NPS by route and cabin" → Excel tracker
-6. *Leadership:* "Draft a customer notice on irregular operations policy" → draft email for approval
+- **Quick win:** "What are the top five complaint themes this week?" → Word doc (one page)
+- **Hand-off:** "Group this week's complaints by theme, check which ones fall under DOT refund rules, and draft replies for the ten oldest cases" → Excel workbook + email drafts
+- **Recurring:** "Every Monday, check open refund cases against DOT deadlines and flag any at risk" → scheduled digest
+
+Related example skill: [customer-escalation-pack](../skills/customer-escalation-pack.md)
 
 ### 11. Operations/Facilities
 
 **Title:** Airport Facilities Manager  
 **Duty:** Manage gates, lounges, hangars, and airport facility contracts.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Facilities/work order system (confirm), gate management (confirm)
+**Systems:** Facilities work order system (confirm), airport authority portal (confirm)
 
-1. *Daily:* "List open facility work orders at [station] by priority" → Excel tracker
-2. *Analytical:* "Analyze gate utilization over four weeks" → Excel tracker
-3. *Leadership:* "Prepare a facilities capital plan deck" → PowerPoint deck
-4. *Daily:* "Gather lounge maintenance issues from email" → Excel tracker
-5. *Analytical:* "Compare facility cost per departure across stations" → Word doc
-6. *Leadership:* "Draft a Teams post on gate closures during construction" → Teams post drafted for approval
+- **Quick win:** "List open work orders for gates and jet bridges, oldest first" → Excel workbook
+- **Hand-off:** "Gather this year's lounge and gate contracts, utility invoices and outage reports, compare costs to budget, and prepare the facilities review with renewal recommendations" → PowerPoint deck
+- **Recurring:** "Each month, check facility contract renewal dates and draft notes to the contract owners" → email drafts
 
 ### 12. Engineering/R&D/Technology
 
 **Title:** Flight Operations Engineering / IT Manager  
 **Duty:** Manage flight planning, aircraft performance, and operations technology.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Flight planning system (confirm), EFB platform (confirm)
+**Systems:** Flight planning system (confirm), EFB management (confirm)
 
-1. *Daily:* "Summarize open IT incidents affecting operations" → Excel tracker
-2. *Analytical:* "Analyze fuel burn versus flight plan by fleet" → Excel tracker
-3. *Leadership:* "Prepare a technology roadmap update for executives" → PowerPoint deck
-4. *Daily:* "Gather pilot feedback on EFB updates" → Excel tracker
-5. *Analytical:* "Compare on-time performance impacts from system outages" → Word doc
-6. *Leadership:* "Draft a release notice for the flight planning update" → Teams post drafted for approval
+- **Quick win:** "What open EFB or flight planning tickets are affecting crews right now?" → Excel workbook
+- **Hand-off:** "Pull fuel burn data, pilot feedback and vendor notes on the new cost index settings, compare against plan, and write the performance recommendation" → Word doc
+- **Recurring:** "Before each systems change window, draft the crew notice with what's changing and who to contact" → Teams post draft
 
 ### 13. Executive
 
 **Title:** Chief Operating Officer  
 **Duty:** Lead airline operations, safety, reliability, and customer experience.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Operations control system (confirm), ERP (confirm)
+**Systems:** Power BI, operations dashboards (confirm)
 
-1. *Daily:* "Give me a daily brief on on-time performance, cancellations, and safety" → scheduled digest
-2. *Analytical:* "Analyze completion factor and delay drivers versus plan" → PowerPoint deck
-3. *Leadership:* "Draft my board update on operational reliability" → Word doc
-4. *Daily:* "Summarize customer escalations from leadership emails" → Word doc
-5. *Analytical:* "Compare reliability across hubs and explain differences" → Excel tracker
-6. *Leadership:* "Draft an all-employee message on holiday peak readiness" → draft email for approval
+- **Quick win:** "What are the three things I need to know before today's ops call?" → Word doc (one page)
+- **Hand-off:** "Pull this month's on-time performance, completion factor, safety highlights and customer complaint trends, and build the board operations update with the top risks" → PowerPoint deck
+- **Recurring:** "Every Friday, summarize the week's operational performance and any open escalations" → scheduled digest
 
 ### 14. Operations Control
 
 **Title:** Operations Control Center (OCC) Duty Manager  
 **Duty:** Manage irregular operations, aircraft swaps, and crew recovery.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, Operations control system (confirm), crew tracking (confirm)
+**Systems:** Operations control system (confirm), crew tracking (confirm)
 
-1. *Daily:* "Summarize overnight IROPS events and recovery actions" → Word doc
-2. *Analytical:* "Analyze delay propagation by hub over 30 days" → Excel tracker
-3. *Leadership:* "Draft a shift handover note for the next duty manager" → Word doc
-4. *Daily:* "Gather weather and ATC program impacts for today" → Word doc
-5. *Analytical:* "Compare crew legality issues during recent disruptions" → Excel tracker
-6. *Leadership:* "Draft a Teams post on today's de-icing plan" → Teams post drafted for approval
+- **Quick win:** "What changed overnight that I need to know before the 7am call?" → Word doc (one page)
+- **Hand-off:** "Pull the last 30 days of disruptions from email, Teams and the ops log, find which hubs keep spreading delays, and build the deck for Thursday's reliability review" → PowerPoint deck + Excel workbook
+- **Recurring:** "Every morning at 5:30, draft the IROPS handover from overnight events and leave it for my approval" → scheduled digest
 
 ### 15. Pilot / Flight Deck
 
 **Title:** Captain / First Officer  
 **Duty:** Operate flights safely, follow SOPs, manage flight deck duties.  
-**Sources:** Outlook, Teams chats, meeting transcripts, SharePoint/OneDrive, calendar, Dynamics 365, Power BI, EFB (confirm), crew scheduling app (confirm)
+**Systems:** EFB (confirm), crew scheduling app (confirm)
 
-1. *Daily:* "Gather my trip briefing package with NOTAMs and weather notes" → Word doc
-2. *Analytical:* "Summarize my recent fatigue reports and duty times" → Excel tracker
-3. *Leadership:* "Draft an ASAP-style report summary for my chief pilot" → draft email for approval
-4. *Daily:* "Collect fleet bulletins issued this month" → Word doc
-5. *Analytical:* "Compare my block hours versus limits" → Excel tracker
-6. *Leadership:* "Write a short post to my base channel about the SOP change" → Teams post drafted for approval
+- **Quick win:** "What fleet bulletins and SOP changes came out this month?" → Word doc (one page)
+- **Hand-off:** "For my trip next week, gather the pairing, any NOTAM notes and fleet bulletins shared by email, and the layover details into one trip briefing" → Word doc
+- **Recurring:** "At the end of each month, compare my block and duty hours against limits and flag anything close" → scheduled digest
 
 ## Top 5 custom skills to build first
 
-- **irops-recovery-brief** (Operations Control Center (OCC) Duty Manager; Chief Operating Officer): Gather disruption data → analyze delay causes → scheduled digest
-- **mel-deferral-tracker** (Aircraft Maintenance Technician; Quality Assurance Manager (Maintenance)): Collect MEL items → map expirations → Excel tracker
-- **safety-report-review** (Director of Safety (SMS)): Gather reports → identify emerging risks → Word doc
-- **route-performance-analysis** (Network & Revenue Marketing Manager; Revenue Accounting Manager): Pull route data → compute yield and margin → PowerPoint deck
-- **crew-training-expiry** (Crew Scheduling & HR Manager): Gather training records → flag expirations → drafted reminders for approval
+- **irops-recovery-brief** (OCC Duty Manager; Chief Operating Officer): gather overnight disruption data → analyze delay causes and recovery actions → scheduled digest
+- **mel-deferral-tracker** (Aircraft Maintenance Technician; Quality Assurance Manager): collect MEL items → map expirations → Excel workbook
+- **safety-report-review** (Director of Safety): gather hazard and ASAP reports → identify emerging risks → Word doc. Start from [safety-incident-brief](../skills/safety-incident-brief.md).
+- **route-performance-review** (Network & Revenue Marketing Manager; Revenue Accounting Manager): pull route data → compare yield and margin to plan → PowerPoint deck
+- **crew-training-expiry** (Crew Scheduling & HR Manager): gather training records → flag expirations → email drafts
 
 ## Top 5 connectors to demo
 
-- **Operations control system** (Operations Control Center (OCC) Duty Manager): A duty manager summarizes overnight IROPS before the morning call.
+- **Operations control system** (OCC Duty Manager): A duty manager summarizes overnight IROPS before the morning call.
 - **Maintenance tracking** (Aircraft Maintenance Technician): A technician lists MEL deferrals by aircraft.
 - **Crew scheduling** (Crew Scheduling & HR Manager; Flight Attendant): Crew scheduling flags training expirations.
 - **Reservations/customer service** (Customer Care Manager): Customer care drafts responses to top complaint themes.
@@ -240,7 +219,7 @@
 ## Business areas
 
 - **Flight Operations:** Captain / First Officer; Flight Operations Engineering / IT Manager
-- **Operations Control:** Operations Control Center (OCC) Duty Manager
+- **Operations Control:** OCC Duty Manager
 - **Airport/Ground Operations:** Station Manager / Ramp Supervisor; Airport Facilities Manager
 - **Inflight:** Flight Attendant
 - **Maintenance & Quality:** Aircraft Maintenance Technician; Quality Assurance Manager (Maintenance)
