@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID a5383d86-68df-401c-b7f2-f71b28cd0af2
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -37,7 +37,7 @@ url: Microsoft 365 Copilot Cost Management API overview - https://learn.microsof
       - Every spending policy: status, period and per-user limits, billing method, services
         turned on, groups, and email alert settings.
       - Problems worth a look: policies that aren't enabled, policies with no group, all-users
-        policies, and policies the Copilot Group Assignment Guide doesn't list.
+        policies, and policies the Copilot Access Governance Guide doesn't list.
 
     With -UserPrincipalName it also shows, for each person, every service they're covered for:
     which policy Microsoft picked, how much they've used this month (UTC), what's left, and
@@ -90,7 +90,7 @@ $cm    = "$graphEndpoint/beta/copilot/costManagement"
 $v1    = "$graphEndpoint/v1.0"
 $stamp = Get-Date -Format yyyyMMdd-HHmm
 
-# Policy names from the Copilot Group Assignment Guide, used to flag anything unexpected.
+# Policy names from the Copilot Access Governance Guide, used to flag anything unexpected.
 $guidePolicies = @(
     "Cowork Limited", "Cowork Unlimited", "Cowork Temporary Unlimited",
     "SharePoint OneDrive Advanced Work", "Work IQ API", "Managed Runtime", "Teams Phone Agent",

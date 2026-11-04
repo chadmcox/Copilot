@@ -43,7 +43,7 @@ Thresholds: per-user minimum 2,000 credits, inactive after 90 days. The user can
 
 ## Across the Cowork tiers
 
-Policy names come from the Copilot Group Assignment Guide.
+Policy names come from the Copilot Access Governance Guide.
 
 | Check | Severity | Fix |
 | --- | --- | --- |

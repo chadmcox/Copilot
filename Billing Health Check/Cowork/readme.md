@@ -158,7 +158,7 @@ Save, then copy the **OAuth client registration ID**.
 
 This writes **CopilotBillingHealth-Cowork.zip**. You can download just the script: if the `plugin` folder isn't next to it, the script downloads the plugin files from this repo on GitHub.
 
-In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose **Copilot Health Check Users** from the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md#copilot-health-check-users). Don't pick all users.
+In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose **Copilot Health Check Users** from the [Access Governance Guide](../../Access%20Governance%20Guide/readme.md#copilot-health-check-users). Don't pick all users.
 
 ### 6. Test it
 

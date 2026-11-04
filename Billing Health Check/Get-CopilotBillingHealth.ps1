@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID 7448633b-66d2-4ffa-8544-8fe7bb0a9904
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -81,7 +81,7 @@ param(
     [string]$Period = "D28",
     [string]$OutputFolder  = ".\CopilotBillingHealth-$(Get-Date -Format yyyyMMdd-HHmm)",
 
-    # Policy names used for the Cowork tier checks (from the Copilot Group Assignment Guide).
+    # Policy names used for the Cowork tier checks (from the Copilot Access Governance Guide).
     [string]$LimitedPolicy   = "Cowork Limited",
     [string]$UnlimitedPolicy = "Cowork Unlimited",
     [string]$TempPolicy      = "Cowork Temporary Unlimited",

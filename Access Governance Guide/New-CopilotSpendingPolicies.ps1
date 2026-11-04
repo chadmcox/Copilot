@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID 3e98f86b-cb9e-4ee4-b474-f61fe91ff970
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -19,13 +19,13 @@ and (iii) to indemnify, hold harmless, and defend Us and Our suppliers from and
 against any claims or lawsuits, including attorneys` fees, that arise or result
 from the use or distribution of the Sample Code..
 .description
-Creates the Copilot Credits spending policies from the Group Assignment Guide with the Graph cost management API.
+Creates the Copilot Credits spending policies from the Access Governance Guide with the Graph cost management API.
 url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-365/copilot/extensibility/api/admin-settings/cost-management/spendingpolicy-create
 #>
 
 <#
 .SYNOPSIS
-    Creates the Copilot Credits spending policies from the Copilot Group Assignment Guide with
+    Creates the Copilot Credits spending policies from the Copilot Access Governance Guide with
     the new Microsoft Graph cost management API (beta, MC1521616). Graph only
     (Invoke-MgGraphRequest).
 
