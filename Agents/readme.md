@@ -2,9 +2,9 @@
 
 Updated Oct 26, 2026 · @Chad Cox
 
-> **Start here: do the Group Assignment Guide first.**
-> This guide is step 2. It uses groups and admin roles that the [Copilot Group Assignment Guide](../Group%20Assignment%20Guide/readme.md) sets up.
-> 1. Follow the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md). Run its scripts to create the Copilot groups, access packages and PIM admin groups.
+> **Start here: do the Access Governance Guide first.**
+> This guide is step 2. It uses groups and admin roles that the [Copilot Access Governance Guide](../Access%20Governance%20Guide/readme.md) sets up.
+> 1. Follow the [Access Governance Guide](../Access%20Governance%20Guide/readme.md). Run its scripts to create the Copilot groups, access packages and PIM admin groups.
 > 2. Then come back here to control who can build, share, publish and receive agents.
 
 This guide explains who can **build** Copilot agents, who can **share and publish** them, and how to **give agents to people** in Microsoft 365.
@@ -197,7 +197,7 @@ From mid-November 2026, **Create an agent** in SharePoint and OneDrive opens Age
 | Teams app setup and permission policies | Teams Administrator | Copilot Teams Admin |
 | Restricted content discovery for SharePoint sites | SharePoint Administrator | Copilot SharePoint Admin |
 
-All of these groups use PIM, so people turn the role on only when they need it. See `New-CopilotAdminPim.ps1` in the Group Assignment Guide folder.
+All of these groups use PIM, so people turn the role on only when they need it. See `New-CopilotAdminPim.ps1` in the Access Governance Guide folder.
 
 ## Sources
 

@@ -1,4 +1,4 @@
-# Copilot Group Assignment Guide
+# Copilot Access Governance Guide
 
 Updated Oct 26, 2026 · @Chad Cox
 

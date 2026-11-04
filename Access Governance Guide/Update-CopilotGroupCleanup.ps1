@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID c57bb82e-5aa9-4dda-8923-e307eecea6f9
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -19,7 +19,7 @@ and (iii) to indemnify, hold harmless, and defend Us and Our suppliers from and
 against any claims or lawsuits, including attorneys` fees, that arise or result
 from the use or distribution of the Sample Code..
 .description
-One-off cleanup of the Copilot groups from the first version of the Group Assignment Guide.
+One-off cleanup of the Copilot groups from the first version of the Access Governance Guide.
 url: Set up usage-based billing for Copilot Credits - https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-setup
 #>
 

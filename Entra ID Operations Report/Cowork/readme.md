@@ -177,7 +177,7 @@ Save, then copy the **OAuth client registration ID**. (`e8c77dc2-...` is the Mic
 
 This writes **EntraIdOperations-Cowork.zip**. If the `plugin` folder isn't next to the script, it downloads the plugin files from this repo on GitHub.
 
-In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose **Copilot Entra ID Operations Reader** from the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md#copilot-entra-id-operations-reader). Don't pick all users.
+In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Upload**, choose the zip, and on **Scope users** pick **Specific users or groups**. Choose **Copilot Entra ID Operations Reader** from the [Access Governance Guide](../../Access%20Governance%20Guide/readme.md#copilot-entra-id-operations-reader). Don't pick all users.
 
 ### 6. Test it
 

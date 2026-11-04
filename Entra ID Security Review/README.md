@@ -57,9 +57,9 @@ Some of the guidance is process, on-premises or Defender, and some Graph data ha
 
 ## Who runs it: Copilot Entra ID Operations Reader
 
-The review reads the same things as the Entra ID Operations Report, with the same role, so it uses the same group: **Copilot Entra ID Operations Reader**, a role-assignable group under PIM that holds **Global Reader**. See [Who runs it](../Entra%20ID%20Operations%20Report/README.md#who-runs-it-copilot-entra-id-operations-reader) and the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md#copilot-entra-id-operations-reader).
+The review reads the same things as the Entra ID Operations Report, with the same role, so it uses the same group: **Copilot Entra ID Operations Reader**, a role-assignable group under PIM that holds **Global Reader**. See [Who runs it](../Entra%20ID%20Operations%20Report/README.md#who-runs-it-copilot-entra-id-operations-reader) and the [Access Governance Guide](../Access%20Governance%20Guide/readme.md#copilot-entra-id-operations-reader).
 
-1. **Create the group** with `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1` in the Group Assignment Guide, if you haven't for the Operations Report. People activate it for 8 hours with MFA, a reason and approval.
+1. **Create the group** with `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1` in the Access Governance Guide, if you haven't for the Operations Report. People activate it for 8 hours with MFA, a reason and approval.
 2. **Scope the Cowork plugin to the group** when you upload it: Agents > Tools > Registry > Upload > Scope users > Specific users or groups > Copilot Entra ID Operations Reader.
 3. Members also need a Microsoft 365 Copilot license and Cowork access, or a GitHub Copilot plan for VS Code. The Enterprise MCP server acts as the signed-in person, so they see only what their activated role allows.
 

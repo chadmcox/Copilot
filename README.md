@@ -8,7 +8,7 @@ Do these in order.
 
 | # | Folder | What it is | What you get |
 | --- | --- | --- | --- |
-| 1 | [Group Assignment Guide](Group%20Assignment%20Guide/readme.md) | Scripts and steps that create the Copilot groups, access packages and PIM admin groups, and say which admin center setting each group goes in | Copilot access managed through groups, so you add or remove people in one place |
+| 1 | [Access Governance Guide](Access%20Governance%20Guide/readme.md) | Scripts and steps that create the Copilot groups, access packages and PIM admin groups, and say which admin center setting each group goes in | Copilot access managed through groups, so you add or remove people in one place |
 | 2 | [Agents](Agents/readme.md) | The Agent Delegation Guide: who can build, share, publish and receive agents, using the groups from step 1 | Agent creation and sharing limited to the right people |
 
 ## Check that it's set up right

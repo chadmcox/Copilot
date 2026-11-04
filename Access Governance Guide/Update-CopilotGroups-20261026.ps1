@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID 93e49570-cee0-4118-a74e-1e17290e21ec
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -19,14 +19,14 @@ and (iii) to indemnify, hold harmless, and defend Us and Our suppliers from and
 against any claims or lawsuits, including attorneys` fees, that arise or result
 from the use or distribution of the Sample Code..
 .description
-Dated one-off that brings existing Copilot groups up to the Oct 26, 2026 Group Assignment Guide.
+Dated one-off that brings existing Copilot groups up to the Oct 26, 2026 Access Governance Guide.
 url: Manage Microsoft Copilot settings in the M365 admin center - https://learn.microsoft.com/microsoft-365/copilot/microsoft-365-copilot-page
 #>
 
 <#
 .SYNOPSIS
     Dated one-off: brings the "Copilot*" groups already in the tenant up to the Oct 26, 2026
-    version of the Copilot Group Assignment Guide.
+    version of the Copilot Access Governance Guide.
       1. Renames groups whose names changed in this version (none this week - the table is empty).
       2. Refreshes descriptions that are now wrong (setting renames, Copilot Code, SpaceXAI).
       3. Deletes groups the design no longer uses (none this week - Update-CopilotGroupCleanup.ps1

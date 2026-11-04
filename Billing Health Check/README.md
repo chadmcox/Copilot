@@ -74,7 +74,7 @@ Two checks work in opposite directions because of this:
 
 Put the people who run the health checks in one group: **Copilot Health Check Users**. The same group runs both the [Billing](../Billing%20Health%20Check/README.md) and [Agent and Tools](../Agent%20and%20Tools%20Health%20Check/README.md) health checks.
 
-1. **Create it as a role-assignable security group, and put it under PIM.** `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1` in the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md#copilot-health-check-users) do both. The roles sit on the group, so Groups Administrators and User Administrators can't change its members (only Global Administrators, Privileged Role Administrators and the group's owners can; give it no owners). People activate it for 8 hours with MFA, a reason and approval instead of holding reader roles all the time. Microsoft recommends approval for groups used to activate Entra roles.
+1. **Create it as a role-assignable security group, and put it under PIM.** `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1` in the [Access Governance Guide](../Access%20Governance%20Guide/readme.md#copilot-health-check-users) do both. The roles sit on the group, so Groups Administrators and User Administrators can't change its members (only Global Administrators, Privileged Role Administrators and the group's owners can; give it no owners). People activate it for 8 hours with MFA, a reason and approval instead of holding reader roles all the time. Microsoft recommends approval for groups used to activate Entra roles.
 2. **Give the group reader roles only** (table below). Prefer these to Global Reader, which reads the whole tenant.
 3. **Scope the Cowork plugin to the group** when you upload it: Agents > Tools > Registry > Upload > Scope users > Specific users or groups > Copilot Health Check Users.
 4. Members also need a Microsoft 365 Copilot license and Cowork access to run the check in Copilot Cowork. The Enterprise MCP server acts as the signed-in person, so they see only what their activated roles allow.
@@ -135,7 +135,7 @@ Each finding has a severity, a reason and a fix. Thresholds (2,000 credits, 80%,
 | Billing method is `notSpecified` | Spending | Medium | Pick prepaid or pay-as-you-go |
 | Several services share one resource group | Billing | Low | Split them, so each team's costs are separate |
 | Resource group has no cost owner or business unit tags | Billing | Low | Tag it |
-| Policy isn't in the [Group Assignment Guide](../Group%20Assignment%20Guide/readme.md) | Spending | Low | Document it, or retire it |
+| Policy isn't in the [Access Governance Guide](../Access%20Governance%20Guide/readme.md) | Spending | Low | Document it, or retire it |
 
 ### Group hygiene
 
@@ -180,11 +180,11 @@ No API shows these, so the report lists them as a checklist:
 ## 3. Outputs
 
 - **Score for each policy** from 0 to 100, shown red, amber or green. Each High finding takes off 25, each Medium 10 and each Low 3.
-- **Interactive HTML report** (score dial, policy cards, filters, search, CSV export, print) **and CSV files**, with each fix linked to the right part of the Group Assignment Guide. A Power BI report can read the same CSV files later.
+- **Interactive HTML report** (score dial, policy cards, filters, search, CSV export, print) **and CSV files**, with each fix linked to the right part of the Access Governance Guide. A Power BI report can read the same CSV files later.
 - **The same check in Copilot Cowork.** The report ends with a ready-to-paste prompt and what it returns. See [Cowork/readme.md](Cowork/readme.md).
 - **Weekly change list** compared with last week: new problems, fixed problems, and changes in group size and spend.
 - **Fix mode, off by default.** It uses the tools you already have:
-  - Policy settings: `New-CopilotSpendingPolicies.ps1 -UpdateExisting` in the [Group Assignment Guide folder](../Group%20Assignment%20Guide).
+  - Policy settings: `New-CopilotSpendingPolicies.ps1 -UpdateExisting` in the [Access Governance Guide folder](../Access%20Governance%20Guide).
   - Stale members: removed through their access package, not straight from the group, so access reviews stay accurate.
   - Missing owners: a small new script with `-WhatIf` and an approval switch.
 - **Privacy.** The reports show what each person spends. Save them outside this repo and treat them as sensitive.

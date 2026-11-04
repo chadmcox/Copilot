@@ -115,7 +115,7 @@ Open a terminal in the folder where you want the results, run `copilot`, and ask
 
 - Approve each terminal command and tool call yourself. Don't turn on auto-approve for this workspace.
 - Copilot drafts notes to group owners but doesn't send them.
-- Fix mode isn't part of this skill. Make changes with the [Group Assignment Guide](../../Group%20Assignment%20Guide/readme.md) scripts.
+- Fix mode isn't part of this skill. Make changes with the [Access Governance Guide](../../Access%20Governance%20Guide/readme.md) scripts.
 
 ## Troubleshooting
 
