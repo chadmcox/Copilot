@@ -32,7 +32,7 @@ So yes: VS Code needs its own setup (below). The CLI needs nothing extra once th
 
 - **VS Code** with the **GitHub Copilot** extension, signed in to a GitHub account with Copilot, and Chat in **Agent** mode.
 - **PowerShell 7** (or Windows PowerShell 5.1) with the **Microsoft.Graph.Authentication** module: `Install-Module Microsoft.Graph.Authentication -Scope CurrentUser`.
-- Membership in **Copilot Health Check Users**, activated in PIM before you run the check. See [Who runs it](../README.md#who-runs-it-copilot-health-check-users). The script needs Security Reader for Defender; without it, run with `-SkipDefender`.
+- Membership in **Copilot Health Check Users**, activated in PIM before you run the check. See [Who runs it](../README.md#who-runs-it-copilot-health-check-users). The script needs Security Reader for Defender; without it, run with `-SkipDefender`. It needs Reports Reader for Copilot agent adoption; without it, run with `-SkipCopilotUsage`.
 - For the live Enterprise MCP way only:
   - The tenant setup below, done once by an admin.
   - On **Copilot Business or Enterprise**, your GitHub org or enterprise must allow the **MCP servers in Copilot** policy.
@@ -98,7 +98,7 @@ Run the agent and tools health check with the script. Use the Global cloud and s
 
 Copilot runs `scripts/Get-AgentToolsHealth.ps1 -Environment Global -OutputFolder ...` in the terminal, after you approve it. Finish the sign-in in the browser window. When it's done, Copilot reads Findings.csv and Scorecard.csv, gives you the score per area, the counts and the top 3 fixes, and points you to **Report.html**.
 
-Use **USGov** for GCC High or **USGovDoD** for DoD. Add *"stale after 60 days"* (`-StaleDays 60`), *"skip Defender"* (`-SkipDefender`) or *"no Agent 365 license"* (`-SkipPackages`) as needed.
+Use **USGov** for GCC High or **USGovDoD** for DoD. Add *"stale after 60 days"* (`-StaleDays 60`), *"skip Defender"* (`-SkipDefender`), *"skip Copilot usage"* (`-SkipCopilotUsage`) or *"no Agent 365 license"* (`-SkipPackages`) as needed.
 
 ### Way 2: live through the Enterprise MCP
 

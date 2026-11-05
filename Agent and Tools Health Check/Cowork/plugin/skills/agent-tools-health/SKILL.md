@@ -10,7 +10,7 @@ description: |
 license: MIT
 metadata:
   author: Chad Cox
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Agent and tools health check
@@ -105,6 +105,7 @@ fails, stop and tell the user the connector can't read the tenant, with the erro
 | Sponsors and owners (are they active?) | `GET /beta/users/{id}?$select=id,displayName,accountEnabled`. A 404 means the person is gone |
 | Groups from Packages.csv `groupIds` | `GET /beta/groups/{id}?$select=id,displayName,description` and `GET /beta/groups/{id}/owners?$select=id` |
 | Conditional Access | `GET /beta/identity/conditionalAccess/policies?$select=displayName,state,conditions,grantControls` |
+| Copilot agent adoption (last 90 days) | `GET /beta/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D90')`. Find the agent activity date column by name (it varies by tenant/version) rather than assuming one; count users active on an agent in the last 90 days against the total rows |
 | Agents without Agent ID | `GET /beta/servicePrincipals?$filter=tags/any(t:t eq 'AgentCreatedBy:CopilotStudio')&$select=id,appId,displayName,accountEnabled,tags,createdDateTime`, then the same for `AgenticApp`, `AIAgentBuilder` and `AgenticInstance`, and `tags/any(t:startswith(t,'power-virtual-agents-'))`. Leave out IDs that are agent identities or blueprint principals. Then owners and last sign-in as above |
 
 Not readable through the Enterprise MCP: the agent attestation date (`.../lifecycle` returns 403),

@@ -1,6 +1,6 @@
 # Agent and Tools Health Check
 
-Updated Oct 31, 2026
+Updated Nov 5, 2026
 
 A read-only check of how well your Copilot agents and tools, Entra agent identities and agent identity blueprints are set up, with a score per area and a fix for every finding. It works like the [Copilot Billing Health Check](../Billing%20Health%20Check/README.md): run it in **Copilot Cowork**, or from PowerShell.
 
@@ -20,6 +20,7 @@ A read-only check of how well your Copilot agents and tools, Entra agent identit
 .\Get-AgentToolsHealth.ps1 -PackagesOnly    # just Packages.csv and DefenderAgents.csv, to attach in Cowork
 .\Get-AgentToolsHealth.ps1 -SkipPackages    # no Agent 365 license
 .\Get-AgentToolsHealth.ps1 -SkipDefender    # no Defender (or no Security Reader)
+.\Get-AgentToolsHealth.ps1 -SkipCopilotUsage  # no Reports Reader, or no Microsoft 365 Copilot licenses
 .\Get-AgentToolsHealth.ps1 -Environment USGov  # GCC High, without the cloud question
 ```
 
@@ -36,7 +37,7 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 | **Agents and tools** | Available to or installed for everyone instead of groups (High). Assigned to people directly; groups with fewer than two owners or no description. Unclear name, missing description. Old pending requests. Not used in 90 days |
 | **Agent identities** | No sponsor, or a sponsor or owner disabled or gone (High). High-privilege Graph permissions such as Mail.Send or Directory.ReadWrite.All (High). One sponsor and no owner. Unclear name. No sign-in for 90 days, or never. Agent user accounts |
 | **Blueprints** | Inheritable permissions set to All allowed (High). No sponsor (High). Client secrets instead of certificates or federated credentials, expiring credentials. Unclear name, no description. Nothing active under it |
-| **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents |
+| **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents. Agents exist in the catalog, but almost no licensed Microsoft 365 Copilot user used one in the last 90 days (Copilot usage report) |
 | **Discovered agents** (Microsoft Defender, KQL) | Agents Defender found (`AgentsInfo`: Copilot Studio, Foundry, third-party) that aren't in the Agent 365 registry, especially ones available to everyone (High) or with no owner. Cloud agents with no Entra Agent ID. **MCP servers** the agents use: over plain http (High), or on a host outside this script's list of Microsoft domains (Low; check it against your approved tools). Local AI agents found on devices (needs Defender for Endpoint Plan 2). Without the Agent 365 catalog, Defender's list becomes the agent list |
 | **Agents without Agent ID** | Older Copilot Studio agents still running as classic service principals (found by their `AgentCreatedBy:CopilotStudio`, `AgenticApp` and similar tags), which miss Agent ID controls such as agent Conditional Access and lifecycle policies. There's no in-place migration. Microsoft's guidance: retire unused ones, recreate lightly used ones with Agent ID, and leave busy production agents until Microsoft ships an automated migration path |
 
@@ -64,10 +65,11 @@ The checks follow two recent government and industry sources, plus Microsoft's o
 | Agent ID instead of classic service principals | 5.5, 5.6 | Design and configuration; accountability |
 | Credentials and Conditional Access for agents | 4.1, 6.7 | Design and configuration; behavioral |
 | Stale agents and tools | 5.3, 6.2 | Accountability |
+| Agents exist, but almost no licensed Copilot user used one in 90 days | 5.3, 6.2 | Accountability |
 
 **Stale threshold:** CIS Safeguard 5.3 says to delete or disable dormant accounts after **45 days** of inactivity, where supported. The default here is 90; run `-StaleDays 45` to match CIS. (Entra's own default inactivity policy notifies at 60 days and disables at 90.)
 
-**Not checked here:** logging of agent actions (CIS 8.2; confirm Purview audit and Defender are on), human oversight of high-impact actions (set in each agent's design), and which tools are approved (Agents > Tools; block unused ones with [Agent and Tools Cleanup](../Agent%20and%20Tools%20Cleanup/README.md)).
+**Not checked here:** logging of agent actions (CIS 8.2; confirm Purview audit and Defender are on — Microsoft Graph's AI interaction change notifications need application-only permissions this script's delegated sign-in can't use), human oversight of high-impact actions (set in each agent's design), and which tools are approved (Agents > Tools; block unused ones with [Agent and Tools Cleanup](../Agent%20and%20Tools%20Cleanup/README.md)).
 
 The safeguard titles are CIS's. **Which safeguard and which CISA category each check maps to is this repo's judgment**, not something CIS or CISA published. Check it against the guides before you cite it in an audit.
 
@@ -103,7 +105,7 @@ Put the people who run the health checks in one group: **Copilot Health Check Us
 | --- | --- |
 | **AI Reader** | Copilot agents and settings; agent identities, blueprints, blueprint principals, sponsors, owners; their app permissions and delegated grants; groups, users and agent users. *See the note below* |
 | **Security Reader** | Sign-in activity, Conditional Access policies (Microsoft's least-privileged role for reading them), and Microsoft Defender advanced hunting (AgentsInfo, CloudAppEvents) |
-| **Reports Reader** | Sign-in activity (also covered by Security Reader) |
+| **Reports Reader** | Sign-in activity (also covered by Security Reader); the Microsoft 365 Copilot usage report (Copilot agent adoption) |
 
 **AI Reader and agent identities: test it.** The [Entra roles reference](https://learn.microsoft.com/entra/identity/role-based-access-control/permissions-reference#ai-reader) gives AI Reader read access to agent identities, blueprints and blueprint principals. But the Graph pages for listing them ([agent identities](https://learn.microsoft.com/graph/api/agentidentity-list?view=graph-rest-beta), [blueprints](https://learn.microsoft.com/graph/api/agentidentityblueprint-list?view=graph-rest-beta), [blueprint principals](https://learn.microsoft.com/graph/api/agentidentityblueprintprincipal-list)) name only **Agent ID Administrator** for people who don't own them. If those reads return 403 with AI Reader active, that's the gap: use Global Reader for the run, or activate Copilot Agent ID Admin.
 
@@ -113,7 +115,7 @@ Put the people who run the health checks in one group: **Copilot Health Check Us
 
 ## Permissions (PowerShell)
 
-Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentity.Read.All, AgentIdentityBlueprint.Read.All, AgentIdentityBlueprintPrincipal.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All. Roles: activate **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader) in PIM for the run; see above. The catalog also needs a Microsoft Agent 365 license or Microsoft 365 E7.
+Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentity.Read.All, AgentIdentityBlueprint.Read.All, AgentIdentityBlueprintPrincipal.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All, Reports.Read.All. Roles: activate **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader) in PIM for the run; see above. The catalog also needs a Microsoft Agent 365 license or Microsoft 365 E7. Copilot agent adoption needs at least one Microsoft 365 Copilot license in the tenant; skip it with `-SkipCopilotUsage`.
 
 Only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Microsoft.Graph.Authentication), Graph beta, Windows PowerShell 5.1 and PowerShell 7.
 
@@ -141,15 +143,16 @@ The output files name agents, groups and permissions. Keep them private; the `.g
 - [runHuntingQuery](https://learn.microsoft.com/graph/api/security-security-runhuntingquery)
 - [Agent 365 observability attribute reference](https://learn.microsoft.com/microsoft-agent-365/developer/observability-attribute-reference) (CloudAppEvents fields) and [Discover local AI agents](https://learn.microsoft.com/defender-endpoint/discover-local-ai-agents)
 - [Agent settings in the Microsoft 365 admin center](https://learn.microsoft.com/microsoft-agent-365/admin/agent-settings) and [Restrict who can create agents](https://learn.microsoft.com/entra/identity/role-based-access-control/delegate-app-roles#restrict-who-can-create-applications-and-agents)
+- [Get Microsoft 365 Copilot usage report](https://learn.microsoft.com/graph/api/reportroot-getmicrosoft365copilotusageuserdetail) (Copilot agent adoption)
 
 ## What's verified and what isn't
 
-Checked against Microsoft Learn, CIS and published summaries of the CISA guidance on Oct 31, 2026.
+Checked against Microsoft Learn, CIS and published summaries of the CISA guidance on Oct 31, 2026. Copilot agent adoption (the Microsoft 365 Copilot usage report) added and checked against Microsoft Learn on Nov 5, 2026.
 
-**Confirmed in Microsoft docs:** the Graph endpoints and their scopes; the AgentsInfo columns and the `LocalAgents` platform; the CloudAppEvents action types and the TargetAgentId/AgentId fields; the Copilot Studio tags and that there's no in-place migration; inheritable permissions' All allowed pattern; the inactivity policy path and its 60/90/455 days; the setting names on the manual checklist; the plugin upload and scoping path; the roles for advanced hunting, sign-in activity and reading Conditional Access; and Agent 365 being included in Microsoft 365 E7.
+**Confirmed in Microsoft docs:** the Graph endpoints and their scopes; the AgentsInfo columns and the `LocalAgents` platform; the CloudAppEvents action types and the TargetAgentId/AgentId fields; the Copilot Studio tags and that there's no in-place migration; inheritable permissions' All allowed pattern; the inactivity policy path and its 60/90/455 days; the setting names on the manual checklist; the plugin upload and scoping path; the roles for advanced hunting, sign-in activity and reading Conditional Access; Agent 365 being included in Microsoft 365 E7; and the `getMicrosoft365CopilotUsageUserDetail` endpoint, its `Reports.Read.All` scope and the roles that can call it (including Reports Reader).
 
 **Confirmed with CIS:** the companion guides' date, the safeguard titles, 5.3's 45 days and 5.5's quarterly reviews.
 
-**This repo's own choices, not Microsoft's or CIS's:** the unclear-name and high-privilege lists, the Microsoft domain list for MCP hosts, severities and scores, the 90-day default, and the CIS and CISA mapping.
+**This repo's own choices, not Microsoft's or CIS's:** the unclear-name and high-privilege lists, the Microsoft domain list for MCP hosts, severities and scores, the 90-day default, the 5%/20-user adoption threshold, and the CIS and CISA mapping.
 
-**Not confirmed:** whether AI Reader is enough for the agent identity reads (see the note above) and for the Agent 365 catalog; the join from CloudAppEvents to AgentsInfo on appId; and the CISA details, which come from summaries because the cisa.gov page couldn't be opened.
+**Not confirmed:** whether AI Reader is enough for the agent identity reads (see the note above) and for the Agent 365 catalog; the join from CloudAppEvents to AgentsInfo on appId; the CISA details, which come from summaries because the cisa.gov page couldn't be opened; and the exact JSON property name of the usage report's agent-activity-date column — Microsoft's docs confirm the report has one (v2, "Copilot Agent Last Activity Date") but not its camelCase name, so the script finds it by matching property names instead of a hard-coded one, and skips the check if it can't find a match.

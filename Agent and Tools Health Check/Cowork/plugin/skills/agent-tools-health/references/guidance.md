@@ -46,7 +46,8 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | No policy blocking high-risk agents | 6.7 | Behavioral |
 | Unclear name, missing description | 2.1, 5.5 | Accountability |
 | Not used or no sign-in for the stale period; blueprint with nothing active | 5.3, 6.2 | Accountability |
-| Pending request older than 14 days | 6.1 | None |
+| Agents exist, but almost no licensed Microsoft 365 Copilot user used one in 90 days (Copilot usage report) | 5.3, 6.2 | Accountability |
+| Pending request older than 14 days; blocked but still has a pending request | 6.1 | None |
 | Found by Defender but not in the registry | 1.1, 2.1, 2.3 | Accountability |
 | Local AI agent on devices | 2.1, 2.3, 2.5 | Design and configuration |
 | MCP server reached over http (no TLS) | 3.10 | Design and configuration |
@@ -55,6 +56,6 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 
 ## Not checked here, but in the guidance
 
-- **Logging and monitoring** (CISA's accountability category; CIS 8.2 Collect Audit Logs): confirm Purview audit is on and Defender monitors agent activity.
+- **Logging and monitoring** (CISA's accountability category; CIS 8.2 Collect Audit Logs): confirm Purview audit is on and Defender monitors agent activity. Microsoft Graph's AI interaction change notifications (`copilot/interactionHistory/getAllEnterpriseInteractions` subscriptions, `AiEnterpriseInteraction.Read.All`) could feed a compliance capture of agent conversations, but that permission is application-only and `GET /subscriptions` only returns subscriptions owned by the calling app; this script's delegated Microsoft Graph PowerShell sign-in can't reliably check it, so it isn't a script check here.
 - **Human oversight of high-impact actions** (CIS agent guide: governed autonomy): check in each agent's design (Copilot Studio, Foundry), not through Graph.
 - **Approved tools** (CIS MCP guide: secure tool access): this check flags MCP servers over http and on hosts outside this repo's Microsoft domain list, from Defender's AgentsInfo. Use **Agents > Tools** to allow only approved MCP servers, and the Agent and Tools Cleanup scripts to block unused ones.

@@ -1,6 +1,6 @@
 # Rules
 
-Thresholds: stale after 90 days, credential warning 30 days before expiry, pending requests older than 14 days. The user can change them in the prompt.
+Thresholds: stale after 90 days, credential warning 30 days before expiry, pending requests older than 14 days. The user can change them in the prompt. Copilot agent adoption uses a fixed 90-day usage report and a 5% threshold, and isn't one of the prompt-configurable thresholds.
 
 **Unclear name** (this repo's list, not Microsoft's; Microsoft recommends a naming convention but publishes no word list): empty, fewer than 4 characters, or contains a word starting with *test*, *demo*, *sample* or *sandbox*, or the words *temp*, *tmp*, *copy*, *draft*, *POC*, *untitled*, *dummy*, *delete me*, *do not use*; or starts with *new agent*, *my agent*, *new plugin*, *my bot* and similar; or ends with a number after agent/plugin/skill/bot (*Agent 2*) or a copy marker (*(1)*). For agent identities, ignore the " (Microsoft Copilot Studio)" suffix before checking.
 
@@ -29,6 +29,7 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 | `requestStatus` is pending and `lastModifiedDateTime` is more than 14 days ago | Low | Usage | Approve or reject it |
 | Custom agent whose `elementTypes` include customEngine or bot, with no `agentIdentityId` | Low | Identity | If it's a custom agent you own, move it to Agent ID so it gets a sponsor, Conditional Access and lifecycle controls |
 | Not blocked, no `activeUsers30d`, `lastUsedDateTime` empty or older than 90 days, and `lastModifiedDateTime` older than 90 days | Medium | Usage | Block it, or run Agent and Tools Cleanup |
+| `isBlocked` is true and `requestStatus` is still pending | Low | Access | Tell the requester why it's blocked, or unblock it if that's no longer accurate |
 
 ## Agent identities
 
@@ -66,6 +67,7 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 | No Conditional Access policy targets agent identities (`conditions.clientApplications.includeAgentIdServicePrincipals` or `agentIdServicePrincipalFilter`, `conditions.agents`, or `conditions.agentIdRiskLevels`) | High | Security | Create agent policies (start in report-only): block high-risk agents, and limit what non-production agents reach |
 | Agent policies exist, but none is `enabled` | Medium | Security | Review the report-only results, then turn them on |
 | No enabled policy with `agentIdRiskLevels` including high and a `block` grant | Medium | Security | Add a policy that blocks agent identities at high risk |
+| Agents exist in the catalog, but fewer than 5% of licensed Microsoft 365 Copilot users used one in the last 90 days, out of at least 20 reported users (Microsoft 365 Copilot usage report, `getMicrosoft365CopilotUsageUserDetail`) | Low | Usage | Check that agents are pinned and discoverable, and that people know they exist; recheck after any awareness push |
 
 ## Discovered agents (from DefenderAgents.csv)
 
@@ -98,7 +100,7 @@ Older Copilot Studio agents run as ordinary service principals. Find them by the
 
 ## Scoring
 
-Every item starts at 100: High −25, Medium −10, Low −3 (Info 0), never below 0. An area's score is the average of its items' scores; an area with no items scores 100. Rating: Green 80+, Amber 50–79, Red under 50. The Tenant area has one item, "Conditional Access". Discovered agents and Agents without Agent ID only appear when there is data for them.
+Every item starts at 100: High −25, Medium −10, Low −3 (Info 0), never below 0. An area's score is the average of its items' scores; an area with no items scores 100. Rating: Green 80+, Amber 50–79, Red under 50. The Tenant area has two items, "Conditional Access" and "Copilot agent adoption" (the second only when the Copilot usage report was read). Discovered agents and Agents without Agent ID only appear when there is data for them.
 
 ## Well-governed funnel (agent identities)
 

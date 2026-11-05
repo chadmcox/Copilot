@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID e67ca9ab-061f-4c62-b8ea-59d9c024d1b6
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -50,6 +50,9 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
       - Agents without Agent ID: older Copilot Studio agents that run as classic
         service principals (tags AgentCreatedBy:CopilotStudio, AgenticApp, AIAgentBuilder,
         AgenticInstance, power-virtual-agents-*), not as Entra agent identities.
+      - Copilot agent adoption: agents are in the catalog, but almost no licensed Microsoft 365
+        Copilot user has used one in the last 90 days (the Copilot usage report). Use -SkipCopilotUsage
+        without Reports Reader, or if the tenant has no Microsoft 365 Copilot licenses.
 
     Scores: every item starts at 100 (High -25, Medium -10, Low -3). Each area's score is the
     average of its items. Green 80+, Amber 50-79, Red under 50.
@@ -64,13 +67,15 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
     Permissions (delegated): CopilotPackages.Read.All (Agent 365 license, AI Administrator),
     Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All (sign-ins),
     User.Read.All, Group.Read.All, Policy.Read.All (Conditional Access), ThreatHunting.Read.All
-    (Defender advanced hunting; Security Reader role). Use -SkipDefender without Defender.
+    (Defender advanced hunting; Security Reader role), Reports.Read.All (Microsoft 365 Copilot
+    usage report; Reports Reader role). Use -SkipDefender without Defender, -SkipCopilotUsage
+    without Reports Reader or Microsoft 365 Copilot licenses.
 
 .EXAMPLE
     .\Get-AgentToolsHealth.ps1
     .\Get-AgentToolsHealth.ps1 -StaleDays 60
     .\Get-AgentToolsHealth.ps1 -PackagesOnly
-    .\Get-AgentToolsHealth.ps1 -SkipPackages -SkipDefender
+    .\Get-AgentToolsHealth.ps1 -SkipPackages -SkipDefender -SkipCopilotUsage
 #>
 [CmdletBinding()]
 param(
@@ -80,6 +85,7 @@ param(
     [switch]$PackagesOnly,
     [switch]$SkipPackages,
     [switch]$SkipDefender,
+    [switch]$SkipCopilotUsage,
     [string]$OutputFolder = ".\AgentToolsHealth-$(Get-Date -Format yyyyMMdd-HHmm)",
 
     # Words that make a name unclear. Matched at the start of a word, so "demo" also catches "demoe".
@@ -97,6 +103,7 @@ $scopes = @(
     if (-not $PackagesOnly) { "Application.Read.All", "AgentIdentity.Read.All", "AgentIdentityBlueprint.Read.All", "AgentIdentityBlueprintPrincipal.Read.All", "AuditLog.Read.All", "User.Read.All", "Group.Read.All", "Policy.Read.All" }
     if ($PackagesOnly)      { "Group.Read.All" }
     if (-not $SkipDefender) { "ThreatHunting.Read.All" }
+    if (-not $PackagesOnly -and -not $SkipCopilotUsage) { "Reports.Read.All" }
 )
 # Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
 # Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
@@ -183,7 +190,7 @@ function Get-Category([string]$Check) {
         'Defender|registry|Local AI agent'                 { "Inventory"; break }
         'MCP server'                                       { "Tools"; break }
         'permission|secret|credential|agent user'          { "Permissions"; break }
-        "^Group '|Available|Installed|Assigned"           { "Access"; break }
+        "^Group '|Available|Installed|Assigned|Blocked"   { "Access"; break }
         'name|description'                                 { "Naming"; break }
         default                                            { "Usage" }
     }
@@ -209,7 +216,7 @@ function Get-Reference([string]$Check) {
         'Available to all|Installed for the entire|directly, not through a group|available to all users|no longer exists' { "CIS 6.1, 6.8 | CISA: privilege"; break }
         "^Group '"                                               { "CIS 6.1 | CISA: accountability"; break }
         'Unclear name|description'                               { "CIS 2.1, 5.5 | CISA: accountability"; break }
-        'Not used|No sign-in|No active agents'                   { "CIS 5.3, 6.2 | CISA: accountability"; break }
+        'Not used|No sign-in|No active agents|used an agent in the last'   { "CIS 5.3, 6.2 | CISA: accountability"; break }
         'pending'                                                { "CIS 6.1"; break }
         default                                                  { "" }
     }
@@ -292,6 +299,9 @@ function Test-Package($P, $ActivityByKey) {
     if ($custom -and (Test-PoorDescription $P.shortDescription $name)) { New-Finding $area $name "Medium" "Missing or too-short description" "Describe what it does, for whom, and what data it uses" }
     if ($P.requestStatus -eq "pending" -and $P.lastModifiedDateTime -and $P.lastModifiedDateTime -lt $now.AddDays(-$PendingRequestDays)) {
         New-Finding $area $name "Low" "Request ($($P.requestType)) pending for more than $PendingRequestDays days" "Approve or reject it"
+    }
+    if ($P.isBlocked -and $P.requestStatus -eq "pending") {
+        New-Finding $area $name "Low" "Blocked, but still has a pending request ($($P.requestType))" "Tell the requester why it's blocked, or unblock it if that's no longer accurate"
     }
     $defenderLast = @($P.id, $P.appId, $P.manifestId, $P.assetId, $P.agentIdentityId) | Where-Object { $_ -and $ActivityByKey["$_"] } | ForEach-Object { $ActivityByKey["$_"] } | Sort-Object -Descending | Select-Object -First 1
     $lastUsed = @($P.lastUsedDateTime, $defenderLast) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1
@@ -386,6 +396,31 @@ function Test-Tenant {
     elseif (-not ($agentPolicies | Where-Object state -eq "enabled")) { New-Finding "Tenant" "Conditional Access" "Medium" "Agent Conditional Access policies are report-only or off" "Review the report-only results, then turn them on" }
     if (-not ($agentPolicies | Where-Object { $_.state -eq "enabled" -and "$($_.conditions.agentIdRiskLevels)" -match "high" -and $_.grantControls.builtInControls -contains "block" })) {
         New-Finding "Tenant" "Conditional Access" "Medium" "No enabled policy blocks high-risk agents" "Add a policy that blocks agent identities at high risk"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Copilot agent adoption (Microsoft 365 Copilot usage report)
+# ---------------------------------------------------------------------------
+
+# Reads the last 90 days of the Copilot usage report. The column name for an agent's last activity
+# date isn't confirmed in Microsoft's docs (only the report's column header text is), so this finds
+# it by matching property names instead of a hard-coded name, and returns nothing if it can't.
+function Get-CopilotAgentUsage {
+    $report = Get-GraphOptional "$graph/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D90')"
+    $rows = @(if ($report.value) { $report.value } else { $report })
+    if (-not $rows) { return }
+    $agentProp = ($rows | Select-Object -First 1).psobject.Properties.Name | Where-Object { $_ -match "Agent" -and $_ -match "Activity|LastActiv" } | Select-Object -First 1
+    if (-not $agentProp) { Write-Warning "Couldn't find a Copilot agent activity column in the usage report; skipping Copilot agent adoption."; return }
+    $rows | Select-Object -First 1 @{ n = "Total"; e = { $rows.Count } },
+        @{ n = "AgentActiveCount"; e = { @($rows | Where-Object { $_.$agentProp -and (ConvertTo-Utc $_.$agentProp) -ge $now.AddDays(-90) }).Count } }
+}
+
+function Test-CopilotAgentUsage($Usage, [int]$AgentCount) {
+    if (-not $Usage -or -not $AgentCount -or $Usage.Total -lt 20) { return }   # too few licensed users to judge adoption
+    $percent = [math]::Round(100 * $Usage.AgentActiveCount / $Usage.Total, 1)
+    if ($percent -lt 5) {
+        New-Finding "Tenant" "Copilot agent adoption" "Low" "$AgentCount agent(s) in the catalog, but only $($Usage.AgentActiveCount) of $($Usage.Total) licensed Microsoft 365 Copilot users ($percent%) used an agent in the last 90 days (Copilot usage report)" "Check that agents are pinned and discoverable, and that people know they exist; recheck after any awareness push"
     }
 }
 
@@ -555,6 +590,12 @@ if ($PackagesOnly) {
     Write-Host "Saved Packages.csv and DefenderAgents.csv to $OutputFolder. Attach them in Copilot Cowork with the prompt in the Cowork folder of this repo."
     return
 }
+$copilotUsage = $null
+if (-not $SkipCopilotUsage) {
+    Write-Host "Reading the Microsoft 365 Copilot usage report (last 90 days)..."
+    try { $copilotUsage = Get-CopilotAgentUsage }
+    catch { Write-Warning "Couldn't read the Copilot usage report. It needs Reports.Read.All and the Reports Reader role. Run with -SkipCopilotUsage to skip it. $($_.Exception.Message)" }
+}
 
 Write-Host "Reading agent identities, blueprints and sign-in activity..."
 $signIns = @{}
@@ -583,6 +624,7 @@ $findings = @(
     # Blueprints registered in this tenant only; Microsoft's and other publishers' blueprints are theirs to fix.
     $blueprints | ForEach-Object { Test-Blueprint $_ $principals[$_.appId] @($children[$_.appId]) $signIns $roleNames }
     Test-Tenant
+    if ($copilotUsage) { Test-CopilotAgentUsage $copilotUsage @($packages | Where-Object kind -eq "Agent").Count }
     if ($haveDefender) { Test-DefenderAgent $defenderAgents (Get-RegistryKey $packages) ([bool]$packages) }
     $classicAgents | ForEach-Object { Test-ClassicAgent $_ $signIns }
 )
@@ -613,7 +655,7 @@ $areas = @(
     "Tools"            | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($packages | Where-Object kind -eq "Tool" | ForEach-Object displayName) } }
     "Agent identities" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($identities | ForEach-Object displayName) } }
     "Blueprints"       | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($blueprints | ForEach-Object displayName) } }
-    "Tenant"           | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @("Conditional Access") } }
+    "Tenant"           | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @("Conditional Access") + $(if (-not $SkipCopilotUsage) { "Copilot agent adoption" }) } }
     if ($haveDefender) {
         "Discovered agents" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @(
             $defenderAgents | Where-Object { $_.Platform -ne "LocalAgents" -and $_.LifecycleStatus -ne "Uninstalled" } | ForEach-Object { if ($_.AgentName) { "$($_.AgentName) ($($_.Platform))" } else { "$($_.AgentId) ($($_.Platform))" } }
@@ -690,6 +732,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "GET /beta/reports/servicePrincipalSignInActivities"
                           "GET /beta/groups/{id} (+ owners), GET /beta/users/{id}"
                           "GET /beta/identity/conditionalAccess/policies"
+                          "GET /beta/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D90') (Copilot agent adoption)"
                           "GET /beta/servicePrincipals?`$filter=tags/any(t:t eq 'AgentCreatedBy:CopilotStudio') (and AgenticApp, AIAgentBuilder, AgenticInstance, power-virtual-agents-*)"
                           "POST /beta/security/runHuntingQuery: AgentsInfo | summarize arg_max(Timestamp, *) by AgentId (MCP servers, skills, tools)"
                           "POST /beta/security/runHuntingQuery: CloudAppEvents | where ActionType in (InvokeAgent, ExecuteTool...) | summarize max(Timestamp) by agent appId (TargetAgentId or AgentId)")
@@ -699,6 +742,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names or descriptions."
                           if ($SkipPackages -or -not $packages) { "Agents and tools weren't checked: the Agent 365 catalog wasn't read." }
                           if (-not $haveDefender) { "Discovered agents weren't checked: the Defender hunting query didn't run (needs ThreatHunting.Read.All and Security Reader)." }
+                          if ($SkipCopilotUsage -or -not $copilotUsage) { "Copilot agent adoption wasn't checked: the Copilot usage report wasn't read, or didn't have an agent activity column." }
                           if ($haveDefender -and -not $packages) { "The Agent 365 registry wasn't read, so Defender's AgentsInfo inventory was used as the agent list." }
                           if (-not $signIns.Count) { "Sign-in activity wasn't available, so stale checks on identities and blueprints are incomplete." })
         prompt       = $coworkPrompt
