@@ -148,9 +148,10 @@ document instead**, even a short one. If you can't read the template, say so and
      `subjectLabel`: "Area"; `areaLabel`: "Category"; `sample`: false.
    - `funnelTitle`: "Well-governed agent identities: {percent}%", and `funnel`: the five steps,
      each `{ "label", "count", "note" }`.
-   - `scorecard`: one entry per area (Agents, Tools, Agent identities, Blueprints, Tenant, and
-     Discovered agents and Agents without Agent ID when you have data for them): `name`,
-     `score`, `rating`, `high`, `medium`, `low`, `info`, and `detail` ("12 items checked").
+   - `scorecard`: one entry per area (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot
+     adoption when you have the usage report, and Discovered agents and Agents without Agent ID
+     when you have data for them): `name`, `score`, `rating`, `high`, `medium`, `low`, `info`, and
+     `detail` ("12 items checked").
    - `findings`: one entry per finding: `subject` (the area), `area` (the category), `severity`,
      `target` (the item), `check`, and `fix` with the reference in brackets at the end, for example
      "Add a sponsor [CIS 5.1, 5.5 | CISA: accountability]".

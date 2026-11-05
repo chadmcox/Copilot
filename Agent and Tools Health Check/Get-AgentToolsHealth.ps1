@@ -297,7 +297,7 @@ function Test-Package($P, $ActivityByKey) {
     }
     if ($custom -and (Test-UnclearName $name)) { New-Finding $area $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
     if ($custom -and (Test-PoorDescription $P.shortDescription $name)) { New-Finding $area $name "Medium" "Missing or too-short description" "Describe what it does, for whom, and what data it uses" }
-    if ($P.requestStatus -eq "pending" -and $P.lastModifiedDateTime -and $P.lastModifiedDateTime -lt $now.AddDays(-$PendingRequestDays)) {
+    if (-not $P.isBlocked -and $P.requestStatus -eq "pending" -and $P.lastModifiedDateTime -and $P.lastModifiedDateTime -lt $now.AddDays(-$PendingRequestDays)) {
         New-Finding $area $name "Low" "Request ($($P.requestType)) pending for more than $PendingRequestDays days" "Approve or reject it"
     }
     if ($P.isBlocked -and $P.requestStatus -eq "pending") {
@@ -406,9 +406,10 @@ function Test-Tenant {
 # Reads the last 90 days of the Copilot usage report. The column name for an agent's last activity
 # date isn't confirmed in Microsoft's docs (only the report's column header text is), so this finds
 # it by matching property names instead of a hard-coded name, and returns nothing if it can't.
+# Uses Get-GraphAll (not Get-GraphOptional) so a 403 or other failure reaches the caller instead of
+# being swallowed, and reads every page instead of just the first.
 function Get-CopilotAgentUsage {
-    $report = Get-GraphOptional "$graph/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D90')"
-    $rows = @(if ($report.value) { $report.value } else { $report })
+    $rows = @(Get-GraphAll "$graph/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D90')")
     if (-not $rows) { return }
     $agentProp = ($rows | Select-Object -First 1).psobject.Properties.Name | Where-Object { $_ -match "Agent" -and $_ -match "Activity|LastActiv" } | Select-Object -First 1
     if (-not $agentProp) { Write-Warning "Couldn't find a Copilot agent activity column in the usage report; skipping Copilot agent adoption."; return }
@@ -420,7 +421,7 @@ function Test-CopilotAgentUsage($Usage, [int]$AgentCount) {
     if (-not $Usage -or -not $AgentCount -or $Usage.Total -lt 20) { return }   # too few licensed users to judge adoption
     $percent = [math]::Round(100 * $Usage.AgentActiveCount / $Usage.Total, 1)
     if ($percent -lt 5) {
-        New-Finding "Tenant" "Copilot agent adoption" "Low" "$AgentCount agent(s) in the catalog, but only $($Usage.AgentActiveCount) of $($Usage.Total) licensed Microsoft 365 Copilot users ($percent%) used an agent in the last 90 days (Copilot usage report)" "Check that agents are pinned and discoverable, and that people know they exist; recheck after any awareness push"
+        New-Finding "Copilot adoption" "Copilot agent adoption" "Low" "$AgentCount agent(s) in the catalog, but only $($Usage.AgentActiveCount) of $($Usage.Total) licensed Microsoft 365 Copilot users ($percent%) used an agent in the last 90 days (Copilot usage report)" "Check that agents are pinned and discoverable, and that people know they exist; recheck after any awareness push"
     }
 }
 
@@ -655,7 +656,8 @@ $areas = @(
     "Tools"            | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($packages | Where-Object kind -eq "Tool" | ForEach-Object displayName) } }
     "Agent identities" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($identities | ForEach-Object displayName) } }
     "Blueprints"       | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($blueprints | ForEach-Object displayName) } }
-    "Tenant"           | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @("Conditional Access") + $(if (-not $SkipCopilotUsage) { "Copilot agent adoption" }) } }
+    "Tenant"           | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @("Conditional Access") } }
+    "Copilot adoption" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @(if ($copilotUsage) { "Copilot agent adoption" }) } }
     if ($haveDefender) {
         "Discovered agents" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @(
             $defenderAgents | Where-Object { $_.Platform -ne "LocalAgents" -and $_.LifecycleStatus -ne "Uninstalled" } | ForEach-Object { if ($_.AgentName) { "$($_.AgentName) ($($_.Platform))" } else { "$($_.AgentId) ($($_.Platform))" } }
@@ -678,7 +680,7 @@ Use the attached Packages.csv for agents and tools, and the attached DefenderAge
 This is read-only. Don't change anything in the tenant, and don't send any email or Teams message.
 
 Apply the agent-tools-health rules and give me:
-1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Discovered agents, Agents without Agent ID) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
+1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot adoption, Discovered agents, Agents without Agent ID) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
 2. A findings table sorted High, Medium, Low, with the item, what's wrong and the fix.
 3. The top 3 fixes to do first.
 4. The well-governed funnel for agent identities: with an active sponsor, a clear name, least privilege, in use.

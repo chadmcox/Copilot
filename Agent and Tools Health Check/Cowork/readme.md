@@ -42,7 +42,7 @@ Use the attached Packages.csv for agents and tools, and the attached DefenderAge
 This is read-only. Don't change anything in the tenant, and don't send any email or Teams message.
 
 Apply the agent-tools-health rules and give me:
-1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Discovered agents, Agents without Agent ID) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
+1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot adoption, Discovered agents, Agents without Agent ID) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
 2. A findings table sorted High, Medium, Low, with the item, what's wrong and the fix.
 3. The top 3 fixes to do first.
 4. The well-governed funnel for agent identities: with an active sponsor, a clear name, least privilege, in use.

@@ -37,7 +37,8 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 | **Agents and tools** | Available to or installed for everyone instead of groups (High). Assigned to people directly; groups with fewer than two owners or no description. Unclear name, missing description. Old pending requests. Not used in 90 days |
 | **Agent identities** | No sponsor, or a sponsor or owner disabled or gone (High). High-privilege Graph permissions such as Mail.Send or Directory.ReadWrite.All (High). One sponsor and no owner. Unclear name. No sign-in for 90 days, or never. Agent user accounts |
 | **Blueprints** | Inheritable permissions set to All allowed (High). No sponsor (High). Client secrets instead of certificates or federated credentials, expiring credentials. Unclear name, no description. Nothing active under it |
-| **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents. Agents exist in the catalog, but almost no licensed Microsoft 365 Copilot user used one in the last 90 days (Copilot usage report) |
+| **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents |
+| **Copilot adoption** | Agents exist in the catalog, but almost no licensed Microsoft 365 Copilot user used one in the last 90 days (Copilot usage report). Its own area so it doesn't average into the Tenant score, and it only appears when the usage report was read |
 | **Discovered agents** (Microsoft Defender, KQL) | Agents Defender found (`AgentsInfo`: Copilot Studio, Foundry, third-party) that aren't in the Agent 365 registry, especially ones available to everyone (High) or with no owner. Cloud agents with no Entra Agent ID. **MCP servers** the agents use: over plain http (High), or on a host outside this script's list of Microsoft domains (Low; check it against your approved tools). Local AI agents found on devices (needs Defender for Endpoint Plan 2). Without the Agent 365 catalog, Defender's list becomes the agent list |
 | **Agents without Agent ID** | Older Copilot Studio agents still running as classic service principals (found by their `AgentCreatedBy:CopilotStudio`, `AgenticApp` and similar tags), which miss Agent ID controls such as agent Conditional Access and lifecycle policies. There's no in-place migration. Microsoft's guidance: retire unused ones, recreate lightly used ones with Agent ID, and leave busy production agents until Microsoft ships an automated migration path |
 
@@ -45,7 +46,7 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 
 **Guidance**: every finding names the CIS Controls v8.1 safeguards and the CISA risk category behind it, in the Reference column of Findings.csv and in brackets after the fix in the report. See [CISA and CIS guidance](#cisa-and-cis-guidance).
 
-**Scores**: every item starts at 100 (High −25, Medium −10, Low −3); an area's score is the average of its items. Green 80+, Amber 50–79, Red under 50.
+**Scores**: every item starts at 100 (High −25, Medium −10, Low −3); an area's score is the average of its items, and an area with no items scores 100. Green 80+, Amber 50–79, Red under 50. **Copilot adoption** is its own area, separate from Tenant, so a missing or unread usage report never pads the Tenant score, and the Tenant score is never diluted by averaging it with Conditional Access.
 
 Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names, descriptions or use, because they aren't yours to fix.
 
