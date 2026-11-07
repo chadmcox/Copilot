@@ -47,7 +47,7 @@ url: Microsoft 365 Copilot Cost Management API overview - https://learn.microsof
         after their 30 days, to see which policy is picked and whether their usage carries over.
 
     What the API can't show: the "Allow new Agents and services as they become available"
-    switch, model profiles, and credit request policies. Check those in the admin center.
+    switch, model templates, and credit request policies. Check those in the admin center.
 
     Permissions (delegated): CopilotCostManagement.Read.All, CopilotCostManagement-Policy.Read.All,
     CopilotCostManagement-Assignment.Read.All, and CopilotCostManagement-UserData.Read.All for
@@ -186,7 +186,7 @@ if ($overlap) {
     $overlap | Select-Object @{ n = "Service"; e = { $_.Name } }, @{ n = "Policies"; e = { ($_.Group.Policy) -join "; " } } | Format-Table -AutoSize -Wrap
 }
 
-Write-Host "Check by hand in Copilot > Cost management > Configuration: the 'Allow new Agents and services' switch (off everywhere except Copilot New Services Pilot) and the model profile on each Cowork policy." -ForegroundColor Yellow
+Write-Host "Check by hand in Copilot > Cost management > Configuration: the 'Allow new Agents and services' switch (off everywhere except Copilot New Services Pilot) and the model template on each Cowork policy." -ForegroundColor Yellow
 
 # ---------------------------------------------------------------------------
 # Per-person balances

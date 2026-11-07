@@ -45,7 +45,7 @@ url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-
     What this script CANNOT do, because the API does not expose it (set these by hand in
     Copilot > Cost management > Configuration):
       - "Allow new Agents and services as they become available" (Auto-apply new services).
-      - Model profiles.
+      - Model templates (model profiles in Microsoft docs).
 
     Rules the API enforces (so the script does too):
       - A policy name is 10-64 characters, letters, digits and spaces only. That is why the
@@ -434,5 +434,5 @@ Write-Host ""
 Write-Host "Still to do by hand in Copilot > Cost management > Configuration:"
 Write-Host "  1. Turn OFF 'Allow new Agents and services as they become available' on every policy above."
 Write-Host "  2. Create the Copilot New Services Pilot policy and leave that switch ON for Copilot Pilot Ring only."
-Write-Host "  3. Pick a model profile on each Cowork policy."
+Write-Host "  3. Pick a model template on each Cowork policy (Model templates in the Access Governance Guide)."
 Write-Host "  4. Check each policy turned itself on (status enabled)."
