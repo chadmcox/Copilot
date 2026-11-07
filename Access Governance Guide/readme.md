@@ -176,7 +176,7 @@ Note: the admin center calls it **Users can register agent identity blueprints**
 The admin center calls this setting **Allow new Agents and services as they become available**. Microsoft docs call it **Auto-apply new services**. It's the first step of the spending policy wizard.
 
 - **In a new policy it's on by default.** When I opened **Add spending policy**, this switch was on, and every service was already checked. Turn it off and uncheck what the policy doesn't need.
-- **For an existing policy:** go to **Copilot** → **Cost management** → **Configuration**, and select the policy name. Microsoft docs say the details panel lets you change **Agents and services**, the model profile, the billing method, the limits and the alerts. Select **Save changes** when you are done.
+- **For an existing policy:** go to **Copilot** → **Cost management** → **Configuration**, and select the policy name. Microsoft docs say the details panel lets you change **Agents and services**, the model template, the billing method, the limits and the alerts. Select **Save changes** when you are done.
 - **Copilot Code is a live example.** Any policy with this switch on has already picked up Code (MC1519871).
 
 Leave it on only in **Copilot New Services Pilot** (see below).
@@ -352,13 +352,13 @@ A spending policy decides two things: who can use a paid Copilot service, such a
 
 1. Go to M365 admin center → **Copilot** → **Cost management** → **Configuration**.
 2. Select **Add spending policy**.
-3. Microsoft docs list six steps: **policy scope** → **agents and services** → **limits and alerts** → **model profiles** → **billing method** → **review and add**. The **Model profiles** step only appears when the policy includes Cowork. My wizard on Oct 23, 2026 showed five steps, with no model profile step.
+3. Microsoft docs list six steps: **policy scope** → **agents and services** → **limits and alerts** → **model profiles** → **billing method** → **review and add**. The model step only appears when the policy includes Cowork. My wizard on Oct 23, 2026 showed five steps, with no model step. *Not checked:* whether the wizard shows it now that **Model templates** is on the Configuration tab (Nov 5, 2026).
 4. On **Agents and services**:
    - Turn off **Allow new Agents and services as they become available** (unless this is the pilot policy).
    - Uncheck every service the policy doesn't need. In a new policy, all of them start checked.
 5. Pick the group on the scope step. You can only pick security groups, not single people, so put people and resource accounts in a group first.
 6. Set the limits. The per-user limit must be at least 2,000 credits a month (see Do these first, step 5). Set a policy threshold alert, and user alerts if the policy has a per-user limit.
-7. Pick the model profile and billing method, then finish the wizard.
+7. Pick the model template (see Model templates) and billing method, then finish the wizard.
 
 The **Cost management** page has three tabs: **Overview**, **Configuration** and **Consumption**.
 
@@ -435,29 +435,35 @@ People in the Limited group can ask for unlimited Cowork for 30 days. Entra remo
 - **The policy limit and the alert are your safety net,** because there is no per-user limit for those 30 days.
 - **Test this with one person first.** Run `Get-CopilotSpendingReport.ps1 -UserPrincipalName <person>` before, during and after their 30 days. It shows which policy covers them for Cowork, how much they've used this month and how much is left.
 
-### Model profiles (Cowork)
+### Model templates (Cowork, preview)
 
-A model profile is a list of models. Attach one to a Cowork spending policy to control which models those users can pick.
+A model template is a list of platforms and models. Attach one to a Cowork spending policy to control which models those users can pick. **Auto** only picks from the models in the template, so leaving a model out also keeps Auto from using it.
+
+*Checked in the admin center on Nov 5, 2026:* the **Configuration** tab now has **Model templates (Preview)** next to **Spending policies**, with an **Add model template** button. The page says model templates are reusable sets of platforms and models that can be applied to spending policies. Microsoft docs still call them **model profiles**. On Oct 23 the tab wasn't there.
 
 *From Microsoft docs ([Configure model profiles](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-copilot-credits-setup#configure-model-profiles)):*
 
 1. Go to **Copilot** → **Cost management** → **Configuration**.
-2. Select **Model profiles**, then **Add model profile**. You can also create one inside the spending policy wizard, on the **Model profiles** step.
-3. In a policy, pick **Use default model selection** to allow every model your tenant has, or **Customize model selection** to use a profile.
-4. To make a profile: enter a name, pick at least two models, and choose whether **Microsoft can select the most comparable model to maintain availability**.
-5. Save the profile. You can reuse it in other Cowork policies.
+2. Select **Model templates**, then **Add model template**. Microsoft docs say you can also create one inside the spending policy wizard.
+3. In a policy, pick **Use default model selection** to allow every model your tenant has, or **Customize model selection** to use a template.
+4. To make a template: enter a name, pick at least two models, and choose whether **Microsoft can select the most comparable model to maintain availability**.
+5. Save the template. You can reuse it in other Cowork policies.
 
 If you don't let Microsoft pick a comparable model, people see an error when a model they picked is down.
 
-A profile can't use a provider that's turned off in **AI providers operating as independent processors**.
+A template can't use a provider that's turned off in **AI providers operating as independent processors**.
 
-**I couldn't confirm this in the admin center on Oct 23, 2026.** The **Configuration** tab only showed **Spending policies**. Microsoft docs say model profiles are there and in the wizard, and that they only work for **Copilot Cowork**. Check your own tenant again.
+**Your model access groups still apply.** The template only narrows what a policy allows. If a template lists an Anthropic model but someone isn't in Copilot Anthropic Models Access, they still don't get it. Keep each template to providers its policy's users can reach.
 
-| Policy | Profile to use |
+**Overlapping policies can undo a template.** A person in more than one policy for the same service gets one policy (see the 30-day tier above). Make sure a broad policy with default models doesn't cover people you meant to hold to a lower-cost template.
+
+Microsoft docs say templates only work for **Copilot Cowork**. *Not checked:* which platforms **Add model template** lets you pick. If it lists more than Cowork, update this section. The feature is in preview, so expect changes.
+
+| Policy | Template to use |
 | --- | --- |
-| Cowork Limited | Lower-cost models, and allow Microsoft to pick a comparable model |
-| Cowork Unlimited | Default models |
-| Cowork Temporary Unlimited | Same as Limited, unless the person asked for a specific model |
+| Cowork Limited | **Cowork Lower-Cost Models**: lower-cost models, and allow Microsoft to pick a comparable model |
+| Cowork Unlimited | Default model selection (no template) |
+| Cowork Temporary Unlimited | Cowork Lower-Cost Models, unless the person asked for a specific model |
 
 ### Credit requests
 
@@ -510,7 +516,7 @@ Microsoft released Microsoft Graph APIs for Copilot cost management in mid-Octob
 
 What you can do with them: read the tenant credit balance, create, change and delete spending policies, pick the groups a policy applies to, turn services on or off in a policy, set email threshold alerts and their recipients, and read one person's credit balance.
 
-What you still do by hand: the **Allow new Agents and services as they become available** switch is not in the API. Model profiles are not in the API either.
+What you still do by hand: the **Allow new Agents and services as they become available** switch is not in the API. Model templates (model profiles in Microsoft docs) are not in the API either. *Not checked since Nov 5:* whether a spending policy read now returns its template.
 
 `New-CopilotSpendingPolicies.ps1` in this folder uses these APIs to create the policies in the table above. Run it with `-WhatIf` first.
 
@@ -774,7 +780,7 @@ I checked each step against the admin centers. These are the differences from th
 | **AI providers for other large language models** | **AI providers operating as independent processors** |
 | **Copilot → Settings → View all → Cowork settings** → **Allow Cowork to use the Microsoft Edge browser** | **Browser use in Microsoft Copilot** → **Allow local browser use** |
 | **Access to usage-based billing experiences** with a group picker | Couldn't find it. The closest is **AI experiences enabled by usage-based billing**, with one checkbox and no group picker |
-| **Copilot → Cost Management → Configuration → Model profiles** | Not shown on the **Configuration** tab |
+| **Copilot → Cost Management → Configuration → Model profiles** | Not shown on the **Configuration** tab. On Nov 5, 2026 it shows as **Model templates (Preview)**. See Model templates |
 | **Copilot → Cost Management → Credit requests** | **Copilot → Cost management → Overview → View requests** |
 | **Agents → Tools → \[plugin\] → Installed for** | Plugin has **Users** (**Available to**) and an **Install** button |
 | Frontier: no user count | Panel shows an estimate of how many of 10,000 assignments you've used |
@@ -791,7 +797,7 @@ Every Copilot post that changes this guide. The newest ones are at the top. Rows
 | The Cowork settings panel is now called **Browser use in Microsoft Copilot** | MC1515930 | Only a name change. See Copilot + Cowork Browser Access |
 | Critique and Council retire from Researcher by mid-November | MC1515927 | Tell Frontier users. Nothing to change in your groups. Action by Nov 14, 2026 |
 | Admin controls for Business Applications in Work IQ, preview by Nov 17 | MC1518036 | Review which Power Platform environments Work IQ can read. Affects Copilot Work IQ API Access |
-| Usage-based models in Chat and Word, Excel and PowerPoint, early to mid-November. GPT-6 Astra and Claude Fable 5.1 become usage-based models | MC1519122 | People need a Copilot license, usage-based billing on and credits. Your model groups still decide which providers they get |
+| Usage-based models in Chat and Word, Excel and PowerPoint. GPT-6 Astra and Claude Fable 5.1 become usage-based models. The general rollout moved from November to December | MC1519122 | People need a Copilot license, usage-based billing on and credits. Your model groups still decide which providers they get. When it lands, check whether model templates apply to these models too; Microsoft docs say templates are Cowork only |
 | Insights Agent V2 in Frontier adds **Agents** → **Settings** → **Agent feedback sharing** (default **No agents**) | MC1520901 | Decide whether agent owners see user feedback. See the Agent Delegation Guide |
 | Clipchamp "Create a video" gets a Cloud Policy control, late November to early December | MC1518034 | A new policy to scope with Copilot Cloud Policy Exceptions |
 | Teams admin center gets a simpler app enablement flow (**Teams apps** → **Manage apps** → **Manage access**) | MC1515931 | Your settings don't change. Update your runbook |
@@ -806,7 +812,7 @@ Every Copilot post that changes this guide. The newest ones are at the top. Rows
 | Usage numbers for Microsoft-built agents no longer need an Agent 365 license (late November) | MC1506727 | Copilot AI Reader members can see agent activity in **Agents** → **All agents** |
 | Sensitivity labels can be put on Entra security groups (mid-November) | MC1508238 | Don't label the Copilot groups yet. A label can't be changed or removed once it's on a security group |
 | Older GPT models in Copilot Studio move to GPT Chat Latest on Nov 12 | MC1506318 | Tell agent owners to test their agents. Your model groups don't change |
-| Spending policies can use a model profile (Cowork only) | MC1479276 | See Model profiles |
+| Spending policies can use a model profile (Cowork only) | MC1479276 | See Model templates. The admin center calls them model templates (preview) |
 | Credit requests can go to your own approval process | MC1470425 | See Credit requests |
 | Credits follow a person when they move between policies | MC1470425 | Test the 30-day temporary tier with one person first |
 | Autopilot (formerly Scout) uses a spending policy; admin settings not out yet | MC1479277, MC1332811 | Keep the Autopilot group |

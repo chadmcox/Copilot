@@ -174,7 +174,11 @@ Each finding has a severity, a reason and a fix. Thresholds (2,000 credits, 80%,
 No API shows these, so the report lists them as a checklist:
 
 - **Allow new Agents and services as they become available** is off on every spending policy except the pilot one.
-- Each Cowork spending policy has the right model profile.
+- Each Cowork policy uses the right model template: Limited and Temporary use the lower-cost template, Unlimited uses the default models.
+- Each model template lets Microsoft pick a comparable model, and lists only providers the policy's users can reach through their model access groups.
+- No model template is unused, and no broad policy with default models covers people meant to be on a lower-cost template.
+
+Model templates are in preview in **Copilot > Cost management > Configuration > Model templates**. Microsoft docs call them model profiles. See [Model templates](../Access%20Governance%20Guide/readme.md#model-templates-cowork-preview) for which template each policy gets. *Not checked:* whether the spending policy API now returns a policy's template. If it does, this becomes an automatic check.
 - Credit request policies send requests to your access packages.
 
 ## 3. Outputs

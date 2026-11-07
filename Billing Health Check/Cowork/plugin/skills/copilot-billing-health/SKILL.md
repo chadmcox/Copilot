@@ -144,9 +144,11 @@ don't improvise. Don't make a spreadsheet unless the user asks for one.
    - `findings`: one entry per finding: `subject` (the policy), `area`, `severity`, `target`,
      `check`, `fix`.
    - `fixFirst`: the three changes that raise the most scores, in plain words.
-   - `manualChecks`: the three checks by hand:
+   - `manualChecks`: the checks by hand:
      - Allow new Agents and services is off on every policy except the pilot one.
-     - Each Cowork policy has the right model profile.
+     - Each Cowork policy uses the right model template: Limited and Temporary use the lower-cost template, Unlimited uses the default models.
+     - Each model template lets Microsoft pick a comparable model, and lists only providers the policy's users can reach through their model access groups.
+     - No model template is unused, and no broad policy with default models covers people meant to be on a lower-cost template.
      - Credit request policies point at the access packages.
    - `graphCalls`: every Graph call you ran, without IDs of people.
    - `notes`: anything the user should know, such as calls that failed or checks you skipped.
