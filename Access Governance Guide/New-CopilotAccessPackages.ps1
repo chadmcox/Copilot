@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID 6d4a7bae-b7e1-4f80-b04b-5539a9bf562a
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -103,6 +103,8 @@ Connect-MgGraph -Environment $Environment -NoWelcome -Scopes @(
     "Group.Read.All"
 )
 
+# Stays on v1.0: the beta entitlement management API uses different paths
+# (accessPackageCatalogs, accessPackageAssignmentPolicies), so these calls would break on beta.
 $graph = "$graphEndpoint/v1.0"
 $em    = "$graph/identityGovernance/entitlementManagement"
 
@@ -147,6 +149,7 @@ $packages = @(
     @{ Name = "Copilot + Autopilot Access";          Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Autopilot Access") }
     @{ Name = "Copilot Frontier Access";             Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access") }
     @{ Name = "Copilot Pilot Ring";                  Tier = "Elevated"; Groups = @("Copilot Pilot Ring") }
+    @{ Name = "Copilot Intelligent Call Delegation Access"; Tier = "Standard"; Groups = @("Copilot Access", "Copilot Intelligent Call Delegation Access") }
     @{ Name = "Copilot Anthropic Models Access";     Tier = "Standard"; Groups = @("Copilot Anthropic Models Access") }
     @{ Name = "Copilot OpenAI Models Access";        Tier = "Standard"; Groups = @("Copilot OpenAI Models Access") }
     # SpaceXAI as a subprocessor is Frontier-only.
@@ -171,9 +174,7 @@ $adminGroups = @(
 if (-not $IncludeCodePackages) { $packages = @($packages | Where-Object { -not $_.Code }) }
 
 if ($IncludeAdminPackages) {
-    foreach ($ag in $adminGroups) {
-        $packages += @{ Name = $ag; Tier = "Admin"; Groups = @($ag) }
-    }
+    $packages = @($packages; foreach ($ag in $adminGroups) { @{ Name = $ag; Tier = "Admin"; Groups = @($ag) } })
 }
 
 # ---------------------------------------------------------------------------
@@ -209,22 +210,21 @@ function New-ApprovalStage([string]$Tier) {
     $t = $tiers[$Tier]
     $fallback = @(@{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = (Get-GroupId $t.ApproverGroup) })
 
-    $stages = @(@{
+    @(@{
         durationBeforeAutomaticDenial   = "P14D"
         isApproverJustificationRequired = $true
         isEscalationEnabled             = $false
         primaryApprovers                = @(@{ "@odata.type" = "#microsoft.graph.requestorManager"; managerLevel = 1 })
         fallbackPrimaryApprovers        = $fallback
-    })
+    }
     if ($t.SecondStage) {
-        $stages += @{
+        @{
             durationBeforeAutomaticDenial   = "P14D"
             isApproverJustificationRequired = $true
             isEscalationEnabled             = $false
             primaryApprovers                = $fallback
         }
-    }
-    $stages
+    })
 }
 
 function New-PolicyBody([string]$PackageId, [string]$PackageName, [string]$Tier, [string]$AllowedGroup) {
@@ -342,7 +342,7 @@ function Get-MemberRole([string]$GroupName) {
 # 3-4. Packages, resource scopes, policies
 # ---------------------------------------------------------------------------
 $packageIds = @{}
-$results = @()
+$results = [System.Collections.Generic.List[object]]::new()
 
 foreach ($p in $packages) {
     $pkg = Get-Filtered "$em/accessPackages" "displayName eq '$(Esc $p.Name)'" "&`$expand=catalog" |
@@ -359,7 +359,7 @@ foreach ($p in $packages) {
             }
             $status = "Created"
         }
-        else { $results += [pscustomobject]@{ Package = $p.Name; Tier = $p.Tier; Status = "WhatIf" }; continue }
+        else { $results.Add(($p | Select-Object @{ n = "Package"; e = { $p.Name } }, @{ n = "Tier"; e = { $p.Tier } }, @{ n = "Status"; e = { "WhatIf" } }, @{ n = "Id"; e = { $null } })); continue }
     }
     $packageIds[$p.Name] = $pkg.id
 
@@ -393,7 +393,7 @@ foreach ($p in $packages) {
         Invoke-Graph POST "$em/assignmentPolicies" (New-PolicyBody $pkg.id $p.Name $p.Tier $p.AllowedGroup) | Out-Null
     }
 
-    $results += [pscustomobject]@{ Package = $p.Name; Tier = $p.Tier; Status = $status; Id = $pkg.id }
+    $results.Add(($p | Select-Object @{ n = "Package"; e = { $p.Name } }, @{ n = "Tier"; e = { $p.Tier } }, @{ n = "Status"; e = { $status } }, @{ n = "Id"; e = { $pkg.id } }))
 }
 
 # Incompatible packages (Limited vs Unlimited spend tiers), both directions
