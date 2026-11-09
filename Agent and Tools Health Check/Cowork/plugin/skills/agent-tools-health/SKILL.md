@@ -53,7 +53,15 @@ the call returns 403). Get it from a file the user attaches:
 - **Packages.csv** from `Get-AgentToolsHealth.ps1 -PackagesOnly` (or from a full run). Columns: id,
   displayName, kind (Agent, Tool, App), elementTypes, type, publisher, shortDescription, isBlocked,
   availableTo, deployedTo, requestStatus, requestType, groupIds, groups, directUsers,
-  lastModifiedDateTime, lastUsedDateTime, activeUsers30d, sessions30d.
+  lastModifiedDateTime, lastUsedDateTime, activeUsers30d, sessions30d, mcpServers (scheme://host,
+  semicolon-separated), mcpAuth (scheme://host=authorization type; Unspecified when there's none),
+  mcpRiskyTools (tools whose annotations set destructiveHint or openWorldHint).
+
+Also attach **Connectors.csv** (same script) for synced Copilot connectors users can search (state
+ready or limitExceeded). Columns: id, name, description, state, connectorId, contentCategory,
+authorizedAppIds (semicolon-separated). If it isn't attached, read
+`GET /beta/external/connections?$select=id,name,description,state,configuration` through the
+Enterprise MCP; if that returns 403, say the Connectors area was skipped.
 
 Also attach **DefenderAgents.csv** (written by the same script) for agents Microsoft Defender found:
 the Enterprise MCP server can't run Defender advanced hunting queries. Columns: AgentId, AgentName,
@@ -103,6 +111,7 @@ fails, stop and tell the user the connector can't read the tenant, with the erro
 | Blueprint principals | `GET /beta/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal?$select=id,appId,displayName` |
 | Agent user accounts | `GET /beta/users/microsoft.graph.agentUser?$select=id,displayName,identityParentId` |
 | Sponsors and owners (are they active?) | `GET /beta/users/{id}?$select=id,displayName,accountEnabled`. A 404 means the person is gone |
+| Authorized apps from Connectors.csv | `GET /beta/servicePrincipals?$filter=appId eq '{appId}'&$select=id,appId,displayName,appOwnerOrganizationId`. None means the app isn't in this tenant. Compare `appOwnerOrganizationId` with the tenant ID (`GET /beta/organization?$select=id`) and Microsoft's tenants (f8cdef31-a31e-4b4a-93e4-5f571e91255a, 72f988bf-86f1-41af-91ab-2d7cd011db47) |
 | Groups from Packages.csv `groupIds` | `GET /beta/groups/{id}?$select=id,displayName,description` and `GET /beta/groups/{id}/owners?$select=id` |
 | Conditional Access | `GET /beta/identity/conditionalAccess/policies?$select=displayName,state,conditions,grantControls` |
 | Copilot agent adoption (last 90 days) | `GET /beta/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D90')`. Find the agent activity date column by name (it varies by tenant/version) rather than assuming one; count users active on an agent in the last 90 days against the total rows |
@@ -149,8 +158,8 @@ document instead**, even a short one. If you can't read the template, say so and
    - `funnelTitle`: "Well-governed agent identities: {percent}%", and `funnel`: the five steps,
      each `{ "label", "count", "note" }`.
    - `scorecard`: one entry per area (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot
-     adoption when you have the usage report, and Discovered agents and Agents without Agent ID
-     when you have data for them): `name`, `score`, `rating`, `high`, `medium`, `low`, `info`, and
+     adoption when you have the usage report, and Discovered agents, Agents without Agent ID and
+     Connectors when you have data for them): `name`, `score`, `rating`, `high`, `medium`, `low`, `info`, and
      `detail` ("12 items checked").
    - `findings`: one entry per finding: `subject` (the area), `area` (the category), `severity`,
      `target` (the item), `check`, and `fix` with the reference in brackets at the end, for example

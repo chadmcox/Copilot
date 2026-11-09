@@ -98,11 +98,11 @@ Run the agent and tools health check with the script. Use the Global cloud and s
 
 Copilot runs `scripts/Get-AgentToolsHealth.ps1 -Environment Global -OutputFolder ...` in the terminal, after you approve it. Finish the sign-in in the browser window. When it's done, Copilot reads Findings.csv and Scorecard.csv, gives you the score per area, the counts and the top 3 fixes, and points you to **Report.html**.
 
-Use **USGov** for GCC High or **USGovDoD** for DoD. Add *"stale after 60 days"* (`-StaleDays 60`), *"skip Defender"* (`-SkipDefender`), *"skip Copilot usage"* (`-SkipCopilotUsage`) or *"no Agent 365 license"* (`-SkipPackages`) as needed.
+Use **USGov** for GCC High or **USGovDoD** for DoD. Add *"stale after 60 days"* (`-StaleDays 60`), *"skip Defender"* (`-SkipDefender`), *"skip Copilot usage"* (`-SkipCopilotUsage`), *"skip connectors"* (`-SkipConnectors`) or *"no Agent 365 license"* (`-SkipPackages`) as needed.
 
 ### Way 2: live through the Enterprise MCP
 
-Put Packages.csv and DefenderAgents.csv in your folder (ask Copilot to run the script with `-PackagesOnly`, or see [Get Packages.csv and DefenderAgents.csv](../Cowork/readme.md#get-packagescsv-and-defenderagentscsv)), add them to the chat (drag them in, or type `#` and pick the files), then paste [the Cowork prompt](../Cowork/readme.md#the-prompt). Copilot reads agent identities, blueprints, groups and Conditional Access live and builds **Agent and Tools Health.html** from the template.
+Put Packages.csv, DefenderAgents.csv and Connectors.csv in your folder (ask Copilot to run the script with `-PackagesOnly`, or see [Get Packages.csv and DefenderAgents.csv](../Cowork/readme.md#get-packagescsv-and-defenderagentscsv)), add them to the chat (drag them in, or type `#` and pick the files), then paste [the Cowork prompt](../Cowork/readme.md#the-prompt). Copilot reads agent identities, blueprints, groups and Conditional Access live and builds **Agent and Tools Health.html** from the template.
 
 ### Way 3: explain results you already have
 

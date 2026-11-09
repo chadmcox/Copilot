@@ -17,8 +17,8 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | 2.5 | Allowlist Authorized Software | Local AI agents and tools should be on an approved list |
 | 2.5 (MCP) | Allowlist Authorized Software | MCP servers outside Microsoft should be on the approved tools list |
 | 3.10 | Encrypt Sensitive Data in Transit | Agents should reach MCP servers over HTTPS only |
-| 3.3 | Configure Data Access Control Lists | Agents should reach only the data they need (least privilege) |
-| 4.1 | Establish and Maintain a Secure Configuration Process | Credentials and Conditional Access for agents are part of their secure configuration |
+| 3.3 | Configure Data Access Control Lists | Agents should reach only the data they need (least privilege), and tools that change data shouldn't be open to everyone |
+| 4.1 | Establish and Maintain a Secure Configuration Process | Credentials, Conditional Access and MCP server authentication are part of an agent's secure configuration |
 | 5.1 | Establish and Maintain an Inventory of Accounts | Each agent identity has an accountable sponsor and owner |
 | 5.3 | Disable Dormant Accounts | CIS: delete or disable dormant accounts after 45 days of inactivity, where supported. These scripts default to 90; use `-StaleDays 45` to match CIS |
 | 5.4 | Restrict Administrator Privileges to Dedicated Administrator Accounts | No high-privilege Graph permissions on agents |
@@ -28,7 +28,7 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | 6.2 | Establish an Access Revoking Process | Unused agents and tools get blocked or disabled |
 | 6.7 | Centralize Access Control | Conditional Access covers agent identities |
 | 6.8 | Define and Maintain Role-Based Access Control | Access by group; inheritable permissions limited to what agents need |
-| 15.1 | Establish and Maintain an Inventory of Service Providers | External MCP servers are third-party services the agent depends on |
+| 15.1 | Establish and Maintain an Inventory of Service Providers | External MCP servers, and outside apps that write into Copilot connectors, are third-party services Copilot depends on |
 
 ## Checks mapped to the guidance
 
@@ -52,10 +52,14 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | Local AI agent on devices | 2.1, 2.3, 2.5 | Design and configuration |
 | MCP server reached over http (no TLS) | 3.10 | Design and configuration |
 | MCP server outside Microsoft | 2.5, 15.1 | Design and configuration (third-party components) |
+| MCP server with no authentication, or a static secret instead of OAuth | 4.1, 6.7 | Design and configuration |
+| Tools that change data or reach outside sources, in a package available to everyone | 3.3, 6.1 | Privilege, behavioral |
+| Copilot connector that an app outside this tenant (or no longer in it) can write content into | 2.5, 15.1 | Design and configuration (third-party components) |
+| Copilot connector index full | 2.1 | None |
 | No Entra Agent ID, or a classic service principal | 5.5, 5.6 | Design and configuration; accountability |
 
 ## Not checked here, but in the guidance
 
 - **Logging and monitoring** (CISA's accountability category; CIS 8.2 Collect Audit Logs): confirm Purview audit is on and Defender monitors agent activity. Microsoft Graph's AI interaction change notifications (`copilot/interactionHistory/getAllEnterpriseInteractions` subscriptions, `AiEnterpriseInteraction.Read.All`) could feed a compliance capture of agent conversations, but that permission is application-only and `GET /subscriptions` only returns subscriptions owned by the calling app; this script's delegated Microsoft Graph PowerShell sign-in can't reliably check it, so it isn't a script check here.
 - **Human oversight of high-impact actions** (CIS agent guide: governed autonomy): check in each agent's design (Copilot Studio, Foundry), not through Graph.
-- **Approved tools** (CIS MCP guide: secure tool access): this check flags MCP servers over http and on hosts outside this repo's Microsoft domain list, from Defender's AgentsInfo. Use **Agents > Tools** to allow only approved MCP servers, and the Agent and Tools Cleanup scripts to block unused ones.
+- **Approved tools** (CIS MCP guide: secure tool access): this check flags MCP servers over http, on hosts outside this repo's Microsoft domain list, or with weak authentication, from the Agent 365 catalog and Defender's AgentsInfo. Use **Agents > Tools** to allow only approved MCP servers, and the Agent and Tools Cleanup scripts to block unused ones.

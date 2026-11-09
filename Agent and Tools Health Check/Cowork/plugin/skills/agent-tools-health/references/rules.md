@@ -10,7 +10,9 @@ Thresholds: stale after 90 days, credential warning 30 days before expiry, pendi
 
 Every check also carries a **Reference** (CIS Controls v8.1 safeguards and the CISA risk category); see **guidance.md**.
 
-Each finding has an **Area** (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot adoption, Discovered agents, Agents without Agent ID), an **Item** (the agent, tool, identity, blueprint or setting), a **Category** (Access, Ownership, Permissions, Naming, Usage, Security, Identity, Inventory), a **Severity**, a **Check** and a **Fix**.
+Each finding has an **Area** (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot adoption, Discovered agents, Agents without Agent ID, Connectors), an **Item** (the agent, tool, identity, blueprint or setting), a **Category** (Access, Ownership, Permissions, Naming, Usage, Security, Identity, Inventory), a **Severity**, a **Check** and a **Fix**.
+
+**Only what users can reach.** Skip the access and MCP checks for a package that's blocked (`isBlocked` true) or available to no one (`availableTo` is `allowedForNone` or `none`). Empty values count as reachable.
 
 Microsoft-published agents and tools, and blueprints from other publishers (a blueprint principal with no blueprint registered in this tenant), aren't checked for names, descriptions or use. Packages of kind **App** (Office add-ins, tabs) aren't checked.
 
@@ -18,8 +20,13 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 
 | Check | Severity | Category | Fix |
 | --- | --- | --- | --- |
-| Custom or external, `availableTo` is all users (`all` or `allowedForAll`) | High | Access | Make it available to specific groups |
-| Custom or external, `deployedTo` is all users (`all` or `acquiredForAll`) | High | Access | Install it for a group, or let people install it themselves |
+| Custom or external, reachable, `availableTo` is all users (`all` or `allowedForAll`) | High | Access | Make it available to specific groups |
+| Custom or external, reachable, `deployedTo` is all users (`all` or `acquiredForAll`) | High | Access | Install it for a group, or let people install it themselves |
+| Reachable, an `mcpServers` entry starts with `http://` (no TLS) | High | Tools | Use HTTPS only, or remove the server |
+| Reachable, an `mcpServers` host isn't on this repo's list of Microsoft domains (same list as Discovered agents) | Low | Tools | Check it's on your approved tools list (Agents > Tools), and who runs it |
+| Reachable, an `mcpAuth` type is `None` or `Unspecified` | High | Tools | Require OAuth (Microsoft Entra ID) on the server, or remove it |
+| Reachable, an `mcpAuth` type is `ApiKeyPluginVault`, `AzureKeyVault` or `ConnectionVault` (a static secret). `OAuthPluginVault` and `DynamicClientRegistration` pass | Medium | Tools | Move it to OAuth so access follows the user, and rotate the secret until then |
+| Reachable, available or installed for all users, and `mcpRiskyTools` isn't empty | High | Tools | Limit the package to a group that needs these tools, or remove the tools |
 | `directUsers` more than 0 | Medium | Access | Assign it to a group instead |
 | An assigned group no longer exists | Medium | Access | Assign it to the right group |
 | An assigned group has fewer than two owners | Medium | Ownership | Add owners so there are at least two |
@@ -84,7 +91,7 @@ Microsoft Defender's `AgentsInfo` inventory covers Copilot Studio, Foundry, thir
 | Not in the registry, and `Availability` is all users | High | Inventory | Limit it to a group, then register it |
 | Not in the registry, and `OwnerCount` is 0 | Medium | Ownership | Find who built it and make them the owner, or remove it |
 | Cloud agent with no `EntraAgentId` | Medium | Identity | Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls |
-| An `McpServerUrls` entry starts with `http://` (no TLS) | High | Tools | Use HTTPS only, or remove the server |
+| An `McpServerUrls` entry starts with `http://` (no TLS). Skip a scheme and host that a matching Packages.csv row already lists in `mcpServers` | High | Tools | Use HTTPS only, or remove the server |
 | An `McpServerUrls` host isn't on this repo's list of Microsoft domains (not a Microsoft-published list: not under microsoft.com, cloud.microsoft, office.com, sharepoint.com, azure.com, azure-api.net, windows.net, dynamics.com, powerplatform.com, azurewebsites.net) | Low | Tools | Check it's on your approved tools list (Agents > Tools), and who runs it |
 | **No Packages.csv** (no Agent 365 catalog): Defender's agents become the agent list. Cloud agent `Availability` is all users | High | Access | Make it available to specific groups |
 | No Packages.csv: `OwnerCount` is 0 | Medium | Ownership | Find who built it and make them the owner, or remove it |
@@ -92,6 +99,17 @@ Microsoft Defender's `AgentsInfo` inventory covers Copilot Studio, Foundry, thir
 
 `LastActivity`, `Invocations30d` and `ToolCalls30d` come from Agent 365 activity in Defender (`CloudAppEvents`, last 30 days), matched on the agent's Entra appId (the invoked agent is `TargetAgentId` on `InvokeAgent` records and `AgentId` on tool calls). The match to AgentsInfo on `EntraAgentId` is this repo's, not a documented join. When an agent in Packages.csv matches a Defender agent with a `LastActivity` within the stale period, it counts as used: don't report "Not used". A Defender agent without activity isn't proof it's unused, because only agents that send Agent 365 observability data appear there.
 | Local agent (Platform `LocalAgents`, not Uninstalled), one finding per agent name with the installation count (each row is one agent on one device for one account) | Low | Inventory | Check it's an approved tool; govern it with Defender for Endpoint and Intune |
+
+## Connectors (synced Copilot connectors, from Connectors.csv)
+
+Only connections users can search: `state` is ready, or limitExceeded (the index is full but what's in it is still searchable). The rollout audience and per-item access rules aren't in Graph; they're a manual check.
+
+| Check | Severity | Category | Fix |
+| --- | --- | --- | --- |
+| An `authorizedAppIds` entry has no service principal in this tenant | Medium | Security | Remove it from the connection, or find out what it is before you keep it |
+| An authorized app's `appOwnerOrganizationId` isn't this tenant or Microsoft's (f8cdef31-a31e-4b4a-93e4-5f571e91255a, 72f988bf-86f1-41af-91ab-2d7cd011db47) | Medium | Security | Confirm the vendor and what it indexes, or remove it from the connection |
+| `state` is limitExceeded | Low | Usage | Raise the index quota, or narrow what the connector indexes |
+| No `description` | Low | Naming | Describe what the connection holds and who it's for |
 
 ## Agents without Agent ID (classic service principals)
 
@@ -124,6 +142,7 @@ Well governed % = step 5 ÷ step 1.
 - Microsoft 365 admin center > Agents > Settings > **Agent and plugin access**: **Allow agents and plugins built by external publishers** is off, or reviewed.
 - Microsoft 365 admin center > Agents > Settings > **Sharing**: Specific users, not All users (applies only to Agent Builder agents).
 - Agents > Tools > Registry: standalone MCP servers and skills have clear names, owners and group-scoped availability.
+- Copilot > Connectors > Your connections: each synced connector is rolled out to the right people, and none is set so every user sees all content.
 - Sponsors attested each agent in the last 12 months (Microsoft suggests every 6 to 12 months) (the attestation API isn't readable through the Enterprise MCP).
 
 If the browser is available in Cowork, read these pages and report what you see. Never change a setting.
