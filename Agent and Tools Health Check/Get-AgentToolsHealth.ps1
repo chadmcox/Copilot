@@ -219,7 +219,7 @@ function Get-Reference([string]$Check) {
         'Local AI agent'                                         { "CIS 2.1, 2.3, 2.5 | CISA: design and configuration"; break }
         'MCP server without TLS'                                 { "CIS 3.10 | CISA: design and configuration"; break }
         'external MCP server'                                    { "CIS 2.5, 15.1 | CISA: design and configuration"; break }
-        'MCP server has no authentication|static secret'         { "CIS 4.1, 6.7 | CISA: design and configuration"; break }
+        'MCP server has no authentication|declare authentication|static secret' { "CIS 4.1, 6.7 | CISA: design and configuration"; break }
         'MCP tool'                                               { "CIS 3.3, 6.1 | CISA: privilege, behavioral"; break }
         'can write content'                                      { "CIS 2.5, 15.1 | CISA: design and configuration"; break }
         'Index is full'                                          { "CIS 2.1"; break }
@@ -322,7 +322,8 @@ function Test-Package($P, $ActivityByKey) {
     if ($P.kind -eq "App") { return }   # Office add-ins and other apps aren't in scope
     $area = if ($P.kind -eq "Agent") { "Agents" } else { "Tools" }
     $name = $P.displayName
-    $custom = $P.type -ne "microsoft"
+    # The catalog has returned Microsoft packages as "microsoft" and as "firstParty"; treat both as Microsoft.
+    $custom = $P.type -notin "microsoft", "firstParty"
     # Users can't reach a blocked package, or one available to no one, so access and MCP checks skip it.
     # isBlocked is a Boolean in the script and the text "True" in Packages.csv. Empty counts as reachable.
     $reachable = "$($P.isBlocked)" -ne "True" -and "$($P.availableTo)" -notmatch "^(none|allowedForNone)$"
@@ -334,7 +335,11 @@ function Test-Package($P, $ActivityByKey) {
         Test-AgentTools $area $name $P.mcpServers
         @("$($P.mcpAuth)" -split ";") | Where-Object { $_ } | ForEach-Object {
             $server, $auth = $_ -split "=", 2
-            if ($auth -in "None", "Unspecified") { New-Finding $area $name "High" "MCP server has no authentication: $server" "Require OAuth (Microsoft Entra ID) on the server, or remove it" }
+            # "None" is declared anonymous access. "Unspecified" means there's no authorization block: Microsoft's
+            # own connectors (like Dynamics 365 on agent365.svc.cloud.microsoft) have none and are authenticated
+            # by the platform, so only a custom or external package is flagged, and at Medium.
+            if ($auth -eq "None") { New-Finding $area $name "High" "MCP server has no authentication: $server" "Require OAuth (Microsoft Entra ID) on the server, or remove it" }
+            elseif ($auth -eq "Unspecified" -and $custom) { New-Finding $area $name "Medium" "MCP server doesn't declare authentication: $server" "Confirm how it authenticates, and require OAuth if it doesn't" }
             elseif ($auth -in "ApiKeyPluginVault", "AzureKeyVault", "ConnectionVault") { New-Finding $area $name "Medium" "MCP server uses a static secret ($auth), not OAuth: $server" "Move it to OAuth so access follows the user, and rotate the secret until then" }
         }
         if ($everyone -and $P.mcpRiskyTools) {
@@ -707,7 +712,8 @@ if (-not $SkipConnectors) {
     catch { Write-Warning "Couldn't read Copilot connectors. It needs ExternalConnection.Read.All and the AI Administrator role. Run with -SkipConnectors to skip it. $($_.Exception.Message)" }
 }
 if ($PackagesOnly) {
-    Write-Host "Saved Packages.csv, DefenderAgents.csv and Connectors.csv to $OutputFolder. Attach them in Copilot Cowork with the prompt in the Cowork folder of this repo."
+    $saved = @("Packages.csv", "DefenderAgents.csv", "Connectors.csv") | Where-Object { Test-Path (Join-Path $OutputFolder $_) }
+    Write-Host "Saved $($saved -join ', ') to $OutputFolder. Attach them in Copilot Cowork with the prompt in the Cowork folder of this repo."
     return
 }
 $copilotUsage = $null

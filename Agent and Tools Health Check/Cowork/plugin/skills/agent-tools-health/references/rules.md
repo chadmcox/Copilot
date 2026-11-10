@@ -24,7 +24,8 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 | Custom or external, reachable, `deployedTo` is all users (`all` or `acquiredForAll`) | High | Access | Install it for a group, or let people install it themselves |
 | Reachable, an `mcpServers` entry starts with `http://` (no TLS) | High | Tools | Use HTTPS only, or remove the server |
 | Reachable, an `mcpServers` host isn't on this repo's list of Microsoft domains (same list as Discovered agents) | Low | Tools | Check it's on your approved tools list (Agents > Tools), and who runs it |
-| Reachable, an `mcpAuth` type is `None` or `Unspecified` | High | Tools | Require OAuth (Microsoft Entra ID) on the server, or remove it |
+| Reachable, an `mcpAuth` type is `None` | High | Tools | Require OAuth (Microsoft Entra ID) on the server, or remove it |
+| Reachable, custom or external, an `mcpAuth` type is `Unspecified` (no authorization block). Microsoft's own connectors have none and are authenticated by the platform, so skip Microsoft packages | Medium | Tools | Confirm how it authenticates, and require OAuth if it doesn't |
 | Reachable, an `mcpAuth` type is `ApiKeyPluginVault`, `AzureKeyVault` or `ConnectionVault` (a static secret). `OAuthPluginVault` and `DynamicClientRegistration` pass | Medium | Tools | Move it to OAuth so access follows the user, and rotate the secret until then |
 | Reachable, available or installed for all users, and `mcpRiskyTools` isn't empty | High | Tools | Limit the package to a group that needs these tools, or remove the tools |
 | `directUsers` more than 0 | Medium | Access | Assign it to a group instead |
