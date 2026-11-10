@@ -35,7 +35,16 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
     It checks (rules in Cowork/plugin/skills/agent-tools-health/references/rules.md):
       - Agents and tools: available to or installed for everyone, assigned to people instead of
         groups, groups with fewer than two owners or no description, unclear names, missing
-        descriptions, old pending requests, no use in -StaleDays.
+        descriptions, old pending requests, no use in -StaleDays. MCP servers in the catalog
+        (read from each package's AgentConnectors definition): reached without TLS, on a host
+        outside this script's Microsoft domains, with no authentication or a static secret, and
+        tools that change data or reach outside sources in a package available to everyone.
+        Access and MCP checks only cover packages users can reach: a package that's blocked, or
+        available to no one (availableTo allowedForNone), is skipped.
+      - Connectors: synced Copilot connectors (external connections) users can search (state
+        ready or limitExceeded). An authorized app with no service principal in this tenant, or
+        owned by another organization, can write content users get back from Copilot. Also flags
+        a full index and a missing description. Use -SkipConnectors to skip.
       - Agent identities: no sponsor, sponsor or owner disabled or gone, high-privilege
         permissions, single sponsor, unclear names, stale or never signed in, agent user accounts.
       - Blueprints: All allowed inheritable permissions, no sponsor or owner, client secrets,
@@ -57,25 +66,27 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
     Scores: every item starts at 100 (High -25, Medium -10, Low -3). Each area's score is the
     average of its items. Green 80+, Amber 50-79, Red under 50.
 
-    Output (in -OutputFolder): Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv and
-    Report.html. Packages.csv and DefenderAgents.csv are the files you attach in Copilot Cowork:
-    the Enterprise MCP server can't read the Agent 365 catalog or run Defender hunting queries,
-    so Cowork reads them from these files and reads everything else live. Use -PackagesOnly to
-    write just those two files.
+    Output (in -OutputFolder): Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv,
+    Connectors.csv and Report.html. Packages.csv, DefenderAgents.csv and Connectors.csv are the
+    files you attach in Copilot Cowork: the Enterprise MCP server can't read the Agent 365 catalog
+    or run Defender hunting queries, so Cowork reads them from these files and reads everything
+    else live. Use -PackagesOnly to write just those three files.
     The files name agents, groups and sponsors. Keep them private and out of source control.
 
     Permissions (delegated): CopilotPackages.Read.All (Agent 365 license, AI Administrator),
     Application.Read.All, AgentIdentityBlueprint.Read.All, AuditLog.Read.All (sign-ins),
     User.Read.All, Group.Read.All, Policy.Read.All (Conditional Access), ThreatHunting.Read.All
     (Defender advanced hunting; Security Reader role), Reports.Read.All (Microsoft 365 Copilot
-    usage report; Reports Reader role). Use -SkipDefender without Defender, -SkipCopilotUsage
-    without Reports Reader or Microsoft 365 Copilot licenses.
+    usage report; Reports Reader role), ExternalConnection.Read.All (synced Copilot connectors;
+    AI Administrator). Use -SkipDefender without Defender,
+    -SkipCopilotUsage without Reports Reader or Microsoft 365 Copilot licenses, -SkipConnectors
+    without access to Copilot connectors.
 
 .EXAMPLE
     .\Get-AgentToolsHealth.ps1
     .\Get-AgentToolsHealth.ps1 -StaleDays 60
     .\Get-AgentToolsHealth.ps1 -PackagesOnly
-    .\Get-AgentToolsHealth.ps1 -SkipPackages -SkipDefender -SkipCopilotUsage
+    .\Get-AgentToolsHealth.ps1 -SkipPackages -SkipDefender -SkipCopilotUsage -SkipConnectors
 #>
 [CmdletBinding()]
 param(
@@ -86,6 +97,7 @@ param(
     [switch]$SkipPackages,
     [switch]$SkipDefender,
     [switch]$SkipCopilotUsage,
+    [switch]$SkipConnectors,
     [string]$OutputFolder = ".\AgentToolsHealth-$(Get-Date -Format yyyyMMdd-HHmm)",
 
     # Words that make a name unclear. Matched at the start of a word, so "demo" also catches "demoe".
@@ -104,6 +116,7 @@ $scopes = @(
     if ($PackagesOnly)      { "Group.Read.All" }
     if (-not $SkipDefender) { "ThreatHunting.Read.All" }
     if (-not $PackagesOnly -and -not $SkipCopilotUsage) { "Reports.Read.All" }
+    if (-not $SkipConnectors) { "ExternalConnection.Read.All" }
 )
 # Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
 # Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
@@ -184,11 +197,13 @@ function New-Finding([string]$Area, [string]$Item, [string]$Severity, [string]$C
 # Category for the report's filters, from the check text.
 function Get-Category([string]$Check) {
     switch -Regex ($Check) {
+        'can write content'                                { "Security"; break }
+        'Index is full'                                    { "Usage"; break }
         'Conditional Access|high-risk'                     { "Security"; break }
         'sponsor|owner'                                    { "Ownership"; break }
         'Agent ID|classic service principal'               { "Identity"; break }
         'Defender|registry|Local AI agent'                 { "Inventory"; break }
-        'MCP server'                                       { "Tools"; break }
+        'MCP server|MCP tool'                              { "Tools"; break }
         'permission|secret|credential|agent user'          { "Permissions"; break }
         "^Group '|Available|Installed|Assigned|Blocked"   { "Access"; break }
         'name|description'                                 { "Naming"; break }
@@ -204,6 +219,10 @@ function Get-Reference([string]$Check) {
         'Local AI agent'                                         { "CIS 2.1, 2.3, 2.5 | CISA: design and configuration"; break }
         'MCP server without TLS'                                 { "CIS 3.10 | CISA: design and configuration"; break }
         'external MCP server'                                    { "CIS 2.5, 15.1 | CISA: design and configuration"; break }
+        'MCP server has no authentication|declare authentication|static secret' { "CIS 4.1, 6.7 | CISA: design and configuration"; break }
+        'MCP tool'                                               { "CIS 3.3, 6.1 | CISA: privilege, behavioral"; break }
+        'can write content'                                      { "CIS 2.5, 15.1 | CISA: design and configuration"; break }
+        'Index is full'                                          { "CIS 2.1"; break }
         '\(Agent ID\)|not an Agent ID'                        { "CIS 5.5, 5.6 | CISA: design and configuration, accountability"; break }
         'No sponsor|no longer exists|is disabled|One sponsor|No owner|no owner' { "CIS 5.1, 5.5 | CISA: accountability"; break }
         "^Group '.*owner"                                        { "CIS 5.1, 6.1 | CISA: accountability"; break }
@@ -256,12 +275,31 @@ function Get-PackageKind($ElementTypes) {
     else                                                       { "App" }
 }
 
+# The MCP servers a package calls: each AgentConnectors element's definition is a JSON string with
+# toolSource.remoteMcpServer (mcpServerUrl, authorization.type, mcpToolDescription.tools).
+function Get-McpServer($Detail) {
+    @($Detail.elementDetails) | Where-Object { $_ -and $_.elementType -eq "AgentConnectors" } |
+        ForEach-Object { @($_.elements) } | Where-Object { $_ -and $_.definition } | ForEach-Object {
+            try { ($_.definition | ConvertFrom-Json -ErrorAction Stop).toolSource.remoteMcpServer }
+            catch { Write-Warning "Couldn't read an MCP server definition for '$($Detail.displayName)'." }
+        } | Where-Object { $_ -and $_.mcpServerUrl }
+}
+
+# Scheme and host only, never the path or query (they can carry tenant or tool identifiers).
+function Get-SchemeHost([string]$Url) {
+    $uri = $Url -as [uri]
+    if ($uri -and $uri.IsAbsoluteUri) { "$($uri.Scheme)://$($uri.Authority)" } else { "(unreadable URL)" }
+}
+
 # One row per package, with the detail call's usage and access fields. This is Packages.csv.
+# mcpServers: scheme://host;... mcpAuth: scheme://host=authorization type;... (Unspecified when there's
+# none). mcpRiskyTools: tools whose annotations set destructiveHint or openWorldHint.
 function Get-PackageRow {
     process {
         $p = $_
         $d = Get-GraphOptional "$graph/copilot/admin/catalog/packages/$([uri]::EscapeDataString($p.id))"
         if (-not $d) { Write-Warning "Couldn't read details for '$($p.displayName)'."; $d = $p }
+        $mcp = @(Get-McpServer $d)
         $allowed = @($d.allowedUsersAndGroups) + @($d.acquireUsersAndGroups) | Where-Object { $_ }
         $d | Select-Object id, displayName,
             @{ n = "kind";             e = { Get-PackageKind $_.elementTypes } },
@@ -273,7 +311,10 @@ function Get-PackageRow {
             @{ n = "lastModifiedDateTime"; e = { ConvertTo-Utc $_.lastModifiedDateTime } },
             @{ n = "lastUsedDateTime"; e = { ConvertTo-Utc $_.lastUsedDateTime } },
             @{ n = "activeUsers30d";   e = { $_.activeUsers } },
-            @{ n = "sessions30d";      e = { $_.totalSessions } }
+            @{ n = "sessions30d";      e = { $_.totalSessions } },
+            @{ n = "mcpServers";       e = { @($mcp | ForEach-Object { Get-SchemeHost $_.mcpServerUrl } | Sort-Object -Unique) -join ";" } },
+            @{ n = "mcpAuth";          e = { @($mcp | ForEach-Object { "$(Get-SchemeHost $_.mcpServerUrl)=$(if ("$($_.authorization.type)") { $_.authorization.type } else { 'Unspecified' })" } | Sort-Object -Unique) -join ";" } },
+            @{ n = "mcpRiskyTools";    e = { @($mcp | ForEach-Object { @($_.mcpToolDescription.tools) } | Where-Object { $_ -and ($_.annotations.destructiveHint -eq $true -or $_.annotations.openWorldHint -eq $true) } | ForEach-Object name | Sort-Object -Unique) -join ";" } }
     }
 }
 
@@ -281,10 +322,30 @@ function Test-Package($P, $ActivityByKey) {
     if ($P.kind -eq "App") { return }   # Office add-ins and other apps aren't in scope
     $area = if ($P.kind -eq "Agent") { "Agents" } else { "Tools" }
     $name = $P.displayName
-    $custom = $P.type -ne "microsoft"
+    # The catalog has returned Microsoft packages as "microsoft" and as "firstParty"; treat both as Microsoft.
+    $custom = $P.type -notin "microsoft", "firstParty"
+    # Users can't reach a blocked package, or one available to no one, so access and MCP checks skip it.
+    # isBlocked is a Boolean in the script and the text "True" in Packages.csv. Empty counts as reachable.
+    $reachable = "$($P.isBlocked)" -ne "True" -and "$($P.availableTo)" -notmatch "^(none|allowedForNone)$"
+    $everyone  = $P.availableTo -match "^all$|ForAll$" -or $P.deployedTo -match "^all$|ForAll$"
 
-    if ($custom -and $P.availableTo -match "^all$|ForAll$") { New-Finding $area $name "High" "Available to all users" "Make it available to specific groups" }
-    if ($custom -and $P.deployedTo -match "^all$|ForAll$") { New-Finding $area $name "High" "Installed for the entire organization" "Install it for a group, or let people install it themselves" }
+    if ($reachable -and $custom -and $P.availableTo -match "^all$|ForAll$") { New-Finding $area $name "High" "Available to all users" "Make it available to specific groups" }
+    if ($reachable -and $custom -and $P.deployedTo -match "^all$|ForAll$") { New-Finding $area $name "High" "Installed for the entire organization" "Install it for a group, or let people install it themselves" }
+    if ($reachable) {
+        Test-AgentTools $area $name $P.mcpServers
+        @("$($P.mcpAuth)" -split ";") | Where-Object { $_ } | ForEach-Object {
+            $server, $auth = $_ -split "=", 2
+            # "None" is declared anonymous access. "Unspecified" means there's no authorization block: Microsoft's
+            # own connectors (like Dynamics 365 on agent365.svc.cloud.microsoft) have none and are authenticated
+            # by the platform, so only a custom or external package is flagged, and at Medium.
+            if ($auth -eq "None") { New-Finding $area $name "High" "MCP server has no authentication: $server" "Require OAuth (Microsoft Entra ID) on the server, or remove it" }
+            elseif ($auth -eq "Unspecified" -and $custom) { New-Finding $area $name "Medium" "MCP server doesn't declare authentication: $server" "Confirm how it authenticates, and require OAuth if it doesn't" }
+            elseif ($auth -in "ApiKeyPluginVault", "AzureKeyVault", "ConnectionVault") { New-Finding $area $name "Medium" "MCP server uses a static secret ($auth), not OAuth: $server" "Move it to OAuth so access follows the user, and rotate the secret until then" }
+        }
+        if ($everyone -and $P.mcpRiskyTools) {
+            New-Finding $area $name "High" "MCP tool(s) that change data or reach outside sources, in a package available to everyone: $($P.mcpRiskyTools -replace ';', ', ')" "Limit the package to a group that needs these tools, or remove the tools"
+        }
+    }
     if ($P.directUsers -gt 0) { New-Finding $area $name "Medium" "Assigned to $($P.directUsers) $(if ($P.directUsers -eq 1) { 'person' } else { 'people' }) directly, not through a group" "Assign it to a group instead" }
     @($P.groupIds -split ";") | Where-Object { $_ } | ForEach-Object {
         $g = Get-Group $_
@@ -492,18 +553,24 @@ function Get-ActivityByKey($Agents) {
 # flagged Low as an external MCP server to check against your approved tools list.
 $microsoftHosts = '\.(microsoft|cloud\.microsoft|office|office365|sharepoint|azure|azure-api|windows|dynamics|powerplatform|powerapps|azurewebsites|svc\.cloud\.microsoft)\.(com|net|microsoft)$|\.cloud\.microsoft$'
 
-function Test-AgentTools([string]$Area, [string]$Name, [string]$Urls) {
-    @($Urls -split ";") | Where-Object { $_ } | Sort-Object -Unique | ForEach-Object {
+# $Known: scheme://host values already checked from the Agent 365 catalog, so Defender doesn't repeat them.
+function Test-AgentTools([string]$Area, [string]$Name, [string]$Urls, [string]$Known) {
+    $skip = @($Known -split ";" | Where-Object { $_ })
+    @($Urls -split ";") | Where-Object { $_ -and (Get-SchemeHost $_) -notin $skip } | Sort-Object -Unique | ForEach-Object {
         $uri = $_ -as [uri]
         if ($_ -like "http://*") { New-Finding $Area $Name "High" "Connects to an MCP server without TLS: $_" "Use HTTPS only, or remove the server" }
         elseif ($uri -and $uri.Host -notmatch $microsoftHosts) { New-Finding $Area $Name "Low" "Connects to an external MCP server: $($uri.Host)" "Check it's on your approved tools list (Agents > Tools), and who runs it" }
     }
 }
 
-# Every ID a registry package can be known by, so Defender's agents can be matched to it.
+# Every ID a registry package can be known by, so Defender's agents can be matched to it. The value is
+# the package's MCP servers (prefixed so it's never empty), so Defender doesn't repeat what the catalog checked.
 function Get-RegistryKey($Packages) {
     $keys = @{}
-    $Packages | ForEach-Object { @($_.id, $_.appId, $_.manifestId, $_.assetId, $_.agentIdentityId) } | Where-Object { $_ } | ForEach-Object { $keys["$_"] = $true }
+    $Packages | ForEach-Object {
+        $servers = "catalog;$($_.mcpServers)"
+        @($_.id, $_.appId, $_.manifestId, $_.assetId, $_.agentIdentityId) | Where-Object { $_ } | ForEach-Object { $keys["$_"] = $servers }
+    }
     $keys
 }
 
@@ -524,7 +591,8 @@ function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry) {
             if (Test-UnclearName $_.AgentName) { New-Finding "Discovered agents" $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
         }
         if (-not $_.EntraAgentId) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls" }
-        Test-AgentTools "Discovered agents" $name $_.McpServerUrls
+        $known = @($_.AgentId, $_.SourceAgentId, $_.EntraAgentId) | Where-Object { $_ -and $RegistryKeys["$_"] } | ForEach-Object { $RegistryKeys["$_"] }
+        Test-AgentTools "Discovered agents" $name $_.McpServerUrls (@($known) -join ";")
     }
     # Local AI agents (coding assistants and the like) seen on devices: one finding per agent name.
     # Each AgentsInfo row for a local agent is one installation (one agent, device and account).
@@ -564,6 +632,51 @@ function Test-ClassicAgent($S, $SignIns) {
 }
 
 # ---------------------------------------------------------------------------
+# Connectors (synced Copilot connectors, Graph external connections)
+# ---------------------------------------------------------------------------
+
+# Microsoft's own tenants. Apps they own are first-party, not outside apps. Public values, not this tenant's.
+$microsoftTenantIds = @("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47")
+$appCache = @{}
+
+# A service principal by appId, cached. $null when there's none in this tenant; "unread" when the lookup failed.
+function Get-AppByAppId([string]$AppId) {
+    if (-not $appCache.ContainsKey($AppId)) {
+        $appCache[$AppId] = try {
+            @(Get-GraphAll "$graph/servicePrincipals?`$filter=$([uri]::EscapeDataString("appId eq '$AppId'"))&`$select=id,appId,displayName,appOwnerOrganizationId") | Select-Object -First 1
+        }
+        catch { Write-Warning "Couldn't look up authorized app $AppId. $($_.Exception.Message)"; "unread" }
+    }
+    $appCache[$AppId]
+}
+
+# One row per connection users can search (state ready, or limitExceeded: the index is full but what's
+# in it is still searchable). This is Connectors.csv.
+function Get-ConnectorRow {
+    process {
+        $_ | Where-Object { $_.state -in "ready", "limitExceeded" } | Select-Object id, name, description, state, connectorId, contentCategory,
+            @{ n = "authorizedAppIds"; e = { @($_.configuration.authorizedAppIds | Where-Object { $_ }) -join ";" } }
+    }
+}
+
+# Rollout audience and per-item access aren't in Graph; they're a manual check.
+function Test-Connector($C, [string]$TenantId) {
+    $name = if ($C.name) { $C.name } else { $C.id }
+    @("$($C.authorizedAppIds)" -split ";") | Where-Object { $_ } | ForEach-Object {
+        $app = Get-AppByAppId $_
+        if ($app -is [string]) { return }   # lookup failed; the warning says which app
+        if (-not $app) {
+            New-Finding "Connectors" $name "Medium" "Authorized app $_ isn't in this tenant, and can write content users get from Copilot" "Remove it from the connection, or find out what it is before you keep it"
+        }
+        elseif ($TenantId -and $app.appOwnerOrganizationId -and $app.appOwnerOrganizationId -ne $TenantId -and $app.appOwnerOrganizationId -notin $microsoftTenantIds) {
+            New-Finding "Connectors" $name "Medium" "Authorized app '$($app.displayName)' belongs to another organization, and can write content users get from Copilot" "Confirm the vendor and what it indexes, or remove it from the connection"
+        }
+    }
+    if ($C.state -eq "limitExceeded") { New-Finding "Connectors" $name "Low" "Index is full (limitExceeded), so Copilot answers from part of the source" "Raise the index quota, or narrow what the connector indexes" }
+    if (-not "$($C.description)".Trim()) { New-Finding "Connectors" $name "Low" "No description" "Describe what the connection holds and who it's for" }
+}
+
+# ---------------------------------------------------------------------------
 # Run
 # ---------------------------------------------------------------------------
 
@@ -587,8 +700,20 @@ if (-not $SkipDefender) {
     }
     catch { Write-Warning "Couldn't run the Defender hunting query. It needs ThreatHunting.Read.All and the Security Reader role. Run with -SkipDefender to skip it. $($_.Exception.Message)" }
 }
+$connectors = @()
+$haveConnectors = $false
+if (-not $SkipConnectors) {
+    Write-Host "Reading Copilot connectors (external connections)..."
+    try {
+        $connectors = @(Get-GraphAll "$graph/external/connections?`$select=id,name,description,state,connectorId,contentCategory,configuration" | Get-ConnectorRow)
+        $haveConnectors = $true
+        $connectors | Export-Csv (Join-Path $OutputFolder "Connectors.csv") -NoTypeInformation -Encoding UTF8
+    }
+    catch { Write-Warning "Couldn't read Copilot connectors. It needs ExternalConnection.Read.All and the AI Administrator role. Run with -SkipConnectors to skip it. $($_.Exception.Message)" }
+}
 if ($PackagesOnly) {
-    Write-Host "Saved Packages.csv and DefenderAgents.csv to $OutputFolder. Attach them in Copilot Cowork with the prompt in the Cowork folder of this repo."
+    $saved = @("Packages.csv", "DefenderAgents.csv", "Connectors.csv") | Where-Object { Test-Path (Join-Path $OutputFolder $_) }
+    Write-Host "Saved $($saved -join ', ') to $OutputFolder. Attach them in Copilot Cowork with the prompt in the Cowork folder of this repo."
     return
 }
 $copilotUsage = $null
@@ -628,6 +753,8 @@ $findings = @(
     if ($copilotUsage) { Test-CopilotAgentUsage $copilotUsage @($packages | Where-Object kind -eq "Agent").Count }
     if ($haveDefender) { Test-DefenderAgent $defenderAgents (Get-RegistryKey $packages) ([bool]$packages) }
     $classicAgents | ForEach-Object { Test-ClassicAgent $_ $signIns }
+    $tenantId = (Get-MgContext).TenantId
+    $connectors | ForEach-Object { Test-Connector $_ $tenantId }
 )
 
 # Well-governed funnel for agent identities.
@@ -664,6 +791,9 @@ $areas = @(
             $defenderAgents | Where-Object Platform -eq "LocalAgents" | ForEach-Object AgentName | Sort-Object -Unique | ForEach-Object { "$_ (local)" }) } }
     }
     "Agents without Agent ID" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($classicAgents | ForEach-Object displayName) } }
+    if ($haveConnectors) {
+        "Connectors" | Select-Object @{ n = "Name"; e = { $_ } }, @{ n = "Items"; e = { @($connectors | ForEach-Object { if ($_.name) { $_.name } else { $_.id } }) } }
+    }
 )
 $scorecard = @($areas | Get-AreaScore -Findings $findings | Sort-Object Score)
 
@@ -675,12 +805,12 @@ $scorecard | Export-Csv (Join-Path $OutputFolder "Scorecard.csv") -NoTypeInforma
 $coworkPrompt = @"
 Run the agent and tools health check. Count anything unused for $StaleDays days as stale.
 
-Use the attached Packages.csv for agents and tools, and the attached DefenderAgents.csv for agents Microsoft Defender found. Use the Microsoft MCP Server for Enterprise to read: service principals tagged as agents that aren't agent identities (agents without Agent ID); every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); and the Conditional Access policies.
+Use the attached Packages.csv for agents and tools (including the mcpServers, mcpAuth and mcpRiskyTools columns), the attached DefenderAgents.csv for agents Microsoft Defender found, and the attached Connectors.csv for synced Copilot connectors if there is one. Use the Microsoft MCP Server for Enterprise to read: service principals tagged as agents that aren't agent identities (agents without Agent ID); every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); the Conditional Access policies; and, for each authorized app in Connectors.csv, its service principal (display name and owning organization).
 
 This is read-only. Don't change anything in the tenant, and don't send any email or Teams message.
 
 Apply the agent-tools-health rules and give me:
-1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot adoption, Discovered agents, Agents without Agent ID) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
+1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot adoption, Discovered agents, Agents without Agent ID, Connectors) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
 2. A findings table sorted High, Medium, Low, with the item, what's wrong and the fix.
 3. The top 3 fixes to do first.
 4. The well-governed funnel for agent identities: with an active sponsor, a clear name, least privilege, in use.
@@ -723,9 +853,11 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "Microsoft 365 admin center > Agents > Settings > Agent and plugin access: Allow agents and plugins built by external publishers is off, or reviewed."
                           "Microsoft 365 admin center > Agents > Settings > Sharing: Specific users, not All users (applies to Agent Builder agents only)."
                           "Agents > Tools > Registry: standalone MCP servers and skills (no API) have clear names, owners and group-scoped availability."
+                          "Copilot > Connectors > Your connections: each synced connector is rolled out to the right people, and none is set so every user sees all content (rollout audience and item access aren't in Graph)."
                           "Sponsors attested each agent in the last 12 months (access review or attestation).")
         graphCalls   = @(
-                          "GET /beta/copilot/admin/catalog/packages (+ /{id} for each)"
+                          "GET /beta/copilot/admin/catalog/packages (+ /{id} for each, including elementDetails for MCP servers)"
+                          "GET /beta/external/connections (+ GET /beta/servicePrincipals?`$filter=appId eq '{id}' for each authorized app)"
                           "GET /beta/servicePrincipals/microsoft.graph.agentIdentity?`$expand=sponsors (+ owners, appRoleAssignments)"
                           "GET /beta/oauth2PermissionGrants?`$filter=clientId eq '{id}'"
                           "GET /beta/applications/microsoft.graph.agentIdentityBlueprint?`$expand=sponsors (+ owners, inheritablePermissions)"
@@ -745,6 +877,8 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           if ($SkipPackages -or -not $packages) { "Agents and tools weren't checked: the Agent 365 catalog wasn't read." }
                           if (-not $haveDefender) { "Discovered agents weren't checked: the Defender hunting query didn't run (needs ThreatHunting.Read.All and Security Reader)." }
                           if ($SkipCopilotUsage -or -not $copilotUsage) { "Copilot agent adoption wasn't checked: the Copilot usage report wasn't read, or didn't have an agent activity column." }
+                          if (-not $haveConnectors) { "Synced Copilot connectors weren't checked: -SkipConnectors, or external connections couldn't be read (needs ExternalConnection.Read.All)." }
+                          "Access and MCP checks skip packages users can't reach: blocked, or available to no one."
                           if ($haveDefender -and -not $packages) { "The Agent 365 registry wasn't read, so Defender's AgentsInfo inventory was used as the agent list." }
                           if (-not $signIns.Count) { "Sign-in activity wasn't available, so stale checks on identities and blueprints are incomplete." })
         prompt       = $coworkPrompt

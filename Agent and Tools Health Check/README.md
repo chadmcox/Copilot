@@ -12,15 +12,16 @@ A read-only check of how well your Copilot agents and tools, Entra agent identit
 | --- | --- |
 | **Copilot Cowork** (recommended) | Set up the plugin once, attach `Packages.csv` and `DefenderAgents.csv`, paste the prompt. See **[Cowork/readme.md](Cowork/readme.md)** |
 | **GitHub Copilot** (VS Code or the Copilot CLI) | Install the skill with one script, then ask. Copilot runs the script for you, or reads live through the Enterprise MCP. See **[GitHub Copilot/readme.md](GitHub%20Copilot/readme.md)** |
-| **PowerShell** | `.\Get-AgentToolsHealth.ps1`. Writes Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv and Report.html |
+| **PowerShell** | `.\Get-AgentToolsHealth.ps1`. Writes Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv, Connectors.csv and Report.html |
 
 ```powershell
 .\Get-AgentToolsHealth.ps1                  # full check
 .\Get-AgentToolsHealth.ps1 -StaleDays 60    # stale after 60 days instead of 90
-.\Get-AgentToolsHealth.ps1 -PackagesOnly    # just Packages.csv and DefenderAgents.csv, to attach in Cowork
+.\Get-AgentToolsHealth.ps1 -PackagesOnly    # just Packages.csv, DefenderAgents.csv and Connectors.csv, to attach in Cowork
 .\Get-AgentToolsHealth.ps1 -SkipPackages    # no Agent 365 license
 .\Get-AgentToolsHealth.ps1 -SkipDefender    # no Defender (or no Security Reader)
 .\Get-AgentToolsHealth.ps1 -SkipCopilotUsage  # no Reports Reader, or no Microsoft 365 Copilot licenses
+.\Get-AgentToolsHealth.ps1 -SkipConnectors  # don't read synced Copilot connectors
 .\Get-AgentToolsHealth.ps1 -Environment USGov  # GCC High, without the cloud question
 ```
 
@@ -34,12 +35,13 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 
 | Area | Checks |
 | --- | --- |
-| **Agents and tools** | Available to or installed for everyone instead of groups (High). Assigned to people directly; groups with fewer than two owners or no description. Unclear name, missing description. Old pending requests. Not used in 90 days |
+| **Agents and tools** | Available to or installed for everyone instead of groups (High). Assigned to people directly; groups with fewer than two owners or no description. Unclear name, missing description. Old pending requests. Not used in 90 days. **MCP servers** in the catalog: over plain http (High), no authentication (High), a static secret instead of OAuth (Medium), a host outside this script's Microsoft domains (Low), and tools that change data or reach outside sources in a package available to everyone (High). Access and MCP checks skip packages users can't reach (blocked, or available to no one) |
 | **Agent identities** | No sponsor, or a sponsor or owner disabled or gone (High). High-privilege Graph permissions such as Mail.Send or Directory.ReadWrite.All (High). One sponsor and no owner. Unclear name. No sign-in for 90 days, or never. Agent user accounts |
 | **Blueprints** | Inheritable permissions set to All allowed (High). No sponsor (High). Client secrets instead of certificates or federated credentials, expiring credentials. Unclear name, no description. Nothing active under it |
 | **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents |
 | **Copilot adoption** | Agents exist in the catalog, but almost no licensed Microsoft 365 Copilot user used one in the last 90 days (Copilot usage report). Its own area so it doesn't average into the Tenant score, and it only appears when the usage report was read |
 | **Discovered agents** (Microsoft Defender, KQL) | Agents Defender found (`AgentsInfo`: Copilot Studio, Foundry, third-party) that aren't in the Agent 365 registry, especially ones available to everyone (High) or with no owner. Cloud agents with no Entra Agent ID. **MCP servers** the agents use: over plain http (High), or on a host outside this script's list of Microsoft domains (Low; check it against your approved tools). Local AI agents found on devices (needs Defender for Endpoint Plan 2). Without the Agent 365 catalog, Defender's list becomes the agent list |
+| **Connectors** (synced Copilot connectors) | Connectors users can search (ready, or index full). An app that can write content into the connector isn't in this tenant, or belongs to another organization (Medium): whatever it writes, users get back from Copilot. Index full, so answers come from part of the source (Low). No description (Low). Skip with `-SkipConnectors` |
 | **Agents without Agent ID** | Older Copilot Studio agents still running as classic service principals (found by their `AgentCreatedBy:CopilotStudio`, `AgenticApp` and similar tags), which miss Agent ID controls such as agent Conditional Access and lifecycle policies. There's no in-place migration. Microsoft's guidance: retire unused ones, recreate lightly used ones with Agent ID, and leave busy production agents until Microsoft ships an automated migration path |
 
 **Unclear names** (this repo's list, not Microsoft's; Microsoft only recommends [a naming convention](https://learn.microsoft.com/entra/agent-id/best-practices-agent-id#govern-the-agent-lifecycle), such as a department prefix) are flagged when a name has *test*, *demo*, *temp*, *copy*, *draft*, *sample*, *POC*, *sandbox*, *untitled*, *dummy*, *do not use*, starts with *new agent* or *my agent*, ends in *Agent 2* or *(1)*, or is under four characters. Change the list with `-UnclearNamePattern`. **High-privilege permissions** are also this repo's list (`-HighPrivilegePattern`); Microsoft's guidance is least privilege, without a fixed list.
@@ -89,6 +91,7 @@ The same queries work in the Defender portal under **Hunting > Advanced hunting*
 - The **Agent ID default inactivity policy** (preview) is on (Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID (Preview)). It notifies sponsors and owners at 60 days, disables at 90 and deletes at 455.
 - **Allow agents and plugins built by external publishers** is off or reviewed (admin center > Agents > Settings > Agent and plugin access), and **Sharing** is set to specific users (Agents > Settings > Sharing; it applies only to Agent Builder agents).
 - **Standalone MCP servers and skills** in Agents > Tools > Registry have clear names, owners and group-scoped availability.
+- **Synced Copilot connectors** are rolled out to the right people, and none is set so every user sees all content (Copilot > Connectors > Your connections). Graph doesn't expose either.
 - Sponsors **attested** each agent in the last 12 months (Microsoft suggests every 6 to 12 months).
 
 With browser access on, Cowork can read these pages and report what they're set to.
@@ -116,7 +119,7 @@ Put the people who run the health checks in one group: **Copilot Health Check Us
 
 ## Permissions (PowerShell)
 
-Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentity.Read.All, AgentIdentityBlueprint.Read.All, AgentIdentityBlueprintPrincipal.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All, Reports.Read.All. Roles: activate **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader) in PIM for the run; see above. The catalog also needs a Microsoft Agent 365 license or Microsoft 365 E7. Copilot agent adoption needs at least one Microsoft 365 Copilot license in the tenant; skip it with `-SkipCopilotUsage`.
+Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentity.Read.All, AgentIdentityBlueprint.Read.All, AgentIdentityBlueprintPrincipal.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All, Reports.Read.All, ExternalConnection.Read.All. Roles: activate **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader) in PIM for the run; see above. The catalog also needs a Microsoft Agent 365 license or Microsoft 365 E7. Copilot agent adoption needs at least one Microsoft 365 Copilot license in the tenant; skip it with `-SkipCopilotUsage`.
 
 Only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Microsoft.Graph.Authentication), Graph beta, Windows PowerShell 5.1 and PowerShell 7.
 

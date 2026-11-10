@@ -21,6 +21,7 @@ The Enterprise MCP server **can't read the Agent 365 catalog**: no MCP scope cov
 | Conditional Access policies for agents | Enterprise MCP, live |
 | Agents without Agent ID (older agents running as classic service principals, found by tag) | Enterprise MCP, live |
 | Agents Microsoft Defender found (AgentsInfo), their MCP servers, skills and tools, and their Agent 365 activity (CloudAppEvents) | **DefenderAgents.csv**, which you attach. The script runs the KQL through Graph advanced hunting; the MCP can't (403) |
+| Synced Copilot connectors and the apps that can write into them | **Connectors.csv**, which you attach; the apps' service principals through the Enterprise MCP, live |
 | Attestation date, admin center settings (blueprint creation, inactivity policy, external publishers, sharing) | Not readable through the MCP. Manual checklist, or Cowork reads them in the browser if you turn that on |
 
 ## Pick a way
@@ -32,17 +33,17 @@ The Enterprise MCP server **can't read the Agent 365 catalog**: no MCP scope cov
 
 ## The prompt
 
-Attach **Packages.csv** and **DefenderAgents.csv** and paste this. It's also printed at the bottom of every `Report.html`.
+Attach **Packages.csv**, **DefenderAgents.csv** and **Connectors.csv** and paste this. It's also printed at the bottom of every `Report.html`.
 
 ```text
 Run the agent and tools health check. Count anything unused for 90 days as stale.
 
-Use the attached Packages.csv for agents and tools, and the attached DefenderAgents.csv for agents Microsoft Defender found. Use the Microsoft MCP Server for Enterprise to read: service principals tagged as agents that aren't agent identities (agents without Agent ID); every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); and the Conditional Access policies.
+Use the attached Packages.csv for agents and tools (including the mcpServers, mcpAuth and mcpRiskyTools columns), the attached DefenderAgents.csv for agents Microsoft Defender found, and the attached Connectors.csv for synced Copilot connectors if there is one. Use the Microsoft MCP Server for Enterprise to read: service principals tagged as agents that aren't agent identities (agents without Agent ID); every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); the Conditional Access policies; and, for each authorized app in Connectors.csv, its service principal (display name and owning organization).
 
 This is read-only. Don't change anything in the tenant, and don't send any email or Teams message.
 
 Apply the agent-tools-health rules and give me:
-1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot adoption, Discovered agents, Agents without Agent ID) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
+1. A scorecard: one row per area (Agents, Tools, Agent identities, Blueprints, Tenant, Copilot adoption, Discovered agents, Agents without Agent ID, Connectors) with a score out of 100 and Green 80+, Amber 50-79, Red under 50.
 2. A findings table sorted High, Medium, Low, with the item, what's wrong and the fix.
 3. The top 3 fixes to do first.
 4. The well-governed funnel for agent identities: with an active sponsor, a clear name, least privilege, in use.
@@ -90,9 +91,10 @@ Good follow-ups:
 
 ## Get Packages.csv and DefenderAgents.csv
 
-Run `.\Get-AgentToolsHealth.ps1 -PackagesOnly` (a few minutes; one call per package). It writes both files.
+Run `.\Get-AgentToolsHealth.ps1 -PackagesOnly` (a few minutes; one call per package). It writes all three files.
 
 - Packages.csv needs the **AI Administrator** role and a **Microsoft Agent 365** license (included in Microsoft 365 E7).
+- Connectors.csv needs **ExternalConnection.Read.All** and the **AI Administrator** role. Add `-SkipConnectors` to leave it out.
 - DefenderAgents.csv needs **Security Reader** (it runs a Defender advanced hunting query on the `AgentsInfo` table). Add `-SkipDefender` if you don't have Defender.
 
 No PowerShell? With browser access on, Cowork can run the read-only AgentsInfo query in the Defender portal's advanced hunting instead.
