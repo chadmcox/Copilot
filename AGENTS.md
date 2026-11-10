@@ -65,3 +65,7 @@ Each solution that has a skill has two folders, and both use the same skill file
 - **GitHub Copilot/**: setup for GitHub Copilot in VS Code and the Copilot CLI. `Install-GitHubCopilotSkill.ps1` copies the skills from `Cowork/plugin/skills/` (or downloads them from GitHub) and puts the solution's scripts in the skill's `scripts` folder.
 
 When you add a file to a skill, or a new skill, add it to both `New-CoworkPluginPackage.ps1` and `Install-GitHubCopilotSkill.ps1`. When a skill step only fits one product, say so in the skill's "If you're running in GitHub Copilot" section.
+
+## Access Governance Guide scripts
+
+The Copilot groups, admin PIM and access packages each have one script that checks the tenant and creates or fixes what's missing: `New-CopilotGroups.ps1`, `New-CopilotAdminPim.ps1` and `New-CopilotAccessPackages.ps1`. Put every change to the design (new group, new description, renamed or retired group, role or PIM setting, new package) in the table at the top of the right script. Don't add dated one-off update scripts.

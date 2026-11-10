@@ -1,6 +1,6 @@
 # Copilot Access Governance Guide
 
-Updated Nov 9, 2026 · @Chad Cox
+Updated Nov 10, 2026 · @Chad Cox
 
 This guide shows where to use each Copilot group. The scripts in this folder create the groups. You add each group to its admin center setting one time. After that, you add or remove people with access packages, not in the admin centers.
 
@@ -22,46 +22,44 @@ Admin centers change often, and some options only appear in some tenants. If you
 
 All the scripts use only Microsoft Graph (the Microsoft.Graph.Authentication module). Run each one that makes changes with `-WhatIf` first to see what it will do. `Get-CopilotSpendingReport.ps1` only reads.
 
-| Order | Script | What it does |
+There are three setup scripts, one for each job. Each one checks the tenant against the design in the script and creates or fixes only what is missing or wrong, so you can run it again any time. Run them in order the first time; after that, run only the one you changed. When this guide changes (a new group, a new description, a new package), the change goes into one of these three scripts, not into a new dated script.
+
+| Order | Script | What it checks and fixes |
 | --- | --- | --- |
-| 1 | `New-CopilotGroups.ps1` | Creates every group in the table below except Copilot Platform Admin. Skips groups that already exist. Creates admin groups as role-assignable. `-IncludeCodeGroups` adds the three Copilot Code groups |
-| 2 | `Update-CopilotGroupCleanup.ps1` | Only for tenants built from the first version of this design. Deletes Copilot + Cowork Access, Copilot + Code Access and Copilot Preview Models Access. Exports members and owners to CSV first. Skips groups that still have members unless you add `-DeleteEvenIfMembers` |
-| 3 | `Update-CopilotGroups-20261026.ps1` | Brings the descriptions of groups already in your tenant up to this version. Renames nothing by default. Run it after the cleanup script |
-| 3b | `Update-CopilotGroups-20261102.ps1` | Updates the descriptions of five groups for this version. Renames and deletes nothing. Run it after the Oct 26 script |
-| 3c | `Update-CopilotGroups-20261109.ps1` | Updates the descriptions of three groups for Nov 9, 2026. Renames and deletes nothing. Run it after the Nov 2 script |
-| 4 | `New-CopilotAdminPim.ps1` | Creates Copilot Platform Admin and puts every admin group under PIM for Groups. Needs `-ApproverGroupName` |
-| 5 | `New-CopilotAccessPackages.ps1` | Creates the catalog, access packages, approval policies and access reviews. `-IncludeAdminPackages` and `-IncludeCodePackages` are optional |
-| 6 | `New-CopilotSpendingPolicies.ps1` | **Preview.** Creates the spending policies with the new Graph cost management API (beta). Add `-UpdateExisting` to fix policies that already exist: it sets their limits, turns on missing services and links missing groups. It never turns anything off |
-| 7 | `Get-CopilotSpendingReport.ps1` | **Preview, read-only.** Shows the credit balance and every spending policy with its groups, services, limits and alerts, and flags problems. Add `-UserPrincipalName` to see which policy covers a person and how much they have left |
-| 8 | (by hand) | Point each admin center setting at its group, using the steps below |
+| 1 | `New-CopilotGroups.ps1` | **Groups.** Every group in the table below, including Copilot Platform Admin. Creates missing groups (admin groups as role-assignable), renames groups listed under an old name, and updates descriptions that don't match. Warns about admin groups that aren't role-assignable. Reports retired groups that are still in the tenant; `-RemoveRetiredGroups` deletes them after exporting members and owners to CSV. `-IncludeCodeGroups` adds the Copilot Code groups. `-SkipAdminGroups` leaves out the admin groups so Groups Administrator is enough |
+| 2 | `New-CopilotAdminPim.ps1` | **Admin roles and PIM.** Assigns any missing Entra roles to the admin groups and reports extra ones (never removes them). Sets each group's PIM for Groups policy. Needs `-ApproverGroupName`. `-SkipPimPolicy` checks only the roles, for tenants without PIM licensing. It doesn't create groups: run script 1 first |
+| 3 | `New-CopilotAccessPackages.ps1` | **Access packages.** Stops and lists any group it needs that isn't in the tenant. Creates the catalog and adds missing groups to it. Creates missing packages, updates their descriptions, adds missing groups and reports extra ones, creates the tier request policy and the incompatible links. `-IncludeAdminPackages`, `-IncludeCodePackages` and `-CreateAdminGroupReviews` are optional |
+| 4 | `New-CopilotSpendingPolicies.ps1` | **Preview.** Creates the spending policies with the new Graph cost management API (beta). Add `-UpdateExisting` to fix policies that already exist: it sets their limits, turns on missing services and links missing groups. It never turns anything off |
+| 5 | `Get-CopilotSpendingReport.ps1` | **Preview, read-only.** Shows the credit balance and every spending policy with its groups, services, limits and alerts, and flags problems. Add `-UserPrincipalName` to see which policy covers a person and how much they have left |
+| 6 | (by hand) | Point each admin center setting at its group, using the steps below |
 
 Each script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High) or **USGovDoD**. China isn't offered: the Copilot and agent APIs these scripts use aren't expected to work there. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High and DoD use the scripts.
 
 ```powershell
 .\New-CopilotGroups.ps1 -WhatIf
 .\New-CopilotGroups.ps1
-.\Update-CopilotGroupCleanup.ps1 -WhatIf
-.\Update-CopilotGroupCleanup.ps1
-.\Update-CopilotGroups-20261026.ps1 -WhatIf
-.\Update-CopilotGroups-20261026.ps1
-.\Update-CopilotGroups-20261102.ps1 -WhatIf
-.\Update-CopilotGroups-20261102.ps1
-.\Update-CopilotGroups-20261109.ps1 -WhatIf
-.\Update-CopilotGroups-20261109.ps1
 .\New-CopilotAdminPim.ps1 -ApproverGroupName "<approver group>" -WhatIf
+.\New-CopilotAdminPim.ps1 -ApproverGroupName "<approver group>"
 .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -WhatIf
+.\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>"
 .\New-CopilotSpendingPolicies.ps1 -WhatIf
 .\New-CopilotSpendingPolicies.ps1 -UpdateExisting -WhatIf
 .\Get-CopilotSpendingReport.ps1
 ```
 
-Permissions you need: Group.ReadWrite.All for the groups. Privileged Role Administrator (or Global Administrator) to create role-assignable groups and set up PIM. Identity Governance Administrator for access packages.
+**How to change the design.** Each script has its tables at the top, with a short "How to change the design" note in its help:
 
-**Before you run the cleanup script:** check that no admin center setting still points at a group it deletes. For example, an AI provider can still be assigned to Copilot Preview Models Access. Move the setting to the new group first.
+- New group, new description, renamed group or retired group: `$groups` and `$retiredGroups` in `New-CopilotGroups.ps1`.
+- Roles, activation hours or approval for an admin group: `$adminGroups` in `New-CopilotAdminPim.ps1`.
+- New package, or another group in a package: `$packages` in `New-CopilotAccessPackages.ps1`.
+
+Permissions you need: Group.ReadWrite.All for the groups. Privileged Role Administrator (or Global Administrator) to create and update role-assignable groups and set up PIM. Identity Governance Administrator for access packages.
+
+**Before you delete retired groups:** check that no admin center setting still points at them. For example, an AI provider can still be assigned to Copilot Preview Models Access. Move the setting to the new group first, then run `New-CopilotGroups.ps1 -RemoveRetiredGroups -WhatIf`.
 
 ## Every group the scripts create
 
-This is the full list from `New-CopilotGroups.ps1` and `New-CopilotAdminPim.ps1`, in the same order. Each row says where you assign the group and which access package from `New-CopilotAccessPackages.ps1` adds people to it.
+This is the full list from `New-CopilotGroups.ps1`, in the same order. Each row says where you assign the group and which access package from `New-CopilotAccessPackages.ps1` adds people to it.
 
 You set each admin center setting once. After that, people join through the access package, not the admin center.
 
@@ -135,7 +133,7 @@ These get roles through PIM, not through an admin center setting. The roles and 
 
 Copilot Platform Admin, Copilot Delegated Admin, Copilot Agent Management Admin, Copilot Agent Registry Admin, Copilot AI Reader, Copilot Billing Admin, Copilot Cost Reader, Copilot Agent ID Admin, Copilot Agent ID Developers, Copilot Office Apps Admin, Copilot Compliance Admin, Copilot Teams Admin, Copilot SharePoint Admin, Copilot Studio Environment Admin, Copilot Plugin Approvers, Copilot Health Check Users, Copilot Entra ID Operations Reader.
 
-Copilot Platform Admin is made by `New-CopilotAdminPim.ps1` and has no access package.
+Copilot Platform Admin is made by `New-CopilotGroups.ps1`, gets its roles from `New-CopilotAdminPim.ps1`, and has no access package.
 
 ## Do these first
 
@@ -392,7 +390,7 @@ Add it next to the main group when you test a new setting. It's also the only gr
 
 ### Groups we removed
 
-`Update-CopilotGroupCleanup.ps1` deletes these:
+`New-CopilotGroups.ps1` reports these while they're still in your tenant, and deletes them when you add `-RemoveRetiredGroups`:
 
 - **Copilot + Cowork Access.** Cowork access now comes from the Cowork spend groups. To give people a Cowork plugin, see Cowork plugins below.
 - **Copilot + Code Access.** Code access will come from a Code spending policy, the same way as Cowork.
@@ -767,7 +765,7 @@ For agent settings (who can build, share, publish and receive agents), see the [
 
 ## Admin groups
 
-*Not checked.* Admin groups use **PIM for Groups** (`New-CopilotAdminPim.ps1`). The group always holds the role. People are *eligible* members: they turn the role on when they need it, for a few hours, with MFA and a reason. To give roles without PIM, run `New-CopilotGroups.ps1` with `-AssignRoles`.
+*Not checked.* Admin groups use **PIM for Groups** (`New-CopilotAdminPim.ps1`). The group always holds the role. People are *eligible* members: they turn the role on when they need it, for a few hours, with MFA and a reason. To give roles without PIM, run `New-CopilotAdminPim.ps1 -SkipPimPolicy`: it assigns the roles to the groups and leaves membership permanent.
 
 | Group | Entra role(s) | How long it stays on | What it's for |
 | --- | --- | --- | --- |

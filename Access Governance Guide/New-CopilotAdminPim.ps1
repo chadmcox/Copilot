@@ -19,62 +19,71 @@ and (iii) to indemnify, hold harmless, and defend Us and Our suppliers from and
 against any claims or lawsuits, including attorneys` fees, that arise or result
 from the use or distribution of the Sample Code..
 .description
-Puts the Copilot admin groups under PIM for Groups and assigns their Entra roles.
+Checks the Copilot admin groups' Entra roles and PIM for Groups settings, and fixes what is missing or wrong.
 url: Privileged Identity Management (PIM) for Groups - https://learn.microsoft.com/entra/id-governance/privileged-identity-management/concept-pim-for-groups
 #>
 
 <#
 .SYNOPSIS
-    Puts the Copilot admin groups under PIM for Groups (just-in-time membership) and creates
-    an all-up "Copilot Platform Admin" group. Uses raw Microsoft Graph calls
-    (Invoke-MgGraphRequest).
+    The one script for the Copilot admin roles and PIM. Run it any time: it checks each admin
+    group in the table below and fixes its roles and PIM settings. Graph only (Invoke-MgGraphRequest).
 
 .DESCRIPTION
     Model (PIM for Groups):
       - Each admin group holds its Entra role(s) as an ACTIVE assignment.
-      - People are made ELIGIBLE members of the group, not permanent members.
+      - People are ELIGIBLE members of the group, not permanent members.
       - To use the role, a person activates group membership in PIM (My roles > Groups),
-        with MFA + justification, optional approval, for a limited number of hours.
+        with MFA and a reason, approval where set, for a limited number of hours.
 
-    For each admin group the script:
-      1. Creates the group if missing (role-assignable security group).
-      2. Ensures each mapped Entra role is actively assigned to the group.
-      3. Configures the group's PIM "member" policy: max activation hours, MFA, justification,
-         approval (where set), eligibility expiration, and limits on permanent active members.
-      4. Optional -MembersCsv: adds people as eligible members (CSV columns: Group,UserPrincipalName).
-      5. Optional -ConvertDirectMembers: turns current direct (permanent) user members into
-         eligible members, then removes their permanent membership.
+    For every group in $adminGroups:
+      1. Checks the group exists and is role-assignable. It doesn't create groups:
+         run New-CopilotGroups.ps1 first.
+      2. Assigns any of its roles that are missing. Reports roles the group holds that aren't
+         in the table (it never removes a role).
+      3. Sets the group's PIM member policy: activation hours, MFA, reason, approval,
+         eligibility expiry and the limit on permanent active members. Skip with -SkipPimPolicy.
+      4. Optional -MembersCsv: makes people eligible members (CSV columns: Group,UserPrincipalName).
+      5. Optional -ConvertDirectMembers: turns permanent user members into eligible members.
 
-    Idempotent and supports -WhatIf.
+    HOW TO CHANGE THE DESIGN
+      - New admin group: add it to $groups in New-CopilotGroups.ps1 (RoleAssignable = $true),
+        then add a line here with its roles, hours and approval.
+      - Role or setting change: change the line here. The next run fixes the tenant.
 
     Requirements:
-      - Microsoft Entra ID P2 or Entra ID Governance licensing.
-      - Privileged Role Administrator or Global Administrator.
-      - Run New-CopilotGroups.ps1 first (this script creates only Copilot Platform Admin).
+      - Microsoft Entra ID P2 or Entra ID Governance for PIM (not needed with -SkipPimPolicy
+        and no -MembersCsv or -ConvertDirectMembers).
+      - Least-privileged role: Privileged Role Administrator.
 
 .PARAMETER ApproverGroupName
-    Group whose members approve activations for groups that require approval. Use a group
-    outside these admin groups (e.g. your security team). PIM never lets requesters approve
-    their own activation.
+    Group whose members approve activations for groups that require approval. Use a group outside
+    these admin groups (for example your security team). Required unless -SkipPimPolicy.
 
 .PARAMETER PlatformApproverGroupName
-    Approver group for the all-up Copilot Platform Admin group. Defaults to ApproverGroupName.
+    Approver group for Copilot Platform Admin. Defaults to ApproverGroupName.
+
+.PARAMETER SkipPimPolicy
+    Only checks the groups and their roles. Use it when you don't have PIM licensing; the
+    roles are then permanent for every member of the group.
 
 .PARAMETER Environment
-    The Microsoft cloud to sign in to: Global (also GCC), USGov (GCC High) or USGovDoD. China isn't offered.
+    The Microsoft cloud to sign in to: Global (also GCC), USGov (GCC High) or USGovDoD.
     Leave it out and the script asks.
 
 .EXAMPLE
-    .\New-CopilotAdminPim.ps1 -ApproverGroupName "Security Operations" -WhatIf
-    .\New-CopilotAdminPim.ps1 -ApproverGroupName "Security Operations" -MembersCsv .\copilot-admins.csv
-    .\New-CopilotAdminPim.ps1 -ApproverGroupName "Security Operations" -ConvertDirectMembers
+    .\New-CopilotAdminPim.ps1 -ApproverGroupName "<approver group>" -WhatIf
+    .\New-CopilotAdminPim.ps1 -ApproverGroupName "<approver group>"
+    .\New-CopilotAdminPim.ps1 -ApproverGroupName "<approver group>" -MembersCsv .\copilot-admins.csv
+    .\New-CopilotAdminPim.ps1 -ApproverGroupName "<approver group>" -ConvertDirectMembers
+    .\New-CopilotAdminPim.ps1 -SkipPimPolicy
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
-    [Parameter(Mandatory = $true)][string]$ApproverGroupName,
+    [string]$ApproverGroupName,
     [string]$PlatformApproverGroupName,
     [string]$MembersCsv,
     [switch]$ConvertDirectMembers,
+    [switch]$SkipPimPolicy,
     [int]$EligibilityDays = 365,
     [int]$MaxActiveAssignmentDays = 15,
     [ValidateSet("Global", "USGov", "USGovDoD")][string]$Environment
@@ -82,34 +91,20 @@ param(
 
 #Requires -Modules Microsoft.Graph.Authentication
 
+if (-not $SkipPimPolicy -and -not $ApproverGroupName) {
+    throw "Pass -ApproverGroupName (the group that approves activations), or -SkipPimPolicy to check only the roles."
+}
 if (-not $PlatformApproverGroupName) { $PlatformApproverGroupName = $ApproverGroupName }
 
-# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
-# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
-if (-not $Environment) {
-    Get-MgEnvironment | Where-Object Name -in "Global", "USGov", "USGovDoD" | Select-Object Name, GraphEndpoint | Out-Host
-    $choice = Read-Host "Type the cloud to connect to (Global, USGov or USGovDoD). Press Enter for Global"
-    $Environment = if ($choice -in "Global", "USGov", "USGovDoD") { $choice } else { "Global" }
-}
-$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
-
-Connect-MgGraph -Environment $Environment -NoWelcome -Scopes @(
-    "Group.ReadWrite.All",
-    "User.Read.All",
-    "RoleManagement.ReadWrite.Directory",
-    "RoleManagementPolicy.ReadWrite.AzureADGroup",
-    "PrivilegedEligibilitySchedule.ReadWrite.AzureADGroup",
-    "PrivilegedAssignmentSchedule.ReadWrite.AzureADGroup"
-)
-
-$graph = "$graphEndpoint/v1.0"
-
 # ---------------------------------------------------------------------------
-# Admin groups: roles held by the group, activation length, approval
+# The design. Change this table, not the code below.
+#   Roles    = Entra roles the group holds (active)
+#   Hours    = longest PIM activation
+#   Approval = activation needs approval from the approver group
+# The groups themselves come from New-CopilotGroups.ps1.
 # ---------------------------------------------------------------------------
 $adminGroups = @(
     @{ Name = "Copilot Platform Admin"; Hours = 4; Approval = $true; Approver = $PlatformApproverGroupName
-       Desc = "All-up Copilot administration (JIT via PIM). Activation grants every role below."
        Roles = @(
            "AI Administrator", "Billing Administrator", "Agent ID Administrator",
            "Agent Registry Administrator",
@@ -117,52 +112,70 @@ $adminGroups = @(
            "SharePoint Administrator", "Power Platform Administrator",
            "Message Center Reader", "Service Support Administrator"
        ) }
-    @{ Name = "Copilot Delegated Admin";          Hours = 8; Approval = $true;  Roles = @("AI Administrator") }
-    @{ Name = "Copilot Agent Management Admin";   Hours = 8; Approval = $true;  Roles = @("AI Administrator") }
-    @{ Name = "Copilot Agent Registry Admin";     Hours = 8; Approval = $true;  Roles = @("Agent Registry Administrator") }
-    @{ Name = "Copilot AI Reader";                Hours = 8; Approval = $false; Roles = @("AI Reader") }
-    @{ Name = "Copilot Billing Admin";            Hours = 4; Approval = $true;  Roles = @("Billing Administrator") }
-    @{ Name = "Copilot Cost Reader";              Hours = 8; Approval = $false; Roles = @() }
-    @{ Name = "Copilot Agent ID Admin";           Hours = 4; Approval = $true;  Roles = @("Agent ID Administrator") }
-    @{ Name = "Copilot Agent ID Developers";      Hours = 8; Approval = $false; Roles = @("Agent ID Developer") }
-    @{ Name = "Copilot Office Apps Admin";        Hours = 8; Approval = $false; Roles = @("Office Apps Administrator") }
-    @{ Name = "Copilot Compliance Admin";         Hours = 4; Approval = $true;  Roles = @("Compliance Administrator") }
-    @{ Name = "Copilot Teams Admin";              Hours = 8; Approval = $true;  Roles = @("Teams Administrator") }
-    @{ Name = "Copilot SharePoint Admin";         Hours = 8; Approval = $true;  Roles = @("SharePoint Administrator") }
-    @{ Name = "Copilot Studio Environment Admin"; Hours = 8; Approval = $true;  Roles = @("Power Platform Administrator") }
-    @{ Name = "Copilot Plugin Approvers";         Hours = 8; Approval = $false; Roles = @() }
-    # Reader roles for the Copilot Billing and Agent and Tools health checks. Approval on: Microsoft recommends
-    # approval for groups used to activate Entra roles, and AI Reader is a privileged role.
-    @{ Name = "Copilot Health Check Users";       Hours = 8; Approval = $true;  Roles = @("AI Reader", "Security Reader", "Reports Reader")
-       Desc = "People who run the Copilot Billing and Agent and Tools health checks (read-only). Scope of the health check Cowork plugins." }
-    # Global Reader for the Entra ID Operations Report and Entra ID Security Review. Approval on: Global Reader reads the whole tenant and
-    # Microsoft labels it a privileged role.
-    @{ Name = "Copilot Entra ID Operations Reader"; Hours = 8; Approval = $true;  Roles = @("Global Reader")
-       Desc = "People who run the Entra ID Operations Report and Entra ID Security Review (read-only). Scope of their Cowork plugins." }
+    @{ Name = "Copilot Delegated Admin";            Hours = 8; Approval = $true;  Roles = @("AI Administrator") }
+    @{ Name = "Copilot Agent Management Admin";     Hours = 8; Approval = $true;  Roles = @("AI Administrator") }
+    @{ Name = "Copilot Agent Registry Admin";       Hours = 8; Approval = $true;  Roles = @("Agent Registry Administrator") }
+    @{ Name = "Copilot AI Reader";                  Hours = 8; Approval = $false; Roles = @("AI Reader") }
+    @{ Name = "Copilot Billing Admin";              Hours = 4; Approval = $true;  Roles = @("Billing Administrator") }
+    @{ Name = "Copilot Cost Reader";                Hours = 8; Approval = $false; Roles = @() }
+    @{ Name = "Copilot Agent ID Admin";             Hours = 4; Approval = $true;  Roles = @("Agent ID Administrator") }
+    @{ Name = "Copilot Agent ID Developers";        Hours = 8; Approval = $false; Roles = @("Agent ID Developer") }
+    @{ Name = "Copilot Office Apps Admin";          Hours = 8; Approval = $false; Roles = @("Office Apps Administrator") }
+    @{ Name = "Copilot Compliance Admin";           Hours = 4; Approval = $true;  Roles = @("Compliance Administrator") }
+    @{ Name = "Copilot Teams Admin";                Hours = 8; Approval = $true;  Roles = @("Teams Administrator") }
+    @{ Name = "Copilot SharePoint Admin";           Hours = 8; Approval = $true;  Roles = @("SharePoint Administrator") }
+    @{ Name = "Copilot Studio Environment Admin";   Hours = 8; Approval = $true;  Roles = @("Power Platform Administrator") }
+    @{ Name = "Copilot Plugin Approvers";           Hours = 8; Approval = $false; Roles = @() }
+    # Approval on: Microsoft recommends approval for groups used to activate Entra roles, and AI Reader is privileged.
+    @{ Name = "Copilot Health Check Users";         Hours = 8; Approval = $true;  Roles = @("AI Reader", "Security Reader", "Reports Reader") }
+    # Approval on: Global Reader reads the whole tenant and Microsoft labels it a privileged role.
+    @{ Name = "Copilot Entra ID Operations Reader"; Hours = 8; Approval = $true;  Roles = @("Global Reader") }
 )
 
 # ---------------------------------------------------------------------------
-# Helpers
+# Steps
 # ---------------------------------------------------------------------------
+function Connect-Cloud {
+    # Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+    # Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+    param([string]$Environment, [string[]]$Scopes)
+    if (-not $Environment) {
+        Get-MgEnvironment | Where-Object Name -in "Global", "USGov", "USGovDoD" | Select-Object Name, GraphEndpoint | Out-Host
+        $choice = Read-Host "Type the cloud to connect to (Global, USGov or USGovDoD). Press Enter for Global"
+        $Environment = if ($choice -in "Global", "USGov", "USGovDoD") { $choice } else { "Global" }
+    }
+    Connect-MgGraph -Environment $Environment -Scopes $Scopes -NoWelcome | Out-Null
+    (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
+}
+
 function Invoke-Graph([string]$Method, [string]$Uri, $Body) {
     $p = @{ Method = $Method; Uri = $Uri; OutputType = "PSObject" }
     if ($null -ne $Body) { $p.Body = ($Body | ConvertTo-Json -Depth 20); $p.ContentType = "application/json" }
     Invoke-MgGraphRequest @p
 }
-function Get-Filtered([string]$BaseUri, [string]$Filter) {
-    (Invoke-Graph GET "$BaseUri`?`$filter=$([uri]::EscapeDataString($Filter))").value
+
+function Get-AllPages([string]$Uri) {
+    while ($Uri) {
+        $page = Invoke-Graph GET $Uri
+        $page.value
+        $Uri = $page.'@odata.nextLink'
+    }
 }
-function Esc([string]$s) { $s.Replace("'", "''") }
+
+function Get-Filtered([string]$Path, [string]$Filter) {
+    @(Get-AllPages "$graph/$Path`?`$filter=$([uri]::EscapeDataString($Filter))" | Where-Object { $_ })
+}
 
 function Get-GroupByName([string]$Name) {
-    Get-Filtered "$graph/groups" "displayName eq '$(Esc $Name)'" | Select-Object -First 1
+    $esc = $Name.Replace("'", "''")
+    Get-Filtered "groups" "displayName eq '$esc'"
 }
 
 $roleCache = @{}
 function Get-RoleDefinitionId([string]$RoleName) {
     if (-not $roleCache.ContainsKey($RoleName)) {
-        $def = Get-Filtered "$graph/roleManagement/directory/roleDefinitions" "displayName eq '$(Esc $RoleName)'" | Select-Object -First 1
-        $roleCache[$RoleName] = $def.id
+        $esc = $RoleName.Replace("'", "''")
+        $roleCache[$RoleName] = (Get-Filtered "roleManagement/directory/roleDefinitions" "displayName eq '$esc'" | Select-Object -First 1).id
     }
     $roleCache[$RoleName]
 }
@@ -171,23 +184,85 @@ function New-Target([string]$Caller, [string]$Level) {
     @{ caller = $Caller; operations = @("All"); level = $Level; inheritableSettings = @(); enforcedSettings = @() }
 }
 
-function Set-PolicyRule([string]$PolicyId, [hashtable]$Rule) {
-    Invoke-Graph PATCH "$graph/policies/roleManagementPolicies/$PolicyId/rules/$($Rule.id)" $Rule | Out-Null
+function Set-GroupRoles($Def, $Group) {
+    # Assigns missing roles and reports extra ones. Returns one line of text.
+    $wantedIds = @{}
+    $lines = @(foreach ($roleName in $Def.Roles) {
+        $roleId = Get-RoleDefinitionId $roleName
+        if (-not $roleId) { "$($roleName): not in tenant"; continue }
+        $wantedIds[$roleId] = $roleName
+        if (Get-Filtered "roleManagement/directory/roleAssignments" "principalId eq '$($Group.id)' and roleDefinitionId eq '$roleId'") { continue }
+        if ($PSCmdlet.ShouldProcess($Def.Name, "Assign role '$roleName'")) {
+            try {
+                Invoke-Graph POST "$graph/roleManagement/directory/roleAssignments" @{
+                    principalId = $Group.id; roleDefinitionId = $roleId; directoryScopeId = "/"
+                } | Out-Null
+                "$($roleName): assigned"
+            }
+            catch { "$($roleName): assign failed: $($_.Exception.Message)" }
+        }
+        else { "$($roleName): WhatIf assign" }
+    })
+    # Roles on the group that aren't in the table. Reported only; nothing is removed.
+    $extra = Get-Filtered "roleManagement/directory/roleAssignments" "principalId eq '$($Group.id)'" |
+        Where-Object { -not $wantedIds.ContainsKey($_.roleDefinitionId) } |
+        ForEach-Object { (Invoke-Graph GET "$graph/roleManagement/directory/roleDefinitions/$($_.roleDefinitionId)?`$select=displayName").displayName }
+    $lines = @($lines; $extra | ForEach-Object { "$($_): extra, not in the design (not removed)" })
+    if ($lines.Count -eq 0) { "OK" } else { $lines -join "; " }
+}
+
+function Set-GroupPimPolicy($Def, $Group) {
+    # Sets the PIM for Groups member policy. Returns one line of text.
+    $assignment = Get-Filtered "policies/roleManagementPolicyAssignments" `
+        "scopeId eq '$($Group.id)' and scopeType eq 'Group' and roleDefinitionId eq 'member'" | Select-Object -First 1
+    if (-not $assignment) { return "No PIM policy yet: open the group in PIM > Groups once, then run again" }
+    if (-not $PSCmdlet.ShouldProcess($Def.Name, "Set PIM member policy ($($Def.Hours)h, approval=$($Def.Approval))")) { return "WhatIf" }
+
+    $approverName = if ($Def.Approver) { $Def.Approver } else { $ApproverGroupName }
+    $approvers = if ($Def.Approval) {
+        $approverGroup = Get-GroupByName $approverName | Select-Object -First 1
+        if (-not $approverGroup) { return "Failed: approver group '$approverName' not found" }
+        @(@{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = $approverGroup.id; description = $approverName })
+    } else { @() }
+
+    $rules = @(
+        @{ "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule"; id = "Expiration_EndUser_Assignment"
+           isExpirationRequired = $true; maximumDuration = "PT$($Def.Hours)H"; target = (New-Target "EndUser" "Assignment") }
+        @{ "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyEnablementRule"; id = "Enablement_EndUser_Assignment"
+           enabledRules = @("MultiFactorAuthentication", "Justification"); target = (New-Target "EndUser" "Assignment") }
+        @{ "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyApprovalRule"; id = "Approval_EndUser_Assignment"
+           target = (New-Target "EndUser" "Assignment")
+           setting = @{
+               isApprovalRequired = [bool]$Def.Approval; isApprovalRequiredForExtension = $false
+               isRequestorJustificationRequired = $true; approvalMode = "SingleStage"
+               approvalStages = @(@{
+                   approvalStageTimeOutInDays = 1; isApproverJustificationRequired = $true
+                   escalationTimeInMinutes = 0; isEscalationEnabled = $false
+                   primaryApprovers = $approvers; escalationApprovers = @()
+               })
+           } }
+        @{ "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule"; id = "Expiration_Admin_Eligibility"
+           isExpirationRequired = $true; maximumDuration = "P$($EligibilityDays)D"; target = (New-Target "Admin" "Eligibility") }
+        @{ "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule"; id = "Expiration_Admin_Assignment"
+           isExpirationRequired = $true; maximumDuration = "P$($MaxActiveAssignmentDays)D"; target = (New-Target "Admin" "Assignment") }
+        @{ "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyEnablementRule"; id = "Enablement_Admin_Assignment"
+           enabledRules = @("Justification", "MultiFactorAuthentication"); target = (New-Target "Admin" "Assignment") }
+    )
+    try {
+        $rules | ForEach-Object { Invoke-Graph PATCH "$graph/policies/roleManagementPolicies/$($assignment.policyId)/rules/$($_.id)" $_ | Out-Null }
+        "Set"
+    }
+    catch { "Failed: $($_.Exception.Message)" }
 }
 
 function Add-Eligibility([string]$GroupId, [string]$UserId, [string]$Label) {
-    $existing = Get-Filtered "$graph/identityGovernance/privilegedAccess/group/eligibilitySchedules" `
-        "groupId eq '$GroupId' and principalId eq '$UserId' and accessId eq 'member'"
-    if ($existing) { return "Already eligible" }
+    if (Get-Filtered "identityGovernance/privilegedAccess/group/eligibilitySchedules" `
+            "groupId eq '$GroupId' and principalId eq '$UserId' and accessId eq 'member'") { return "Already eligible" }
     if (-not $PSCmdlet.ShouldProcess($Label, "Make eligible member")) { return "WhatIf" }
-
     Invoke-Graph POST "$graph/identityGovernance/privilegedAccess/group/eligibilityScheduleRequests" @{
-        accessId      = "member"
-        principalId   = $UserId
-        groupId       = $GroupId
-        action        = "adminAssign"
+        accessId = "member"; principalId = $UserId; groupId = $GroupId; action = "adminAssign"
         justification = "Copilot admin access via PIM for Groups"
-        scheduleInfo  = @{
+        scheduleInfo = @{
             startDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
             expiration    = @{ type = "afterDuration"; duration = "P$($EligibilityDays)D" }
         }
@@ -195,156 +270,70 @@ function Add-Eligibility([string]$GroupId, [string]$UserId, [string]$Label) {
     "Eligible"
 }
 
-$csvRows = @()
-if ($MembersCsv) { $csvRows = Import-Csv $MembersCsv }
+function Set-CopilotAdminGroup {
+    # Checks one admin group: exists, role-assignable, roles, PIM policy, eligible members.
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param([Parameter(ValueFromPipeline = $true)][hashtable]$Def)
+    process {
+        $found = Get-GroupByName $Def.Name
+        $group = $found | Select-Object -First 1
+        $check = if ($found.Count -eq 0) { "Missing: run New-CopilotGroups.ps1" }
+            elseif ($found.Count -gt 1) { "Skipped: $($found.Count) groups share this name" }
+            elseif ($Def.Roles.Count -gt 0 -and -not $group.isAssignableToRole) { "Not role-assignable: delete and recreate it with New-CopilotGroups.ps1" }
+            else { "OK" }
 
-$results = @()
+        $roles = $policy = $members = ""
+        if ($check -eq "OK") {
+            $roles = Set-GroupRoles $Def $group
+            $policy = if ($SkipPimPolicy) { "Skipped" } else { Set-GroupPimPolicy $Def $group }
 
-foreach ($g in $adminGroups) {
-    $approverName = if ($g.Approver) { $g.Approver } else { $ApproverGroupName }
+            $members = @(
+                $csvRows | Where-Object { $_.Group -eq $Def.Name } | ForEach-Object {
+                    $upn = $_.UserPrincipalName
+                    try {
+                        $user = Invoke-Graph GET "$graph/users/$([uri]::EscapeDataString($upn))?`$select=id"
+                        "$($upn): $(Add-Eligibility $group.id $user.id "$upn -> $($Def.Name)")"
+                    }
+                    catch { "$($upn): failed: $($_.Exception.Message)" }
+                }
+                if ($ConvertDirectMembers) {
+                    Get-AllPages "$graph/groups/$($group.id)/members/microsoft.graph.user?`$select=id,userPrincipalName" | Where-Object { $_ } | ForEach-Object {
+                        $label = "$($_.userPrincipalName) in $($Def.Name)"
+                        $r = Add-Eligibility $group.id $_.id $label
+                        if (($r -in @("Eligible", "Already eligible")) -and $PSCmdlet.ShouldProcess($label, "Remove permanent membership")) {
+                            Invoke-Graph DELETE "$graph/groups/$($group.id)/members/$($_.id)/`$ref" | Out-Null
+                            "$($_.userPrincipalName): converted to eligible"
+                        }
+                        else { "$($_.userPrincipalName): $r" }
+                    }
+                }
+            ) -join "; "
+        }
 
-    # 1. Group
-    $group = Get-GroupByName $g.Name
-    if (-not $group) {
-        if ($g.Name -eq "Copilot Platform Admin" -and $PSCmdlet.ShouldProcess($g.Name, "Create role-assignable group")) {
-            $group = Invoke-Graph POST "$graph/groups" @{
-                displayName        = $g.Name
-                description        = $g.Desc
-                mailEnabled        = $false
-                mailNickname       = "CopilotPlatformAdmin"
-                securityEnabled    = $true
-                isAssignableToRole = $true
-            }
-            Start-Sleep -Seconds 10   # allow replication before role assignment / PIM
-        }
-        else {
-            Write-Warning "'$($g.Name)' not found. Run New-CopilotGroups.ps1 first."
-            continue
-        }
-    }
-    if ($g.Roles.Count -gt 0 -and -not $group.isAssignableToRole) {
-        Write-Warning "'$($g.Name)' is not role-assignable; roles can't be assigned. Recreate it."
-        continue
-    }
-
-    # 2. Active role assignments to the group
-    foreach ($roleName in $g.Roles) {
-        $roleId = Get-RoleDefinitionId $roleName
-        if (-not $roleId) { Write-Warning "Role '$roleName' not found in tenant."; continue }
-        $assigned = Get-Filtered "$graph/roleManagement/directory/roleAssignments" "principalId eq '$($group.id)' and roleDefinitionId eq '$roleId'"
-        if (-not $assigned -and $PSCmdlet.ShouldProcess($g.Name, "Assign role '$roleName'")) {
-            Invoke-Graph POST "$graph/roleManagement/directory/roleAssignments" @{
-                principalId = $group.id; roleDefinitionId = $roleId; directoryScopeId = "/"
-            } | Out-Null
-        }
-    }
-
-    # 3. PIM for Groups policy (member)
-    $policyStatus = ""
-    $assignment = Get-Filtered "$graph/policies/roleManagementPolicyAssignments" `
-        "scopeId eq '$($group.id)' and scopeType eq 'Group' and roleDefinitionId eq 'member'" | Select-Object -First 1
-
-    if (-not $assignment) {
-        $policyStatus = "No PIM policy found - open the group in PIM > Groups once, then re-run"
-    }
-    elseif ($PSCmdlet.ShouldProcess($g.Name, "Configure PIM member policy ($($g.Hours)h, approval=$($g.Approval))")) {
-        $policyId = $assignment.policyId
-        $approverGroup = Get-GroupByName $approverName
-        if ($g.Approval -and -not $approverGroup) { throw "Approver group '$approverName' not found." }
-
-        $approvers = if ($g.Approval) {
-            @(@{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = $approverGroup.id; description = $approverName })
-        } else { @() }
-
-        Set-PolicyRule $policyId @{
-            "@odata.type"        = "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule"
-            id                   = "Expiration_EndUser_Assignment"
-            isExpirationRequired = $true
-            maximumDuration      = "PT$($g.Hours)H"
-            target               = (New-Target "EndUser" "Assignment")
-        }
-        Set-PolicyRule $policyId @{
-            "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyEnablementRule"
-            id            = "Enablement_EndUser_Assignment"
-            enabledRules  = @("MultiFactorAuthentication", "Justification")
-            target        = (New-Target "EndUser" "Assignment")
-        }
-        Set-PolicyRule $policyId @{
-            "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyApprovalRule"
-            id            = "Approval_EndUser_Assignment"
-            target        = (New-Target "EndUser" "Assignment")
-            setting       = @{
-                isApprovalRequired               = [bool]$g.Approval
-                isApprovalRequiredForExtension   = $false
-                isRequestorJustificationRequired = $true
-                approvalMode                     = "SingleStage"
-                approvalStages                   = @(@{
-                    approvalStageTimeOutInDays      = 1
-                    isApproverJustificationRequired = $true
-                    escalationTimeInMinutes         = 0
-                    isEscalationEnabled             = $false
-                    primaryApprovers                = $approvers
-                    escalationApprovers             = @()
-                })
-            }
-        }
-        Set-PolicyRule $policyId @{
-            "@odata.type"        = "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule"
-            id                   = "Expiration_Admin_Eligibility"
-            isExpirationRequired = $true
-            maximumDuration      = "P$($EligibilityDays)D"
-            target               = (New-Target "Admin" "Eligibility")
-        }
-        Set-PolicyRule $policyId @{
-            "@odata.type"        = "#microsoft.graph.unifiedRoleManagementPolicyExpirationRule"
-            id                   = "Expiration_Admin_Assignment"
-            isExpirationRequired = $true
-            maximumDuration      = "P$($MaxActiveAssignmentDays)D"
-            target               = (New-Target "Admin" "Assignment")
-        }
-        Set-PolicyRule $policyId @{
-            "@odata.type" = "#microsoft.graph.unifiedRoleManagementPolicyEnablementRule"
-            id            = "Enablement_Admin_Assignment"
-            enabledRules  = @("Justification", "MultiFactorAuthentication")
-            target        = (New-Target "Admin" "Assignment")
-        }
-        $policyStatus = "Configured"
-    }
-
-    # 4. Eligible members from CSV
-    $added = 0
-    foreach ($row in $csvRows | Where-Object { $_.Group -eq $g.Name }) {
-        try {
-            $user = Invoke-Graph GET "$graph/users/$([uri]::EscapeDataString($row.UserPrincipalName))?`$select=id"
-            if ((Add-Eligibility $group.id $user.id "$($row.UserPrincipalName) -> $($g.Name)") -eq "Eligible") { $added++ }
-        }
-        catch { Write-Warning "Could not add $($row.UserPrincipalName) to $($g.Name): $($_.Exception.Message)" }
-    }
-
-    # 5. Convert direct members to eligible
-    $converted = 0
-    if ($ConvertDirectMembers) {
-        $members = (Invoke-Graph GET "$graph/groups/$($group.id)/members/microsoft.graph.user?`$select=id,userPrincipalName").value
-        foreach ($m in $members) {
-            $label = "$($m.userPrincipalName) in $($g.Name)"
-            $r = Add-Eligibility $group.id $m.id $label
-            if ($r -in @("Eligible", "Already eligible") -and $PSCmdlet.ShouldProcess($label, "Remove permanent membership")) {
-                Invoke-Graph DELETE "$graph/groups/$($group.id)/members/$($m.id)/`$ref" | Out-Null
-                $converted++
-            }
-        }
-    }
-
-    $results += [pscustomobject]@{
-        Group           = $g.Name
-        Roles           = ($g.Roles -join "; ")
-        ActivationHours = $g.Hours
-        Approval        = $g.Approval
-        Policy          = $policyStatus
-        EligibleAdded   = $added
-        Converted       = $converted
+        $Def | Select-Object @{ n = "Group"; e = { $Def.Name } },
+            @{ n = "Check"; e = { $check } },
+            @{ n = "Roles"; e = { $roles } },
+            @{ n = "ActivationHours"; e = { $Def.Hours } },
+            @{ n = "Approval"; e = { $Def.Approval } },
+            @{ n = "PimPolicy"; e = { $policy } },
+            @{ n = "Members"; e = { $members } }
     }
 }
 
-$results | Format-Table -AutoSize
+# ---------------------------------------------------------------------------
+# Run
+# ---------------------------------------------------------------------------
+$scopes = @(
+    "Group.Read.All"
+    "RoleManagement.ReadWrite.Directory"
+    if (-not $SkipPimPolicy) { "RoleManagementPolicy.ReadWrite.AzureADGroup" }
+    if ($MembersCsv -or $ConvertDirectMembers) { "PrivilegedEligibilitySchedule.ReadWrite.AzureADGroup" }
+    if ($MembersCsv) { "User.ReadBasic.All" }
+    if ($ConvertDirectMembers) { "GroupMember.ReadWrite.All" }
+)
+$graph = "$(Connect-Cloud -Environment $Environment -Scopes $scopes)/beta"
+$csvRows = @(if ($MembersCsv) { Import-Csv $MembersCsv })
+
+$results = @($adminGroups | Set-CopilotAdminGroup)
+$results | Format-Table -AutoSize -Wrap
 $results | Export-Csv -Path ".\CopilotAdminPim-$(Get-Date -Format yyyyMMdd-HHmm).csv" -NoTypeInformation

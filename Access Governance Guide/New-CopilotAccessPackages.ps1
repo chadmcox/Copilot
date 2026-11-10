@@ -19,61 +19,69 @@ and (iii) to indemnify, hold harmless, and defend Us and Our suppliers from and
 against any claims or lawsuits, including attorneys` fees, that arise or result
 from the use or distribution of the Sample Code..
 .description
-Creates the access packages, approval policies and access reviews for the Copilot groups.
+Checks the Copilot catalog, access packages, request policies and access reviews, and creates or fixes what is missing.
 url: What is entitlement management? - https://learn.microsoft.com/entra/id-governance/entitlement-management-overview
 #>
 
 <#
 .SYNOPSIS
-    Creates Entra ID Governance access packages and access reviews for the Copilot groups
-    created by New-CopilotGroups.ps1. Uses raw Microsoft Graph calls (Invoke-MgGraphRequest).
+    The one script for the Copilot access packages. Run it any time: it checks the catalog and
+    each package in the table below and creates or fixes it. Graph only (Invoke-MgGraphRequest).
 
 .DESCRIPTION
-    Builds:
-      1. A catalog ("Copilot Access Catalog") and adds every referenced Copilot group to it.
-      2. One access package per feature bundle. Bundles include prerequisite groups, so a user
-         who requests "Copilot + Opal Access" also gets Copilot Access and Frontier in one request.
-      3. One assignment policy per package, with approval, expiration and a recurring
-         access review built in, based on a tier (Standard / Elevated / Admin / Temporary).
-         The 30-day Temporary Unlimited Cowork package is visible and requestable only by
-         members of Copilot + Cowork Spend Limit.
-      4. Incompatible-package links so a user can't hold both Limited and Unlimited spend tiers.
-      5. Optional (-IncludeCodePackages): Copilot Code packages. Code is rolling out to
-         Frontier tenants (MC1519871); check Code is in your spending policy wizard first.
-      6. Optional (-IncludeAdminPackages): packages for the role-assignable admin groups
-         (not needed if you use New-CopilotAdminPim.ps1 for admin access).
-      7. Optional (-CreateAdminGroupReviews): standalone recurring access reviews on the admin
-         groups, covering members added outside an access package.
+    1. Checks every group the packages use exists. If any are missing it lists them and stops:
+       run New-CopilotGroups.ps1 first.
+    2. Catalog ("Copilot Access Catalog"): creates it if missing, and adds any group not in it yet.
+    3. For every package in $packages:
+         - Missing: creates it.
+         - Description differs: updates it.
+         - Group in the table but not in the package: adds it.
+         - Group in the package but not in the table: reports it (never removes it).
+         - Request policy for its tier missing: creates it. Other policies on the package are
+           reported, not removed (a tier change leaves the old policy for you to delete).
+    4. Links packages that can't be held together (Limited and Unlimited spend), both ways.
+    5. Optional -CreateAdminGroupReviews: quarterly access reviews on the admin groups.
 
-    Idempotent: existing catalog, packages, resource scopes, policies and reviews (matched by
-    display name) are skipped. Supports -WhatIf.
+    Tiers: Standard (manager, 365 days, review every 6 months), Elevated (manager then approver
+    group, 180 days, every 3 months), Admin (manager then admin approver group, 90 days, every
+    3 months), Temporary (manager then approver group, 30 days, no extension, no review).
+
+    HOW TO CHANGE THE DESIGN
+      - New package: add a line to $packages. Its groups must be in New-CopilotGroups.ps1.
+      - Grant another group: add it to the package's Groups.
+      - Admin group: add it to $adminGroups (used by -IncludeAdminPackages and -CreateAdminGroupReviews).
 
     Requirements:
-      - Microsoft Entra ID Governance (or Entra ID P2) licensing for the users in scope.
-      - Run New-CopilotGroups.ps1 first.
-      - Identity Governance Administrator to create catalogs, packages and reviews.
-      - Adding ROLE-ASSIGNABLE groups to a catalog (-IncludeAdminPackages) additionally requires
-        Global Administrator or Privileged Role Administrator.
-      - For admin roles, Microsoft generally recommends PIM for Groups (just-in-time
-        activation) on top of, or instead of, permanent membership via access packages.
+      - Microsoft Entra ID Governance (or Entra ID P2) for the users in scope.
+      - Least-privileged role: Identity Governance Administrator. Adding role-assignable groups to
+        the catalog (-IncludeAdminPackages) also needs Privileged Role Administrator.
+      - For admin roles, Microsoft recommends PIM for Groups (New-CopilotAdminPim.ps1) over
+        permanent membership through access packages.
 
 .PARAMETER ApproverGroupName
-    Group whose members approve the second stage for Elevated packages and are the fallback
-    reviewer when a user has no manager.
+    Approves the second stage of Elevated and Temporary packages, and is the fallback when a person has no manager.
 
 .PARAMETER AdminApproverGroupName
-    Group whose members approve Admin-tier packages and review admin groups. Use a group
-    that is NOT itself granted through these packages (e.g. your security team) to avoid
-    people approving their own access.
+    Approves Admin-tier packages and reviews admin groups. Use a group that isn't granted by these packages.
+
+.PARAMETER IncludeCodePackages
+    Also checks the Copilot Code packages (MC1519871). Run New-CopilotGroups.ps1 -IncludeCodeGroups first.
+
+.PARAMETER IncludeAdminPackages
+    Also checks one Admin-tier package per admin group. Not needed if you use PIM.
+
+.PARAMETER CreateAdminGroupReviews
+    Also checks a quarterly access review on each admin group, covering members added outside a package.
 
 .PARAMETER Environment
-    The Microsoft cloud to sign in to: Global (also GCC), USGov (GCC High) or USGovDoD. China isn't offered.
+    The Microsoft cloud to sign in to: Global (also GCC), USGov (GCC High) or USGovDoD.
     Leave it out and the script asks.
 
 .EXAMPLE
-    .\New-CopilotAccessPackages.ps1 -WhatIf
-    .\New-CopilotAccessPackages.ps1 -ApproverGroupName "Copilot Delegated Admin" `
-        -AdminApproverGroupName "Security Operations" -IncludeAdminPackages -CreateAdminGroupReviews
+    .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -WhatIf
+    .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>"
+    .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -IncludeCodePackages
+    .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -AdminApproverGroupName "<security group>" -IncludeAdminPackages -CreateAdminGroupReviews
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
@@ -88,50 +96,25 @@ param(
 
 #Requires -Modules Microsoft.Graph.Authentication
 
-# Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
-# Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
-if (-not $Environment) {
-    Get-MgEnvironment | Where-Object Name -in "Global", "USGov", "USGovDoD" | Select-Object Name, GraphEndpoint | Out-Host
-    $choice = Read-Host "Type the cloud to connect to (Global, USGov or USGovDoD). Press Enter for Global"
-    $Environment = if ($choice -in "Global", "USGov", "USGovDoD") { $choice } else { "Global" }
-}
-$graphEndpoint = (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
-
-Connect-MgGraph -Environment $Environment -NoWelcome -Scopes @(
-    "EntitlementManagement.ReadWrite.All",
-    "AccessReview.ReadWrite.All",
-    "Group.Read.All"
-)
-
-# Stays on v1.0: the beta entitlement management API uses different paths
-# (accessPackageCatalogs, accessPackageAssignmentPolicies), so these calls would break on beta.
-$graph = "$graphEndpoint/v1.0"
-$em    = "$graph/identityGovernance/entitlementManagement"
-
-# First day of next month (UTC) as the start of review schedules.
-$now        = (Get-Date).ToUniversalTime()
-$reviewStart = (Get-Date -Year $now.Year -Month $now.Month -Day 1 -Hour 15 -Minute 0 -Second 0).AddMonths(1)
-$reviewStartIso  = $reviewStart.ToString("yyyy-MM-ddTHH:mm:ssZ")
-$reviewStartDate = $reviewStart.ToString("yyyy-MM-dd")
-
 # ---------------------------------------------------------------------------
-# Tiers: approval, expiration and built-in review for each assignment policy
+# The design. Change these tables, not the code below.
+#   Groups       = groups the package grants (prerequisites included)
+#   Incompatible = package a person can't hold at the same time
+#   AllowedGroup = only members of this group can see and request the package
+#   Code         = only with -IncludeCodePackages
 # ---------------------------------------------------------------------------
 $tiers = @{
-    Standard = @{ ExpiryDays = 365; ReviewEveryMonths = 6; SecondStage = $false; ApproverGroup = $ApproverGroupName }
-    Elevated = @{ ExpiryDays = 180; ReviewEveryMonths = 3; SecondStage = $true;  ApproverGroup = $ApproverGroupName }
-    Admin    = @{ ExpiryDays = 90;  ReviewEveryMonths = 3; SecondStage = $true;  ApproverGroup = $AdminApproverGroupName }
+    Standard  = @{ ExpiryDays = 365; ReviewEveryMonths = 6; SecondStage = $false; ApproverGroup = $ApproverGroupName }
+    Elevated  = @{ ExpiryDays = 180; ReviewEveryMonths = 3; SecondStage = $true;  ApproverGroup = $ApproverGroupName }
+    Admin     = @{ ExpiryDays = 90;  ReviewEveryMonths = 3; SecondStage = $true;  ApproverGroup = $AdminApproverGroupName }
     # Fixed 30-day grant: no extension, no recurring review (expiry removes access).
-    Temporary = @{ ExpiryDays = 30; ReviewEveryMonths = 0; SecondStage = $true;  ApproverGroup = $ApproverGroupName; NoExtend = $true }
+    Temporary = @{ ExpiryDays = 30;  ReviewEveryMonths = 0; SecondStage = $true;  ApproverGroup = $ApproverGroupName; NoExtend = $true }
 }
 
-# ---------------------------------------------------------------------------
-# Packages: name, tier, groups granted, optional incompatible package
-# ---------------------------------------------------------------------------
 $packages = @(
     @{ Name = "Copilot Access";                      Tier = "Standard"; Groups = @("Copilot Access") }
     # Cowork access comes from the spend groups (spending policies); no separate Cowork access group.
-    @{ Name = "Copilot + Cowork Access (Limited)";   Tier = "Standard"; Groups = @("Copilot Access", "Copilot + Cowork Spend Limit");     Incompatible = "Copilot + Cowork Access (Unlimited)" }
+    @{ Name = "Copilot + Cowork Access (Limited)";   Tier = "Standard"; Groups = @("Copilot Access", "Copilot + Cowork Spend Limit"); Incompatible = "Copilot + Cowork Access (Unlimited)" }
     @{ Name = "Copilot + Cowork Access (Unlimited)"; Tier = "Elevated"; Groups = @("Copilot Access", "Copilot + Cowork Spend Unlimited") }
     # Only members of the Spend Limit group can see/request this; it grants only the Temp spend group.
     @{ Name = "Copilot + Cowork Access (Temporary Unlimited, 30 days)"; Tier = "Temporary"; Groups = @("Copilot + Cowork Spend Unlimited Temp"); AllowedGroup = "Copilot + Cowork Spend Limit"; Incompatible = "Copilot + Cowork Access (Unlimited)" }
@@ -140,16 +123,16 @@ $packages = @(
     @{ Name = "Copilot Work IQ API Access";          Tier = "Elevated"; Groups = @("Copilot Work IQ API Access") }
     # Managed Runtime users don't need a Copilot license, so Copilot Access isn't bundled.
     @{ Name = "Copilot Managed Runtime Access";      Tier = "Standard"; Groups = @("Copilot Managed Runtime Access") }
+    @{ Name = "Copilot Intelligent Call Delegation Access"; Tier = "Standard"; Groups = @("Copilot Access", "Copilot Intelligent Call Delegation Access") }
     # Copilot Code (rolling out to Frontier from late Oct 2026, MC1519871): -IncludeCodePackages
-    @{ Name = "Copilot + Code Access (Limited)";     Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Code Spend Limit");     Incompatible = "Copilot + Code Access (Unlimited)"; Code = $true }
-    @{ Name = "Copilot + Code Access (Unlimited)";   Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Code Spend Unlimited"); Code = $true }
-    @{ Name = "Copilot + Code Secure Execution Exemption"; Tier = "Admin"; Groups = @("Copilot + Code Secure Execution Exemption"); Code = $true }
+    @{ Name = "Copilot + Code Access (Limited)";     Tier = "Elevated"; Code = $true; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Code Spend Limit"); Incompatible = "Copilot + Code Access (Unlimited)" }
+    @{ Name = "Copilot + Code Access (Unlimited)";   Tier = "Elevated"; Code = $true; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Code Spend Unlimited") }
+    @{ Name = "Copilot + Code Secure Execution Exemption"; Tier = "Admin"; Code = $true; Groups = @("Copilot + Code Secure Execution Exemption") }
     @{ Name = "Copilot + Opal Access";               Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Opal Access") }
     # Autopilot (formerly Scout) is Frontier-only for now.
     @{ Name = "Copilot + Autopilot Access";          Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Autopilot Access") }
     @{ Name = "Copilot Frontier Access";             Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access") }
     @{ Name = "Copilot Pilot Ring";                  Tier = "Elevated"; Groups = @("Copilot Pilot Ring") }
-    @{ Name = "Copilot Intelligent Call Delegation Access"; Tier = "Standard"; Groups = @("Copilot Access", "Copilot Intelligent Call Delegation Access") }
     @{ Name = "Copilot Anthropic Models Access";     Tier = "Standard"; Groups = @("Copilot Anthropic Models Access") }
     @{ Name = "Copilot OpenAI Models Access";        Tier = "Standard"; Groups = @("Copilot OpenAI Models Access") }
     # SpaceXAI as a subprocessor is Frontier-only.
@@ -164,294 +147,313 @@ $packages = @(
     @{ Name = "Copilot Cloud Policy Exceptions";     Tier = "Elevated"; Groups = @("Copilot Cloud Policy Exceptions") }
 )
 
+# Admin groups for -IncludeAdminPackages and -CreateAdminGroupReviews. Copilot Platform Admin is left
+# out on purpose: it is reached only through PIM.
 $adminGroups = @(
     "Copilot Delegated Admin", "Copilot Agent Management Admin", "Copilot Agent Registry Admin", "Copilot AI Reader",
     "Copilot Billing Admin", "Copilot Cost Reader", "Copilot Agent ID Admin", "Copilot Agent ID Developers",
     "Copilot Office Apps Admin", "Copilot Compliance Admin", "Copilot Teams Admin",
-    "Copilot SharePoint Admin", "Copilot Studio Environment Admin", "Copilot Plugin Approvers"
+    "Copilot SharePoint Admin", "Copilot Studio Environment Admin", "Copilot Plugin Approvers",
+    "Copilot Health Check Users", "Copilot Entra ID Operations Reader"
 )
 
-if (-not $IncludeCodePackages) { $packages = @($packages | Where-Object { -not $_.Code }) }
-
-if ($IncludeAdminPackages) {
-    $packages = @($packages; foreach ($ag in $adminGroups) { @{ Name = $ag; Tier = "Admin"; Groups = @($ag) } })
+# ---------------------------------------------------------------------------
+# Steps
+# ---------------------------------------------------------------------------
+function Connect-Cloud {
+    # Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
+    # Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
+    param([string]$Environment, [string[]]$Scopes)
+    if (-not $Environment) {
+        Get-MgEnvironment | Where-Object Name -in "Global", "USGov", "USGovDoD" | Select-Object Name, GraphEndpoint | Out-Host
+        $choice = Read-Host "Type the cloud to connect to (Global, USGov or USGovDoD). Press Enter for Global"
+        $Environment = if ($choice -in "Global", "USGov", "USGovDoD") { $choice } else { "Global" }
+    }
+    Connect-MgGraph -Environment $Environment -Scopes $Scopes -NoWelcome | Out-Null
+    (Get-MgEnvironment | Where-Object Name -eq $Environment).GraphEndpoint
 }
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 function Invoke-Graph([string]$Method, [string]$Uri, $Body) {
     $p = @{ Method = $Method; Uri = $Uri; OutputType = "PSObject" }
-    if ($null -ne $Body) {
-        $p.Body = ($Body | ConvertTo-Json -Depth 20)
-        $p.ContentType = "application/json"
-    }
+    if ($null -ne $Body) { $p.Body = ($Body | ConvertTo-Json -Depth 20); $p.ContentType = "application/json" }
     Invoke-MgGraphRequest @p
 }
 
+function Get-AllPages([string]$Uri) {
+    while ($Uri) {
+        $page = Invoke-Graph GET $Uri
+        $page.value
+        $Uri = $page.'@odata.nextLink'
+    }
+}
+
 function Get-Filtered([string]$BaseUri, [string]$Filter, [string]$Extra = "") {
-    $uri = "$BaseUri`?`$filter=$([uri]::EscapeDataString($Filter))$Extra"
-    (Invoke-Graph GET $uri).value
+    @(Get-AllPages "$BaseUri`?`$filter=$([uri]::EscapeDataString($Filter))$Extra" | Where-Object { $_ })
 }
 
 function Esc([string]$s) { $s.Replace("'", "''") }
 
-$groupCache = @{}
+$groupIds = @{}
 function Get-GroupId([string]$Name) {
-    if (-not $groupCache.ContainsKey($Name)) {
-        $g = Get-Filtered "$graph/groups" "displayName eq '$(Esc $Name)'" | Select-Object -First 1
-        if (-not $g) { throw "Group '$Name' not found. Run New-CopilotGroups.ps1 first." }
-        $groupCache[$Name] = $g.id
+    if (-not $groupIds.ContainsKey($Name)) {
+        $groupIds[$Name] = (Get-Filtered "$graph/groups" "displayName eq '$(Esc $Name)'" | Select-Object -First 1).id
     }
-    $groupCache[$Name]
+    $groupIds[$Name]
 }
 
-function New-ApprovalStage([string]$Tier) {
-    $t = $tiers[$Tier]
-    $fallback = @(@{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = (Get-GroupId $t.ApproverGroup) })
+function Get-ApproverRef([string]$Tier) {
+    @(@{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = (Get-GroupId $tiers[$Tier].ApproverGroup) })
+}
 
-    @(@{
-        durationBeforeAutomaticDenial   = "P14D"
-        isApproverJustificationRequired = $true
-        isEscalationEnabled             = $false
-        primaryApprovers                = @(@{ "@odata.type" = "#microsoft.graph.requestorManager"; managerLevel = 1 })
-        fallbackPrimaryApprovers        = $fallback
-    }
-    if ($t.SecondStage) {
-        @{
-            durationBeforeAutomaticDenial   = "P14D"
-            isApproverJustificationRequired = $true
-            isEscalationEnabled             = $false
-            primaryApprovers                = $fallback
+function New-PolicyBody([string]$PackageId, $Package) {
+    $t = $tiers[$Package.Tier]
+    $manager = @{ "@odata.type" = "#microsoft.graph.requestorManager"; managerLevel = 1 }
+    $approver = Get-ApproverRef $Package.Tier
+
+    $stages = @(
+        @{ durationBeforeAutomaticDenial = "P14D"; isApproverJustificationRequired = $true; isEscalationEnabled = $false
+           primaryApprovers = @($manager); fallbackPrimaryApprovers = $approver }
+        if ($t.SecondStage) {
+            @{ durationBeforeAutomaticDenial = "P14D"; isApproverJustificationRequired = $true; isEscalationEnabled = $false
+               primaryApprovers = $approver }
         }
-    })
-}
-
-function New-PolicyBody([string]$PackageId, [string]$PackageName, [string]$Tier, [string]$AllowedGroup) {
-    $t = $tiers[$Tier]
-    $fallbackReviewer = @(@{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = (Get-GroupId $t.ApproverGroup) })
-
+    )
     $reviewSettings = if ($t.ReviewEveryMonths -gt 0) {
         @{
-            isEnabled                       = $true
-            expirationBehavior              = "removeAccess"
-            isRecommendationEnabled         = $true
-            isReviewerJustificationRequired = $true
-            isSelfReview                    = $false
-            primaryReviewers                = @(@{ "@odata.type" = "#microsoft.graph.requestorManager"; managerLevel = 1 })
-            fallbackReviewers               = $fallbackReviewer
+            isEnabled = $true; expirationBehavior = "removeAccess"; isRecommendationEnabled = $true
+            isReviewerJustificationRequired = $true; isSelfReview = $false
+            primaryReviewers = @($manager); fallbackReviewers = $approver
             schedule = @{
-                startDateTime = $reviewStartIso
+                startDateTime = $reviewStart.ToString("yyyy-MM-ddTHH:mm:ssZ")
                 expiration    = @{ type = "afterDuration"; duration = "P14D" }
                 recurrence    = @{
                     pattern = @{ type = "absoluteMonthly"; interval = $t.ReviewEveryMonths }
-                    range   = @{ type = "noEnd"; startDate = $reviewStartDate }
+                    range   = @{ type = "noEnd"; startDate = $reviewStart.ToString("yyyy-MM-dd") }
                 }
             }
         }
-    } else {
-        @{ isEnabled = $false }   # short fixed-term grant; expiration removes access
-    }
+    } else { @{ isEnabled = $false } }   # short fixed-term grant; expiration removes access
     $reviewText = if ($t.ReviewEveryMonths -gt 0) { "reviewed every $($t.ReviewEveryMonths) months" } else { "no extension; removed automatically at expiry" }
-
-    $who = if ($AllowedGroup) { "Members of $AllowedGroup request" } else { "Members request" }
+    $who = if ($Package.AllowedGroup) { "Members of $($Package.AllowedGroup) request" } else { "Members request" }
 
     $body = @{
-        displayName       = "$PackageName - $Tier request policy"
-        description       = "$who; manager approval$(if ($t.SecondStage) { ' + ' + $t.ApproverGroup }); expires after $($t.ExpiryDays) days; $reviewText."
+        displayName        = "$($Package.Name) - $($Package.Tier) request policy"
+        description        = "$who; manager approval$(if ($t.SecondStage) { ' + ' + $t.ApproverGroup }); expires after $($t.ExpiryDays) days; $reviewText."
         allowedTargetScope = "allMemberUsers"
-        expiration        = @{ type = "afterDuration"; duration = "P$($t.ExpiryDays)D" }
-        requestorSettings = @{
-            enableTargetsToSelfAddAccess        = $true
-            enableTargetsToSelfUpdateAccess     = (-not $t.NoExtend)
-            enableTargetsToSelfRemoveAccess     = $true
-            allowCustomAssignmentSchedule       = $false
-            enableOnBehalfRequestorsToAddAccess    = $false
-            enableOnBehalfRequestorsToUpdateAccess = $false
+        expiration         = @{ type = "afterDuration"; duration = "P$($t.ExpiryDays)D" }
+        requestorSettings  = @{
+            enableTargetsToSelfAddAccess = $true; enableTargetsToSelfUpdateAccess = (-not $t.NoExtend)
+            enableTargetsToSelfRemoveAccess = $true; allowCustomAssignmentSchedule = $false
+            enableOnBehalfRequestorsToAddAccess = $false; enableOnBehalfRequestorsToUpdateAccess = $false
             enableOnBehalfRequestorsToRemoveAccess = $false
         }
-        requestApprovalSettings = @{
-            isApprovalRequiredForAdd    = $true
-            isApprovalRequiredForUpdate = $true
-            stages                      = @(New-ApprovalStage $Tier)
-        }
-        reviewSettings = $reviewSettings
-        accessPackage = @{ id = $PackageId }
+        requestApprovalSettings = @{ isApprovalRequiredForAdd = $true; isApprovalRequiredForUpdate = $true; stages = $stages }
+        reviewSettings     = $reviewSettings
+        accessPackage      = @{ id = $PackageId }
     }
-
     # Restrict who can see and request the package to members of one group.
-    if ($AllowedGroup) {
+    if ($Package.AllowedGroup) {
         $body.allowedTargetScope     = "specificDirectoryUsers"
-        $body.specificAllowedTargets = @(@{
-            "@odata.type" = "#microsoft.graph.groupMembers"
-            groupId       = (Get-GroupId $AllowedGroup)
-            description   = $AllowedGroup
-        })
+        $body.specificAllowedTargets = @(@{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = (Get-GroupId $Package.AllowedGroup); description = $Package.AllowedGroup })
     }
     $body
 }
 
-# ---------------------------------------------------------------------------
-# 1. Catalog
-# ---------------------------------------------------------------------------
-$catalog = Get-Filtered "$em/catalogs" "displayName eq '$(Esc $CatalogName)'" | Select-Object -First 1
-if (-not $catalog -and $PSCmdlet.ShouldProcess($CatalogName, "Create catalog")) {
-    $catalog = Invoke-Graph POST "$em/catalogs" @{
-        displayName         = $CatalogName
-        description         = "Microsoft 365 Copilot feature and administration access."
-        isExternallyVisible = $false
-    }
-    Write-Host "Created catalog '$CatalogName'"
-}
-if (-not $catalog) { Write-Host "WhatIf: stopping before catalog-dependent steps."; return }
-
-# ---------------------------------------------------------------------------
-# 2. Add every referenced group to the catalog
-# ---------------------------------------------------------------------------
-$allGroupNames = $packages.Groups | Sort-Object -Unique
-$catalogResources = @{}
-
-foreach ($name in $allGroupNames) {
-    $gid = Get-GroupId $name
-    $res = Get-Filtered "$em/catalogs/$($catalog.id)/resources" "originId eq '$gid'" | Select-Object -First 1
-
-    if (-not $res -and $PSCmdlet.ShouldProcess($name, "Add group to catalog")) {
-        Invoke-Graph POST "$em/resourceRequests" @{
-            requestType = "adminAdd"
-            resource    = @{ originId = $gid; originSystem = "AadGroup" }
-            catalog     = @{ id = $catalog.id }
-        } | Out-Null
-
-        for ($i = 1; $i -le 10 -and -not $res; $i++) {
-            Start-Sleep -Seconds 3
-            $res = Get-Filtered "$em/catalogs/$($catalog.id)/resources" "originId eq '$gid'" | Select-Object -First 1
+function Set-CatalogResource {
+    # Adds one group to the catalog if it isn't there yet.
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param([Parameter(ValueFromPipeline = $true)][string]$Name)
+    process {
+        $gid = Get-GroupId $Name
+        $res = Get-Filtered "$em/catalogs/$($catalog.id)/resources" "originId eq '$gid'" | Select-Object -First 1
+        if (-not $res -and $PSCmdlet.ShouldProcess($Name, "Add group to catalog")) {
+            Invoke-Graph POST "$em/resourceRequests" @{
+                requestType = "adminAdd"
+                resource    = @{ originId = $gid; originSystem = "AadGroup" }
+                catalog     = @{ id = $catalog.id }
+            } | Out-Null
+            for ($i = 1; $i -le 10 -and -not $res; $i++) {
+                Start-Sleep -Seconds 3
+                $res = Get-Filtered "$em/catalogs/$($catalog.id)/resources" "originId eq '$gid'" | Select-Object -First 1
+            }
+            if (-not $res) { Write-Warning "'$Name' not visible in the catalog yet. Run the script again in a few minutes." }
         }
-        if ($res) { Write-Host "Added '$name' to catalog" } else { Write-Warning "'$name' not visible in catalog yet." }
+        if ($res) { $catalogResources[$Name] = $res }
     }
-    if ($res) { $catalogResources[$name] = $res }
 }
 
 function Get-MemberRole([string]$GroupName) {
-    $res = $catalogResources[$GroupName]
-    $f = "(originSystem eq 'AadGroup' and resource/id eq '$($res.id)')"
+    $f = "(originSystem eq 'AadGroup' and resource/id eq '$($catalogResources[$GroupName].id)')"
     Get-Filtered "$em/catalogs/$($catalog.id)/resourceRoles" $f "&`$expand=resource" |
         Where-Object { $_.originId -like "Member_*" } | Select-Object -First 1
 }
 
-# ---------------------------------------------------------------------------
-# 3-4. Packages, resource scopes, policies
-# ---------------------------------------------------------------------------
-$packageIds = @{}
-$results = [System.Collections.Generic.List[object]]::new()
+function Set-CopilotAccessPackage {
+    # Creates or fixes one package: the package, its description, its groups and its tier policy.
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param([Parameter(ValueFromPipeline = $true)][hashtable]$Package)
+    process {
+        $desc = "Grants: $($Package.Groups -join ', '). Tier: $($Package.Tier)."
+        $pkg = Get-Filtered "$em/accessPackages" "displayName eq '$(Esc $Package.Name)'" "&`$expand=catalog" |
+            Where-Object { $_.catalog.id -eq $catalog.id } | Select-Object -First 1
 
-foreach ($p in $packages) {
-    $pkg = Get-Filtered "$em/accessPackages" "displayName eq '$(Esc $p.Name)'" "&`$expand=catalog" |
-        Where-Object { $_.catalog.id -eq $catalog.id } | Select-Object -First 1
-    $status = "Exists"
-
-    if (-not $pkg) {
-        if ($PSCmdlet.ShouldProcess($p.Name, "Create access package")) {
-            $pkg = Invoke-Graph POST "$em/accessPackages" @{
-                displayName = $p.Name
-                description = "Grants: $($p.Groups -join ', '). Tier: $($p.Tier)."
-                isHidden    = $false
-                catalog     = @{ id = $catalog.id }
-            }
-            $status = "Created"
-        }
-        else { $results.Add(($p | Select-Object @{ n = "Package"; e = { $p.Name } }, @{ n = "Tier"; e = { $p.Tier } }, @{ n = "Status"; e = { "WhatIf" } }, @{ n = "Id"; e = { $null } })); continue }
-    }
-    $packageIds[$p.Name] = $pkg.id
-
-    # Resource role scopes (group Member role)
-    $existingScopes = (Invoke-Graph GET "$em/accessPackages/$($pkg.id)?`$expand=resourceRoleScopes(`$expand=role,scope)").resourceRoleScopes
-    foreach ($gname in $p.Groups) {
-        $gid = Get-GroupId $gname
-        if ($existingScopes | Where-Object { $_.scope.originId -eq $gid }) { continue }
-        $role = Get-MemberRole $gname
-        if (-not $role) { Write-Warning "No Member role found for '$gname'; skipped."; continue }
-
-        if ($PSCmdlet.ShouldProcess("$($p.Name)", "Add '$gname' Member role")) {
-            Invoke-Graph POST "$em/accessPackages/$($pkg.id)/resourceRoleScopes" @{
-                role  = @{
-                    id           = $role.id
-                    displayName  = $role.displayName
-                    originSystem = "AadGroup"
-                    originId     = $role.originId
-                    resource     = @{ id = $catalogResources[$gname].id; originId = $gid; originSystem = "AadGroup" }
+        $notes = @(
+            if (-not $pkg) {
+                if ($PSCmdlet.ShouldProcess($Package.Name, "Create access package")) {
+                    $pkg = Invoke-Graph POST "$em/accessPackages" @{ displayName = $Package.Name; description = $desc; isHidden = $false; catalog = @{ id = $catalog.id } }
+                    "Created"
                 }
-                scope = @{ originId = $gid; originSystem = "AadGroup" }
-            } | Out-Null
-        }
-    }
+                else { "WhatIf: create" }
+            }
+            elseif ($pkg.description -ne $desc) {
+                if ($PSCmdlet.ShouldProcess($Package.Name, "Update description")) {
+                    Invoke-Graph PATCH "$em/accessPackages/$($pkg.id)" @{ description = $desc } | Out-Null
+                    "Description updated"
+                }
+                else { "WhatIf: update description" }
+            }
 
-    # Assignment policy
-    $policyName = "$($p.Name) - $($p.Tier) request policy"
-    $existingPolicies = (Invoke-Graph GET "$em/accessPackages/$($pkg.id)?`$expand=assignmentPolicies").assignmentPolicies
-    if (-not ($existingPolicies | Where-Object { $_.displayName -eq $policyName }) -and
-        $PSCmdlet.ShouldProcess($p.Name, "Create assignment policy ($($p.Tier))")) {
-        Invoke-Graph POST "$em/assignmentPolicies" (New-PolicyBody $pkg.id $p.Name $p.Tier $p.AllowedGroup) | Out-Null
-    }
+            if ($pkg) {
+                # Groups: add missing, report extra.
+                $scopes = @((Invoke-Graph GET "$em/accessPackages/$($pkg.id)?`$expand=resourceRoleScopes(`$expand=role,scope)").resourceRoleScopes)
+                $wanted = @($Package.Groups | ForEach-Object { Get-GroupId $_ })
+                foreach ($gname in $Package.Groups) {
+                    $gid = Get-GroupId $gname
+                    if ($scopes | Where-Object { $_.scope.originId -eq $gid }) { continue }
+                    $role = Get-MemberRole $gname
+                    if (-not $role) { "No Member role for '$gname' in the catalog"; continue }
+                    if ($PSCmdlet.ShouldProcess($Package.Name, "Add '$gname' Member role")) {
+                        Invoke-Graph POST "$em/accessPackages/$($pkg.id)/resourceRoleScopes" @{
+                            role  = @{ id = $role.id; displayName = $role.displayName; originSystem = "AadGroup"; originId = $role.originId
+                                       resource = @{ id = $catalogResources[$gname].id; originId = $gid; originSystem = "AadGroup" } }
+                            scope = @{ originId = $gid; originSystem = "AadGroup" }
+                        } | Out-Null
+                        "Added $gname"
+                    }
+                    else { "WhatIf: add $gname" }
+                }
+                $scopes | Where-Object { $_.scope.originId -notin $wanted } |
+                    ForEach-Object { "Extra group '$(if ($_.scope.displayName) { $_.scope.displayName } else { $_.scope.originId })' not in the design (not removed)" }
 
-    $results.Add(($p | Select-Object @{ n = "Package"; e = { $p.Name } }, @{ n = "Tier"; e = { $p.Tier } }, @{ n = "Status"; e = { $status } }, @{ n = "Id"; e = { $pkg.id } }))
+                # Tier policy: create if missing, report others.
+                $policyName = "$($Package.Name) - $($Package.Tier) request policy"
+                $policies = @((Invoke-Graph GET "$em/accessPackages/$($pkg.id)?`$expand=assignmentPolicies").assignmentPolicies)
+                if (-not ($policies | Where-Object { $_.displayName -eq $policyName })) {
+                    if ($PSCmdlet.ShouldProcess($Package.Name, "Create $($Package.Tier) request policy")) {
+                        Invoke-Graph POST "$em/assignmentPolicies" (New-PolicyBody $pkg.id $Package) | Out-Null
+                        "$($Package.Tier) policy created"
+                    }
+                    else { "WhatIf: create $($Package.Tier) policy" }
+                }
+                $policies | Where-Object { $_.displayName -ne $policyName } |
+                    ForEach-Object { "Other policy '$($_.displayName)' (not removed)" }
+            }
+        )
+        if ($pkg) { $packageIds[$Package.Name] = $pkg.id }
+
+        $Package | Select-Object @{ n = "Package"; e = { $Package.Name } },
+            @{ n = "Tier"; e = { $Package.Tier } },
+            @{ n = "Result"; e = { if ($notes.Count -eq 0) { "OK" } else { $notes -join "; " } } },
+            @{ n = "Id"; e = { $pkg.id } }
+    }
 }
 
-# Incompatible packages (Limited vs Unlimited spend tiers), both directions
-foreach ($p in $packages | Where-Object { $_.Incompatible }) {
-    $a = $packageIds[$p.Name]; $b = $packageIds[$p.Incompatible]
-    if (-not $a -or -not $b) { continue }
-    foreach ($pair in @(@($a, $b), @($b, $a))) {
-        $existing = (Invoke-Graph GET "$em/accessPackages/$($pair[0])/incompatibleAccessPackages").value
-        if ($existing | Where-Object { $_.id -eq $pair[1] }) { continue }
-        if ($PSCmdlet.ShouldProcess($p.Name, "Mark incompatible with $($p.Incompatible)")) {
-            Invoke-Graph POST "$em/accessPackages/$($pair[0])/incompatibleAccessPackages/`$ref" @{
-                "@odata.id" = "$em/accessPackages/$($pair[1])"
-            } | Out-Null
+function Set-IncompatiblePackage {
+    # Marks two packages as incompatible, both ways.
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param([Parameter(ValueFromPipeline = $true)][hashtable]$Package)
+    process {
+        $a = $packageIds[$Package.Name]; $b = $packageIds[$Package.Incompatible]
+        if (-not $a -or -not $b) { return }
+        foreach ($pair in @(@($a, $b), @($b, $a))) {
+            $existing = Get-AllPages "$em/accessPackages/$($pair[0])/incompatibleAccessPackages"
+            if ($existing | Where-Object { $_.id -eq $pair[1] }) { continue }
+            if ($PSCmdlet.ShouldProcess($Package.Name, "Mark incompatible with $($Package.Incompatible)")) {
+                Invoke-Graph POST "$em/accessPackages/$($pair[0])/incompatibleAccessPackages/`$ref" @{ "@odata.id" = "$em/accessPackages/$($pair[1])" } | Out-Null
+            }
         }
     }
 }
 
-# ---------------------------------------------------------------------------
-# 5. Standalone access reviews on admin groups (catch direct assignments)
-# ---------------------------------------------------------------------------
-if ($CreateAdminGroupReviews) {
-    $reviewerGroupId = Get-GroupId $AdminApproverGroupName
-    foreach ($ag in $adminGroups) {
-        $gid   = Get-GroupId $ag
-        $rname = "$ag - quarterly membership review"
-        $existing = Get-Filtered "$graph/identityGovernance/accessReviews/definitions" "displayName eq '$(Esc $rname)'"
-        if ($existing) { continue }
-
-        if ($PSCmdlet.ShouldProcess($ag, "Create quarterly access review")) {
+function Set-AdminGroupReview {
+    # Quarterly membership review on one admin group, covering members added outside a package.
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param([Parameter(ValueFromPipeline = $true)][string]$Name)
+    process {
+        $rname = "$Name - quarterly membership review"
+        $result = if (Get-Filtered "$graph/identityGovernance/accessReviews/definitions" "displayName eq '$(Esc $rname)'") { "OK" }
+        elseif ($PSCmdlet.ShouldProcess($Name, "Create quarterly access review")) {
             Invoke-Graph POST "$graph/identityGovernance/accessReviews/definitions" @{
                 displayName             = $rname
-                descriptionForAdmins    = "Quarterly review of $ag membership (Copilot administration)."
-                descriptionForReviewers = "Confirm each member still needs Copilot admin access via '$ag'."
-                scope = @{
-                    "@odata.type" = "#microsoft.graph.accessReviewQueryScope"
-                    query         = "/groups/$gid/transitiveMembers"
-                    queryType     = "MicrosoftGraph"
-                }
-                reviewers = @(@{ query = "/groups/$reviewerGroupId/transitiveMembers"; queryType = "MicrosoftGraph" })
-                settings = @{
-                    mailNotificationsEnabled        = $true
-                    reminderNotificationsEnabled    = $true
-                    justificationRequiredOnApproval = $true
-                    defaultDecisionEnabled          = $true
-                    defaultDecision                 = "Deny"
-                    instanceDurationInDays          = 14
-                    autoApplyDecisionsEnabled       = $true
-                    recommendationsEnabled          = $true
-                    recurrence = @{
-                        pattern = @{ type = "absoluteMonthly"; interval = 3 }
-                        range   = @{ type = "noEnd"; startDate = $reviewStartDate }
-                    }
+                descriptionForAdmins    = "Quarterly review of $Name membership (Copilot administration)."
+                descriptionForReviewers = "Confirm each member still needs Copilot admin access via '$Name'."
+                scope     = @{ "@odata.type" = "#microsoft.graph.accessReviewQueryScope"; query = "/groups/$(Get-GroupId $Name)/transitiveMembers"; queryType = "MicrosoftGraph" }
+                reviewers = @(@{ query = "/groups/$(Get-GroupId $AdminApproverGroupName)/transitiveMembers"; queryType = "MicrosoftGraph" })
+                settings  = @{
+                    mailNotificationsEnabled = $true; reminderNotificationsEnabled = $true; justificationRequiredOnApproval = $true
+                    defaultDecisionEnabled = $true; defaultDecision = "Deny"; instanceDurationInDays = 14
+                    autoApplyDecisionsEnabled = $true; recommendationsEnabled = $true
+                    recurrence = @{ pattern = @{ type = "absoluteMonthly"; interval = 3 }; range = @{ type = "noEnd"; startDate = $reviewStart.ToString("yyyy-MM-dd") } }
                 }
             } | Out-Null
-            Write-Host "Created review '$rname'"
+            "Created"
         }
+        else { "WhatIf: create" }
+        $Name | Select-Object @{ n = "Package"; e = { $rname } }, @{ n = "Tier"; e = { "Review" } }, @{ n = "Result"; e = { $result } }, @{ n = "Id"; e = { $null } }
     }
 }
 
-$results | Format-Table -AutoSize
+# ---------------------------------------------------------------------------
+# Run
+# ---------------------------------------------------------------------------
+$scopes = @(
+    "EntitlementManagement.ReadWrite.All"
+    "Group.Read.All"
+    if ($CreateAdminGroupReviews) { "AccessReview.ReadWrite.All" }
+)
+# Stays on v1.0: the beta entitlement management API uses different paths
+# (accessPackageCatalogs, accessPackageAssignmentPolicies), so these calls would break on beta.
+$graph = "$(Connect-Cloud -Environment $Environment -Scopes $scopes)/v1.0"
+$em    = "$graph/identityGovernance/entitlementManagement"
+
+# Reviews start on the first day of next month (UTC).
+$now = (Get-Date).ToUniversalTime()
+$reviewStart = (Get-Date -Year $now.Year -Month $now.Month -Day 1 -Hour 15 -Minute 0 -Second 0).AddMonths(1)
+
+$packages = @(
+    $packages | Where-Object { $IncludeCodePackages -or -not $_.Code }
+    if ($IncludeAdminPackages) { $adminGroups | ForEach-Object { @{ Name = $_; Tier = "Admin"; Groups = @($_) } } }
+)
+
+# 1. Every group the packages, approvers and reviews use must exist.
+$needed = @(
+    $packages.Groups; $packages.AllowedGroup | Where-Object { $_ }
+    $tiers.Values.ApproverGroup
+    if ($CreateAdminGroupReviews) { $adminGroups }
+) | Sort-Object -Unique
+$missing = @($needed | Where-Object { -not (Get-GroupId $_) })
+if ($missing.Count -gt 0) {
+    throw "These groups aren't in the tenant. Run New-CopilotGroups.ps1 first (add -IncludeCodeGroups for Code):`n  $($missing -join "`n  ")"
+}
+
+# 2. Catalog and its groups
+$catalog = Get-Filtered "$em/catalogs" "displayName eq '$(Esc $CatalogName)'" | Select-Object -First 1
+if (-not $catalog -and $PSCmdlet.ShouldProcess($CatalogName, "Create catalog")) {
+    $catalog = Invoke-Graph POST "$em/catalogs" @{ displayName = $CatalogName; description = "Microsoft 365 Copilot feature and administration access."; isExternallyVisible = $false }
+    Write-Host "Created catalog '$CatalogName'"
+}
+if (-not $catalog) { Write-Host "WhatIf: catalog '$CatalogName' would be created. Stopping before the steps that need it."; return }
+
+$catalogResources = @{}
+$packages.Groups | Sort-Object -Unique | Set-CatalogResource
+
+# 3-5. Packages, incompatible pairs, admin reviews
+$packageIds = @{}
+$results = @(
+    $packages | Set-CopilotAccessPackage
+    if ($CreateAdminGroupReviews) { $adminGroups | Set-AdminGroupReview }
+)
+$packages | Where-Object { $_.Incompatible } | Set-IncompatiblePackage
+
+$results | Format-Table -AutoSize -Wrap
 $results | Export-Csv -Path ".\CopilotAccessPackages-$(Get-Date -Format yyyyMMdd-HHmm).csv" -NoTypeInformation
