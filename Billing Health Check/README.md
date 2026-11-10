@@ -155,6 +155,7 @@ Each finding has a severity, a reason and a fix. Thresholds (2,000 credits, 80%,
 | Disabled, guest, or no sign-in for 90 days | Both | Medium | Remove them |
 | In both **Cowork Limited** and **Cowork Unlimited** | Spending | High | The higher limit always wins, so Limited does nothing. Remove one. (Being in Temp and Limited together is expected) |
 | In the Temp group but not in Limited | Spending | Medium | Find out how they were added |
+| In two enabled policies for the same service, where one has a higher per-user limit (any policy names, not just the Cowork tiers) | Spending | High if the winner is Unlimited, else Medium | The most permissive limit wins, so the lower cap does nothing. Remove them from one. A group tier on top of an all-users base policy is normal and isn't flagged |
 | **Has** a Copilot license | Billing | Medium | They don't need this policy. Remove them |
 | **No** working Copilot license (none, Copilot turned off in the license, or a license assignment error), in a Cowork or Code policy | Spending | Medium | They can't use it. Assign a working license or remove them |
 | People in a Teams Phone Agent group | Spending | Medium | Keep resource accounts only |

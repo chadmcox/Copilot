@@ -51,6 +51,20 @@ Policy names come from the Copilot Access Governance Guide.
 | In Cowork Temporary Unlimited but not in Cowork Limited | Medium | Check how they were added; Temp is only for Limited members |
 | A service turned on in more than one enabled policy | Info | People in both groups get the higher per-user limit; make sure that's intended |
 
+## Across any policies
+
+Microsoft applies the most permissive policy when more than one covers a person: the higher per-user
+limit wins and limits aren't combined. Check every member of every enabled group policy. An enabled
+all-users policy covers everyone. Compare per-user limits per service the policies share (Unlimited is
+highest). Skip it when every policy involved is a Cowork tier policy (the tier checks above cover that),
+and when the only lower policy is an all-users base policy (a group tier on top of it is normal).
+
+| Check | Severity | Fix |
+| --- | --- | --- |
+| A group policy's per-user limit is overridden by an Unlimited policy for the same person and service | High | Remove them from one policy; the most permissive limit always wins |
+| A group policy's per-user limit is overridden by a higher cap for the same person and service | Medium | Remove them from one policy; the most permissive limit always wins |
+| In two group policies with the same per-user limit for the same service | Low | Keep them in one policy |
+
 ## Not available through the Enterprise MCP
 
 Per-person credit balances (used, left, blocked) need the cost management API. If the user wants

@@ -40,7 +40,10 @@ url: Microsoft 365 Copilot Cost Management API overview - https://learn.microsof
       - Groups: missing, empty, Microsoft 365 group, dynamic, nested, owners, description.
       - Members: disabled, guest, inactive, no Copilot license, near or at their limit.
       - Across policies: people in both Cowork Limited and Cowork Unlimited, and Temp members
-        who aren't in Limited.
+        who aren't in Limited. Any other person covered by two enabled policies for the same
+        service where one has a higher per-user limit: the most permissive limit wins, so the
+        lower cap does nothing (High when the winner is unlimited, otherwise Medium; Low when two
+        group policies have the same limit).
       - Cowork readiness: how many active Copilot users are set up to use Cowork with billing.
         Funnel: Copilot license assigned > Copilot turned on > active in Copilot (-Period) >
         covered by an enabled Cowork policy > billing set > can use Cowork now (unless
@@ -331,6 +334,62 @@ function Test-CoworkTiers($Policies) {
     }
 }
 
+# A per-user limit as a number to compare: unlimited is the highest, $null when it isn't set or readable.
+function Get-PerUserRank($P) {
+    if (Test-Unlimited $P.PerUser) { return [double]::MaxValue }
+    if (-not $P.PerUser -or "$($P.PerUser.value)" -eq "") { return }
+    "$($P.PerUser.value)" -as [double]
+}
+
+# When more than one enabled policy covers a person for the same service, Microsoft applies the most
+# permissive one: the higher per-user limit wins and limits aren't combined, so the lower cap does nothing.
+# An all-users policy covers everyone, so it counts for every group member. A group policy that's more
+# permissive than an all-users base policy is normal tiering and isn't reported. Overlaps only between
+# the Cowork tier policies are left to Test-CoworkTiers.
+function Test-PolicyOverlap($Policies) {
+    $tiers    = @($LimitedPolicy, $UnlimitedPolicy, $TempPolicy)
+    $enabled  = @($Policies | Where-Object Status -eq "enabled")
+    $allUsers = @($enabled | Where-Object AllUsers)
+    $coverage = $enabled | Where-Object { -not $_.AllUsers } | ForEach-Object {
+        $p = $_
+        @($p.GroupIds | ForEach-Object { (Get-Group $_).MemberIds }) | Where-Object { $_ } | Sort-Object -Unique |
+            Select-Object @{ n = "UserId"; e = { $_ } }, @{ n = "Policy"; e = { $p } }
+    }
+    $coverage | Group-Object UserId | ForEach-Object {
+        $userId = $_.Name
+        $mine = @(@($_.Group.Policy) + $allUsers)
+        if ($mine.Count -lt 2) { return }
+        # One row per service where a cap is overridden, then one finding per overridden policy.
+        @($mine.Services) | Where-Object { $_ } | Sort-Object -Unique | ForEach-Object {
+            $service = $_
+            $set = @($mine | Where-Object { $_.Services -contains $service -and $null -ne (Get-PerUserRank $_) })
+            if ($set.Count -lt 2 -or -not ($set.Name | Where-Object { $_ -notin $tiers })) { return }
+            $top     = ($set | ForEach-Object { Get-PerUserRank $_ } | Measure-Object -Maximum).Maximum
+            $winners = @($set | Where-Object { (Get-PerUserRank $_) -eq $top })
+            $losers  = @($set | Where-Object { (Get-PerUserRank $_) -lt $top -and -not $_.AllUsers })
+            $losers | Select-Object @{ n = "Service"; e = { $service } }, @{ n = "Loser"; e = { $_.Name } },
+                @{ n = "LoserLimit"; e = { Format-Quantity $_.PerUser } },
+                @{ n = "Winner"; e = { "$($winners.Name -join ', ') ($(Format-Quantity $winners[0].PerUser))" } },
+                @{ n = "Severity"; e = { if (Test-Unlimited $winners[0].PerUser) { "High" } else { "Medium" } } }
+            $sameLimit = @($winners | Where-Object { -not $_.AllUsers })
+            if (-not $losers -and $sameLimit.Count -ge 2) {
+                $sameLimit[0] | Select-Object @{ n = "Service"; e = { $service } }, @{ n = "Loser"; e = { $_.Name } },
+                    @{ n = "LoserLimit"; e = { "same" } }, @{ n = "Winner"; e = { ($sameLimit.Name -join " and ") } },
+                    @{ n = "Severity"; e = { "Low" } }
+            }
+        } | Group-Object Loser, Winner | ForEach-Object {
+            $row = $_.Group[0]
+            $services = ($_.Group.Service | Sort-Object -Unique) -join ", "
+            if ($row.Severity -eq "Low") {
+                New-Finding $row.Loser "Member" "Low" (Get-UserName $userId) "In $($row.Winner) with the same per-user limit for $services" "Keep them in one policy"
+            }
+            else {
+                New-Finding $row.Loser "Member" $row.Severity (Get-UserName $userId) "Per-user limit $($row.LoserLimit) for $services is overridden by $($row.Winner)" "Remove them from one policy; the most permissive limit always wins"
+            }
+        }
+    }
+}
+
 # Takes policies from the pipeline and scores each one from its findings.
 function Get-Score($Findings) {
     begin {
@@ -420,6 +479,7 @@ $findings = @(
         }
     }
     Test-CoworkTiers $policies
+    Test-PolicyOverlap $policies
 )
 
 # Cowork readiness. Reuses the groups and members already read above.
