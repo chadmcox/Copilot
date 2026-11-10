@@ -141,10 +141,12 @@ Copilot Platform Admin is made by `New-CopilotGroups.ps1`, gets its roles from `
 
 Since Oct 30, 2026, the Copilot Connectors page follows this setting. The old `setFederatedConnectors` command is gone (MC1454973, updated Oct 23, 2026).
 
+*Checked in the admin center on Nov 10, 2026.*
+
 1. Go to M365 admin center → **Agents** → **Settings** → **Agent and plugin access**. Microsoft docs and Message Center also call this page **Allowed agent types**.
-2. Leave **Allow agents and plugins built by Microsoft** on.
-3. Leave **Allow agents and plugins built by your organization** on.
-4. Turn off **Allow agents and plugins built by external publishers** until you have reviewed them.
+2. Leave **Allow apps, agents, and plugins built by Microsoft** on.
+3. Leave **Allow apps, agents, and plugins built by your organization** on.
+4. Turn off **Allow apps, agents, and plugins built by external publishers** until you have reviewed them. When you turn it back on, it asks for **All external publishers** or **Only certified external publishers**; pick certified.
 5. Select **Save**.
 
 Why: this one setting now decides connector and agent access. If it is wrong, your connectors are wrong too. This is the same setting as step 1 in the Agent Delegation Guide.
@@ -206,26 +208,28 @@ This changes the **Cowork Limited** tier: a "small" limit now starts at 2,000 cr
 
 ### 6. Choose who can ask for usage-based billing experiences
 
-This setting decides what people see when they try Cowork (or another paid service) without a spending policy.
+*Checked in the admin center on Nov 10, 2026.* This setting decides what people see when they try Cowork (or another paid service) without a spending policy.
 
 *From Microsoft docs ([Access requests to usage-based billing experiences](https://learn.microsoft.com/microsoft-365/copilot/request-access-usage-based-billing-experiences)):*
 
 1. Go to M365 admin center → **Copilot** → **Settings** → **All settings**.
-2. Select **Access to usage-based billing experiences**.
+2. Select **Access requests to usage-based billing experiences**.
 3. Under **Choose who can request a spending policy**, select **Specific users and groups**. The default is **All users**. The other option is **No users**.
 4. Add **Copilot Access**.
 5. Select **Save**. You need Global Administrator. It can take up to 24 hours.
 
-**Why I couldn't find it on Oct 23, 2026.** Microsoft docs now say the old setting, **AI experiences enabled by usage-based billing**, is **deprecated**. It is being replaced by **Access to usage-based billing experiences**, the setting above. The old page has one checkbox and no group picker; the new page has the group picker. If you still see only the old page, check again later. See [Discovery setting for AI experiences enabled by usage-based billing](https://learn.microsoft.com/microsoft-365/copilot/discovery-setting-ai-experiences).
+**Why I couldn't find it on Oct 23, 2026.** Microsoft docs now say the old setting, **AI experiences enabled by usage-based billing**, is **deprecated**. It is being replaced by **Access requests to usage-based billing experiences**, the setting above. The old page has one checkbox and no group picker; the new page has the group picker. On Nov 10, 2026 both settings were still in the list, and the old one was still on. Leave the old one alone; the new one decides who can ask. See [Discovery setting for AI experiences enabled by usage-based billing](https://learn.microsoft.com/microsoft-365/copilot/discovery-setting-ai-experiences).
 
 ### 7. Set the Copilot Code controls (Frontier)
 
 Copilot Code started rolling out to Frontier tenants in late October 2026 (MC1519871). Code is now a usage-based service, so anyone in a spending policy that includes Code can use it.
 
-1. Go to M365 admin center → **Copilot** → **Settings** and open the Copilot Code policy settings.
-2. Leave **Copilot Code execution location** on **Cloud** unless people must run code on their own device. **Cloud and local** turns on local coding.
-3. Leave **GitHub connection** off until you decide which GitHub services to allow.
-4. Decide on **Auto-approve** (on by default) and **Organizational data in Copilot Code** (on for cloud, off for local).
+*Checked in the admin center on Nov 10, 2026.* Each Code control is its own row in **Copilot** → **Settings** → **View all**, marked **(Frontier)**. **Copilot** → **Code** shows a readiness checklist for the same settings.
+
+1. Go to M365 admin center → **Copilot** → **Settings** → **View all**.
+2. Leave **Code execution location (Frontier)** on **Cloud only** unless people must run code on their own device. **User devices and in the cloud** turns on local coding.
+3. Leave **GitHub account connection in Code (Frontier)** on **No users** until you decide which GitHub services to allow. The Code page also lists **Add allowed domains for GitHub**.
+4. Decide on **Automatic approval in Code (Frontier)** (**All users** by default; you can also pick **Disabled for specific groups**) and **Organization data in local Code sessions (Frontier)** (**No users** by default; it covers only local sessions).
 5. Check your spending policies: if **Allow new Agents and services as they become available** is on, those users already have Code.
 
 See Copilot Code: turn it on (Frontier) below for the full table and the groups to run.
@@ -406,18 +410,18 @@ To use Code, a person needs a Microsoft Copilot license and a spending policy th
 2. Run `New-CopilotGroups.ps1 -IncludeCodeGroups` and `New-CopilotAccessPackages.ps1 -IncludeCodePackages`. This creates **Copilot + Code Spend Limit**, **Copilot + Code Spend Unlimited** and **Copilot + Code Secure Execution Exemption**, and their packages.
 3. Create the Code spending policies in the policy table below.
 4. Set the Code controls. The table below shows each one and its default.
-5. Assign **Copilot + Code Secure Execution Exemption** to the **Policy exemption group** setting in secure local execution. Keep that group very small.
+5. Assign **Copilot + Code Secure Execution Exemption** to the **Policy exemption group** setting in secure local execution. Keep that group very small. On Nov 10, 2026 this setting wasn't in the admin center yet (it only matters once local execution is on), so check again when you turn on local coding.
 
 **The Code controls** (*from Microsoft docs: [Manage Copilot Code for your organization](https://learn.microsoft.com/copilot/code/code-admin)*). These are set for the whole organization, not per group.
 
 | Control | Default | What it does |
 | --- | --- | --- |
 | Pre-install Copilot Code components | Off | Installs the Code parts when the Copilot app starts |
-| Auto-approve | On | Lets people allow Copilot to approve its own actions instead of confirming each one |
-| Copilot Code execution location | Cloud only | Where sessions run: the person's device, the cloud, or both. **Cloud and local** turns on local coding |
-| GitHub connection | Off | Whether people can connect a GitHub account |
+| Automatic approval in Code (Frontier) | All users | Lets people allow Copilot to approve its own actions instead of confirming each one |
+| Code execution location (Frontier) | Cloud only | Where sessions run: **Cloud only**, or **User devices and in the cloud**, which turns on local coding |
+| GitHub account connection in Code (Frontier) | No users | Whether people can connect a GitHub account |
 | Allowed GitHub connections | Both | Which GitHub services are allowed: Both, GitHub.com only, GitHub Enterprise only, or None |
-| Organizational data in Copilot Code | On for cloud, off for local | Whether Code can use your Microsoft 365 and Work IQ data as context |
+| Organization data in local Code sessions (Frontier) | No users | Whether Code running on a person's device can use Microsoft 365, Work IQ and plugin data as context. The admin center has no separate setting for cloud sessions |
 
 **Secure local execution** (*from Microsoft docs: [Secure local execution in Copilot Code](https://learn.microsoft.com/copilot/code/code-secure-local-execution)*). Only for people using local coding, on Windows 11 version 24H2 or later. Mac is planned.
 
