@@ -329,8 +329,9 @@ function Get-SchemeHost([string]$Url) {
 function Get-PackageRow {
     process {
         $p = $_
-        $d = Get-GraphOptional "$graph/copilot/admin/catalog/packages/$([uri]::EscapeDataString($p.id))"
-        if (-not $d) { Write-Warning "Couldn't read details for '$($p.displayName)'."; $d = $p }
+        $d = try { Invoke-MgGraphRequest -Method GET -Uri "$graph/copilot/admin/catalog/packages/$([uri]::EscapeDataString($p.id))" -OutputType PSObject }
+             catch { Write-Warning "Couldn't read details for '$($p.displayName)', so it's checked from the catalog list only. $($_.Exception.Message) $($_.ErrorDetails.Message)" }
+        if (-not $d) { $d = $p }
         $mcp = @(Get-McpServer $d)
         $skills = @(Get-AgentSkill $d)
         $allowed = @($d.allowedUsersAndGroups) + @($d.acquireUsersAndGroups) | Where-Object { $_ }
@@ -569,16 +570,25 @@ function Test-CopilotAgentUsage($Usage, [int]$AgentCount) {
 # ---------------------------------------------------------------------------
 
 # Latest record of every agent Defender knows about. One row per agent. This is DefenderAgents.csv.
+# Every column except Timestamp and AgentId goes through column_ifexists: tenants get the documented
+# AgentsInfo columns at different times (one returned "Failed to resolve scalar expression named
+# 'AgentName'"), and a missing column should leave a field blank, not fail the whole query.
 function Get-DefenderAgent {
     $kql = @'
 AgentsInfo
 | summarize arg_max(Timestamp, *) by AgentId
+| extend LifecycleStatus = tostring(column_ifexists("LifecycleStatus", ""))
 | where LifecycleStatus != "Deleted"
-| extend AgentName = iff(isempty(AgentName), tostring(column_ifexists("Name", "")), AgentName)
-| project AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
-    PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount = array_length(Owners),
-    McpServerUrls = strcat_array(extract_all(@'(https?://[^\s"\],}]+)', tostring(McpServers)), ";"),
-    SkillCount = array_length(Skills), ToolCount = array_length(DeclaredTools)
+| extend AgentName = tostring(column_ifexists("AgentName", "")), OldName = tostring(column_ifexists("Name", ""))
+| project AgentId, AgentName = iff(isnotempty(AgentName), AgentName, OldName),
+    Platform = tostring(column_ifexists("Platform", "")), SourceAgentId = tostring(column_ifexists("SourceAgentId", "")),
+    EntraAgentId = tostring(column_ifexists("EntraAgentId", "")), EntraBlueprintId = tostring(column_ifexists("EntraBlueprintId", "")),
+    Availability = tostring(column_ifexists("Availability", "")), PublishedStatus = tostring(column_ifexists("PublishedStatus", "")),
+    LifecycleStatus, CreatedDateTime = column_ifexists("CreatedDateTime", datetime(null)),
+    LastUpdatedDateTime = column_ifexists("LastUpdatedDateTime", datetime(null)),
+    OwnerCount = array_length(column_ifexists("Owners", dynamic([]))),
+    McpServerUrls = strcat_array(extract_all(@'(https?://[^\s"\],}]+)', tostring(column_ifexists("McpServers", dynamic([])))), ";"),
+    SkillCount = array_length(column_ifexists("Skills", dynamic([]))), ToolCount = array_length(column_ifexists("DeclaredTools", dynamic([])))
 '@
     $activity = Get-DefenderActivity
     Invoke-HuntingQuery $kql | ForEach-Object {
