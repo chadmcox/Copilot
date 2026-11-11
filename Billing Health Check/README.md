@@ -50,7 +50,7 @@ Missing licenses and missing billing for Cowork users are already reported by th
 .\Get-CopilotBillingHealth.ps1 -Period D90   # readiness over 90 days
 ```
 
-> If the Copilot usage report hides names (Microsoft 365 admin center > **Settings > Org settings > Reports** > *Display concealed user, group, and site names in all reports*), "Active in Copilot" is a count only and can't be matched to people. The script tells you; it doesn't change the setting.
+> If the Copilot usage report hides names (Microsoft 365 admin center > **Settings > Org settings > Reports** > *Display concealed user, group, and site names in all reports*), activity can't be matched to people. The script leaves "Active in Copilot" out of the funnel, prints the active count on its own, and measures readiness against everyone with Copilot turned on. It tells you; it doesn't change the setting.
 
 ## Microsoft has two kinds of Copilot policy
 
