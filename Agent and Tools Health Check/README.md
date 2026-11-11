@@ -51,7 +51,7 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 
 **Scores**: every item starts at 100 (High −25, Medium −10, Low −3); an area's score is the average of its items, and an area with no items scores 100. Green 80+, Amber 50–79, Red under 50. **Copilot adoption** is its own area, separate from Tenant, so a missing or unread usage report never pads the Tenant score, and the Tenant score is never diluted by averaging it with Conditional Access.
 
-Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names, descriptions or use, because they aren't yours to fix.
+Agents and tools from Microsoft or a third-party publisher, and blueprints from other publishers, aren't checked for names, descriptions or Agent ID, because they aren't yours to fix. Third-party packages are still checked for access, MCP servers, skills and use. Packages people can't reach (blocked, or available to no one) aren't checked for use or skills.
 
 ## CISA and CIS guidance
 

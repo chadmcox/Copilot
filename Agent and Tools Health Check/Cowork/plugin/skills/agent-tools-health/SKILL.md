@@ -132,8 +132,10 @@ sponsor or owner names in the results unless the user asks; "a sponsor is disabl
 Use **references/rules.md**. Each finding has an Area, Item, Category, Severity (High, Medium, Low,
 Info), Check (what's wrong), Fix and Reference. Take the Reference from **references/guidance.md**:
 the CIS Controls v8.1 safeguards and the CISA risk category for that check, written like
-"CIS 5.1, 5.5 | CISA: accountability". Skip the name, description and use checks for
-Microsoft-published packages and for blueprints from other publishers.
+"CIS 5.1, 5.5 | CISA: accountability". Skip the name, description and Agent ID checks for
+Microsoft and third-party packages (`type` microsoft, firstParty, thirdParty or external) and for
+blueprints from other publishers, and the use and skill checks for packages people can't reach
+(blocked, or available to no one).
 
 ## Step 4: Score and funnel
 
