@@ -106,13 +106,15 @@ isn't in its `disabledPlans`, and its `licenseAssignmentStates` entry isn't `Err
 
 1. **Copilot license assigned**: the Copilot-licensed people.
 2. **Copilot turned on**: of those, a working license and an enabled account.
-3. **Active in Copilot**: of those, active in the usage report (if names are hidden, use the
-   report's count of active people instead and say so).
+3. **Active in Copilot**: of those, active in the usage report. If names are hidden, leave this
+   step out of the funnel (it can't be matched to people, so the later steps can't filter on it),
+   give the report's count of active people on its own line, and say so.
 4. **Covered by a Cowork policy**: of those, in the groups of an enabled policy in Policies.csv
    whose Services include `cowork` (an all-users policy covers everyone).
 5. **Billing set**: of those, the policy's Billing isn't `notSpecified`.
 
-Ready % = step 5 ÷ step 3. Add these findings (only these, so nothing is reported twice):
+Ready % = step 5 ÷ step 3 (÷ step 2 when names are hidden; then say "of Copilot users", not "of
+active Copilot users"). Add these findings (only these, so nothing is reported twice):
 - Medium, policy "(Copilot licenses)": licensed and not in a Cowork policy, but Copilot is turned
   off in the license or the assignment has an error.
 - Info, policy "(no Cowork policy)": active Copilot users with a working license and no Cowork policy
@@ -137,7 +139,7 @@ don't improvise. Don't make a spreadsheet unless the user asks for one.
    run's data. Don't change anything else in the file. Fill it like this:
    - `title`: "Copilot Billing Health"; `generated`: the date and time; `source`: "Copilot Cowork";
      `subjectLabel`: "Policy"; `sample`: false.
-   - `funnelTitle`: "Cowork readiness: {ready %}% of active Copilot users are ready", and `funnel`:
+   - `funnelTitle`: "Cowork readiness: {ready %}% of active Copilot users are ready" ("of Copilot users" when names are hidden), and `funnel`:
      the five steps from Step 3b, each `{ "label", "count", "note" }`.
    - `scorecard`: one entry per policy: `name`, `score`, `rating`, `high`, `medium`, `low`, `info`,
      and `detail` (for example "Group: Copilot + Cowork Spend Limit · 12 members").

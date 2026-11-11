@@ -512,7 +512,11 @@ $people = @($people | Select-Object *, @{ n = "CanUseCowork"; e = { if (-not $Sk
 function Measure-People([scriptblock]$Filter) { @($people | Where-Object $Filter).Count }
 $activeCount = if ($concealed) { @($activity | Where-Object LastActivity).Count } else { Measure-People { (& $working) -and $_.Active -eq "Yes" } }
 $readyCount  = Measure-People $readyFilter
-$readyPercent = if ($activeCount) { [int][math]::Min(100, [math]::Round(100 * $readyCount / $activeCount)) } else { 0 }
+# With names hidden, activity can't be matched to people, so the later steps can't filter on it.
+# Measure readiness against everyone with Copilot turned on instead, and say so.
+$baseCount   = if ($concealed) { Measure-People $working } else { $activeCount }
+$baseLabel   = if ($concealed) { "Copilot users" } else { "active Copilot users" }
+$readyPercent = if ($baseCount) { [int][math]::Min(100, [math]::Round(100 * $readyCount / $baseCount)) } else { 0 }
 
 function New-FunnelStep([string]$Label, [int]$Count, [string]$Note) {
     $Label | Select-Object @{ n = "label"; e = { $Label } }, @{ n = "count"; e = { $Count } }, @{ n = "note"; e = { $Note } }
@@ -521,7 +525,7 @@ function New-FunnelStep([string]$Label, [int]$Count, [string]$Note) {
 $funnel = @(
     New-FunnelStep "Copilot license assigned" $licensed.Count "License includes the Copilot service plan"
     New-FunnelStep "Copilot turned on" (Measure-People $working) "Plan enabled, no license error, account enabled"
-    New-FunnelStep "Active in Copilot" $activeCount $(if ($concealed) { "Count only: the usage report hides names" } else { "Any Copilot activity in $Period" })
+    if (-not $concealed) { New-FunnelStep "Active in Copilot" $activeCount "Any Copilot activity in $Period" }
     New-FunnelStep "Covered by a Cowork policy" (Measure-People { (& $working) -and (& $isActive) -and $_.CoworkPolicy }) "Enabled spending policy that selects Cowork"
     New-FunnelStep "Billing set" $readyCount "That policy has a billing method"
     if (-not $SkipBalances) { New-FunnelStep "Can use Cowork now" (Measure-People { (& $readyFilter) -and $_.CanUseCowork -eq "Yes" }) "Microsoft's answer per person" }
@@ -586,7 +590,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
         source       = "PowerShell: Get-CopilotBillingHealth.ps1"
         subjectLabel = "Policy"
         sample       = $false
-        funnelTitle  = "Cowork readiness: $readyPercent% of active Copilot users are ready"
+        funnelTitle  = "Cowork readiness: $readyPercent% of $baseLabel are ready"
         funnel       = $funnel
         scorecard    = @($scorecard | Select-Object @{ n = "name"; e = { $_.Policy } },
                           @{ n = "score"; e = { $_.Score } }, @{ n = "rating"; e = { $_.Rating } },
@@ -615,7 +619,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
         notes        = @(
                           "Scores start at 100: High -25, Medium -10, Low -3. Readiness findings outside a policy don't change any score."
                           "Ready for Cowork means: working Copilot license, active in $Period, in an enabled Cowork spending policy that has a billing method."
-                          if ($concealed) { "The Copilot usage report hides names, so 'Active in Copilot' is a count only." }
+                          if ($concealed) { "The Copilot usage report hides names, so activity can't be matched to people. 'Active in Copilot' is left out of the funnel, and readiness is measured against everyone with Copilot turned on. $activeCount people had Copilot activity in $Period (count only). To match people, turn off 'Display concealed user, group, and site names in all reports' in Microsoft 365 admin center > Settings > Org settings > Reports." }
                           if (-not $coworkPolicies) { "No enabled spending policy selects Cowork, so nobody can use Cowork yet." }
                           (Get-GraphOptional "$cm/getTenantCreditBalance").billingMethodBalances | Where-Object { $_ } | ForEach-Object { "Tenant credits ($($_.billingMethod)): $($_.remainingQuantity) left of $($_.purchasedQuantity)." })
         prompt       = $coworkPrompt
@@ -631,5 +635,6 @@ if ($template) { New-HtmlReport $template (Join-Path ((Resolve-Path $OutputFolde
 
 $scorecard | Format-Table -AutoSize
 $funnel | Format-Table @{ n = "Cowork readiness"; e = { $_.label } }, @{ n = "People"; e = { $_.count } } -AutoSize
-Write-Host "$readyPercent% of active Copilot users are ready for Cowork."
+if ($concealed) { Write-Host "$activeCount people had Copilot activity in $Period (count only: the usage report hides names)." }
+Write-Host "$readyCount of $baseCount $baseLabel ($readyPercent%) are ready for Cowork."
 Write-Host "Saved Findings.csv, Scorecard.csv, Readiness.csv, Policies.csv and Report.html to $OutputFolder. Keep these files private."
