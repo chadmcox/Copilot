@@ -92,6 +92,8 @@ Agents and tools published by Microsoft (`type` microsoft or firstParty) or by a
 
 Microsoft Defender's `AgentsInfo` inventory covers Copilot Studio, Foundry, third-party and local (endpoint) agents. An agent is **in the registry** when its `AgentId`, `SourceAgentId` or `EntraAgentId` matches a Packages.csv `id`, `appId`, `manifestId`, `assetId` or `agentIdentityId`. Skip the registry checks if Packages.csv isn't attached. Ignore agents whose `LifecycleStatus` is `Uninstalled`. Item name: "AgentName (Platform)".
 
+Not every tenant's `AgentsInfo` has every documented column yet. A field that's blank for **every** agent in DefenderAgents.csv is a column the tenant doesn't have (a real owner count is 0, not blank), so skip the checks that need it: no `OwnerCount` → skip the owner checks, no `EntraAgentId` → skip the Agent ID check, no `AgentName` → skip the name check. If **no** Defender agent matches any Packages.csv row by ID, the IDs aren't comparable in that tenant: skip the "not in the registry" checks and say so, rather than flagging every agent.
+
 | Check | Severity | Category | Fix | Maester |
 | --- | --- | --- | --- | --- |
 | Cloud agent (Platform isn't `LocalAgents`) not in the registry | Medium | Inventory | Add it to the registry (registry sync) with an owner, or remove it | — |
