@@ -355,6 +355,9 @@ function Test-Package($P, $ActivityByKey) {
     $name = $P.displayName
     # The catalog has returned Microsoft packages as "microsoft" and as "firstParty"; treat both as Microsoft.
     $custom = $P.type -notin "microsoft", "firstParty"
+    # Built in this tenant: not Microsoft's, and not a third-party publisher's. Only these can be renamed,
+    # redescribed or moved to Agent ID by you; a vendor's name and description are the vendor's.
+    $own = $custom -and $P.type -notin "thirdParty", "external"
     # Users can't reach a blocked package, or one available to no one, so access and MCP checks skip it.
     # isBlocked is a Boolean in the script and the text "True" in Packages.csv. Empty counts as reachable.
     $reachable = "$($P.isBlocked)" -ne "True" -and "$($P.availableTo)" -notmatch "^(none|allowedForNone)$"
@@ -381,7 +384,7 @@ function Test-Package($P, $ActivityByKey) {
             New-Finding $area $name "Medium" "Skill(s) exposed to Copilot in a package available to everyone: $($P.skillsExposed -replace ';', ', ')" "Limit the package to a group, or turn off expose to Copilot until the skill is reviewed"
         }
     }
-    if ($custom -and $P.skillsWeakDescription) {
+    if ($reachable -and $custom -and $P.skillsWeakDescription) {
         New-Finding $area $name "Medium" "Skill(s) with a missing or too-short description: $($P.skillsWeakDescription -replace ';', ', ')" "Describe when Copilot should use the skill and what it does (at least $MinSkillDescriptionLength characters)"
     }
     if ($P.directUsers -gt 0) { New-Finding $area $name "Medium" "Assigned to $($P.directUsers) $(if ($P.directUsers -eq 1) { 'person' } else { 'people' }) directly, not through a group" "Assign it to a group instead" }
@@ -391,11 +394,11 @@ function Test-Package($P, $ActivityByKey) {
         elseif ($g.ownerCount -lt 2) { New-Finding $area $name "Medium" "Group '$($g.displayName)' has $($g.ownerCount) owner(s)" "Add owners so there are at least two" }
         elseif (-not $g.description) { New-Finding $area $name "Low" "Group '$($g.displayName)' has no description" "Describe the group and name the agent or tool it's for" }
     }
-    if ($custom -and $P.kind -eq "Agent" -and $P.elementTypes -match 'customEngine|bot' -and -not $P.agentIdentityId) {
+    if ($own -and $P.kind -eq "Agent" -and $P.elementTypes -match 'customEngine|bot' -and -not $P.agentIdentityId) {
         New-Finding $area $name "Low" "No Entra agent identity (Agent ID)" "If it's a custom agent you own, move it to Agent ID so it gets a sponsor, Conditional Access and lifecycle controls"
     }
-    if ($custom -and (Test-UnclearName $name)) { New-Finding $area $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
-    if ($custom -and (Test-PoorDescription $P.shortDescription $name)) { New-Finding $area $name "Medium" "Missing or too-short description" "Describe what it does, for whom, and what data it uses" }
+    if ($own -and (Test-UnclearName $name)) { New-Finding $area $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
+    if ($own -and (Test-PoorDescription $P.shortDescription $name)) { New-Finding $area $name "Medium" "Missing or too-short description" "Describe what it does, for whom, and what data it uses" }
     if (-not $P.isBlocked -and $P.requestStatus -eq "pending" -and $P.lastModifiedDateTime -and $P.lastModifiedDateTime -lt $now.AddDays(-$PendingRequestDays)) {
         New-Finding $area $name "Low" "Request ($($P.requestType)) pending for more than $PendingRequestDays days" "Approve or reject it"
     }
@@ -404,7 +407,8 @@ function Test-Package($P, $ActivityByKey) {
     }
     $defenderLast = @($P.id, $P.appId, $P.manifestId, $P.assetId, $P.agentIdentityId) | Where-Object { $_ -and $ActivityByKey["$_"] } | ForEach-Object { $ActivityByKey["$_"] } | Sort-Object -Descending | Select-Object -First 1
     $lastUsed = @($P.lastUsedDateTime, $defenderLast) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1
-    if ($custom -and -not $P.isBlocked -and -not ($P.activeUsers30d -gt 0) -and (-not $lastUsed -or $lastUsed -lt $cutoff) -and $P.lastModifiedDateTime -lt $cutoff) {
+    # Only packages people can reach: one that's blocked or available to no one has nothing to block.
+    if ($custom -and $reachable -and -not ($P.activeUsers30d -gt 0) -and (-not $lastUsed -or $lastUsed -lt $cutoff) -and $P.lastModifiedDateTime -lt $cutoff) {
         New-Finding $area $name "Medium" "Not used in $StaleDays days" "Block it, or run Agent and Tools Cleanup"
     }
 }
@@ -767,7 +771,7 @@ if (-not $SkipDefender) {
         $haveDefender = $true
         $defenderAgents | Export-Csv (Join-Path $OutputFolder "DefenderAgents.csv") -NoTypeInformation -Encoding UTF8
     }
-    catch { Write-Warning "Couldn't run the Defender hunting query. It needs ThreatHunting.Read.All and the Security Reader role. Run with -SkipDefender to skip it. $($_.Exception.Message)" }
+    catch { Write-Warning "Couldn't run the Defender hunting query. It needs ThreatHunting.Read.All and the Security Reader role. Run with -SkipDefender to skip it. $($_.Exception.Message) $($_.ErrorDetails.Message)" }
 }
 $connectors = @()
 $haveConnectors = $false
@@ -954,7 +958,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
         notes        = @(
                           "References in brackets: this repo's mapping of each check to CIS Controls v8.1 safeguards (AI Agent and MCP Companion Guides, April 2026) and to the CISA risk categories in 'Careful Adoption of Agentic AI Services' (CISA, NSA and partners, 2026). The mapping is a judgment, not published by CIS or CISA. CIS 5.3 says to disable dormant accounts after 45 days; run with -StaleDays 45 to match it."
                           "Scores: each item starts at 100 (High -25, Medium -10, Low -3); an area's score is the average of its items."
-                          "Microsoft-published agents and tools, and blueprints from other publishers, aren't checked for names or descriptions."
+                          "Agents and tools from Microsoft or a third-party publisher, and blueprints from other publishers, aren't checked for names, descriptions or Agent ID. Usage and skill checks only cover packages people can reach."
                           if ($SkipPackages -or -not $packages) { "Agents and tools weren't checked: the Agent 365 catalog wasn't read." }
                           if (-not $haveDefender) { "Discovered agents weren't checked: the Defender hunting query didn't run (needs ThreatHunting.Read.All and Security Reader)." }
                           if ($SkipCopilotUsage -or -not $copilotUsage) { "Copilot agent adoption wasn't checked: the Copilot usage report wasn't read, or didn't have an agent activity column." }

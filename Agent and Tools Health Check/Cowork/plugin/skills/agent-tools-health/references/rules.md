@@ -16,7 +16,7 @@ Each finding has an **Area** (Agents, Tools, Agent identities, Blueprints, Tenan
 
 **Only what users can reach.** Skip the access and MCP checks for a package that's blocked (`isBlocked` true) or available to no one (`availableTo` is `allowedForNone` or `none`). Empty values count as reachable.
 
-Microsoft-published agents and tools, and blueprints from other publishers (a blueprint principal with no blueprint registered in this tenant), aren't checked for names, descriptions or use. Packages of kind **App** (Office add-ins, tabs) aren't checked.
+Agents and tools published by Microsoft (`type` microsoft or firstParty) or by a third party (`type` thirdParty or external), and blueprints from other publishers (a blueprint principal with no blueprint registered in this tenant), aren't checked for names, descriptions or Agent ID: the publisher owns those, so you can't fix them. Third-party packages are still checked for access, MCP servers, skills and use. Microsoft packages aren't checked for use. Packages of kind **App** (Office add-ins, tabs) aren't checked.
 
 ## Agents and tools (from Packages.csv)
 
@@ -31,7 +31,7 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 | Reachable, an `mcpAuth` type is `ApiKeyPluginVault`, `AzureKeyVault` or `ConnectionVault` (a static secret). `OAuthPluginVault` and `DynamicClientRegistration` pass | Medium | Tools | Move it to OAuth so access follows the user, and rotate the secret until then | MP.AIGOV.1016 |
 | Reachable, available or installed for all users, and `mcpRiskyTools` isn't empty | High | Tools | Limit the package to a group that needs these tools, or remove the tools | MP.AIGOV.1011 |
 | Reachable, custom or external, available or installed for all users, and `skillsExposed` isn't empty (agent skills with `expose_skill_to_copilot` on) | Medium | Access | Limit the package to a group, or turn off expose to Copilot until the skill is reviewed | MP.AIGOV.1012 |
-| Custom or external, `skillsWeakDescription` isn't empty (an agent skill's `SKILL.md` description is empty or under 40 characters; Copilot reads it to decide when to use the skill) | Medium | Naming | Describe when Copilot should use the skill and what it does | MP.AIGOV.1012 |
+| Reachable, custom or external, `skillsWeakDescription` isn't empty (an agent skill's `SKILL.md` description is empty or under 40 characters; Copilot reads it to decide when to use the skill) | Medium | Naming | Describe when Copilot should use the skill and what it does | MP.AIGOV.1012 |
 | `directUsers` more than 0 | Medium | Access | Assign it to a group instead | MP.AIGOV.1003 |
 | An assigned group no longer exists | Medium | Access | Assign it to the right group | MP.AIGOV.1021 |
 | An assigned group has fewer than two owners | Medium | Ownership | Add owners so there are at least two | MP.AIGOV.1021 |
@@ -39,8 +39,8 @@ Microsoft-published agents and tools, and blueprints from other publishers (a bl
 | Unclear name | Medium | Naming | Rename it so people can tell what it does and who owns it | MP.AIGOV.1006 |
 | Poor description (`shortDescription`) | Medium | Naming | Describe what it does, for whom, and what data it uses | MP.AIGOV.1006 |
 | `requestStatus` is pending, `isBlocked` is false, and `lastModifiedDateTime` is more than 14 days ago | Low | Usage | Approve or reject it | — |
-| Custom agent whose `elementTypes` include customEngine or bot, with no `agentIdentityId` | Low | Identity | If it's a custom agent you own, move it to Agent ID so it gets a sponsor, Conditional Access and lifecycle controls | — |
-| Not blocked, no `activeUsers30d`, `lastUsedDateTime` empty or older than 90 days, and `lastModifiedDateTime` older than 90 days | Medium | Usage | Block it, or run Agent and Tools Cleanup | MP.AIGOV.1020 |
+| Built in this tenant (not Microsoft or third-party), an agent whose `elementTypes` include customEngine or bot, with no `agentIdentityId` | Low | Identity | If it's a custom agent you own, move it to Agent ID so it gets a sponsor, Conditional Access and lifecycle controls | — |
+| Reachable, custom or external, no `activeUsers30d`, `lastUsedDateTime` empty or older than 90 days, and `lastModifiedDateTime` older than 90 days | Medium | Usage | Block it, or run Agent and Tools Cleanup | MP.AIGOV.1020 |
 | `isBlocked` is true and `requestStatus` is still pending | Low | Access | Tell the requester why it's blocked, or unblock it if that's no longer accurate | MP.AIGOV.1002 |
 
 ## Agent identities
