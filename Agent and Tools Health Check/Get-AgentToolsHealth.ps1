@@ -330,7 +330,14 @@ function Get-PackageRow {
     process {
         $p = $_
         $d = try { Invoke-MgGraphRequest -Method GET -Uri "$graph/copilot/admin/catalog/packages/$([uri]::EscapeDataString($p.id))" -OutputType PSObject }
-             catch { Write-Warning "Couldn't read details for '$($p.displayName)', so it's checked from the catalog list only. $($_.Exception.Message) $($_.ErrorDetails.Message)" }
+             catch {
+                 # The status code and Graph's own message, not the full HTTP dump.
+                 $status = if ("$($_.Exception.Message)" -match '\d{3} \([^)]*\)') { "HTTP $($Matches[0])." } else { "" }
+                 $detail = "$($_.ErrorDetails.Message)" -replace '\s+', ' '
+                 $detail = if ($detail -match '"message"\s*:\s*"(.*?)","innerError') { $Matches[1] -replace '\\"', '"' }
+                           elseif ($detail.Length -gt 300) { $detail.Substring(0, 300) } else { $detail }
+                 Write-Warning "Couldn't read details for '$($p.displayName)', so it's checked from the catalog list only. $status $detail"
+             }
         if (-not $d) { $d = $p }
         $mcp = @(Get-McpServer $d)
         $skills = @(Get-AgentSkill $d)
@@ -569,27 +576,41 @@ function Test-CopilotAgentUsage($Usage, [int]$AgentCount) {
 # Discovered agents (Microsoft Defender AgentsInfo)
 # ---------------------------------------------------------------------------
 
+# The AgentsInfo columns this tenant has. Tenants get the documented columns at different times (one had
+# no AgentName), so the query only reads columns that exist and the checks skip the rest.
+function Get-DefenderColumn {
+    try { @(Invoke-HuntingQuery "AgentsInfo | getschema | project ColumnName" | ForEach-Object ColumnName) }
+    catch { Write-Warning "Couldn't read the AgentsInfo columns; assuming the documented ones. $($_.Exception.Message)" }
+}
+
 # Latest record of every agent Defender knows about. One row per agent. This is DefenderAgents.csv.
-# Every column except Timestamp and AgentId goes through column_ifexists: tenants get the documented
-# AgentsInfo columns at different times (one returned "Failed to resolve scalar expression named
-# 'AgentName'"), and a missing column should leave a field blank, not fail the whole query.
-function Get-DefenderAgent {
-    $kql = @'
-AgentsInfo
-| summarize arg_max(Timestamp, *) by AgentId
-| extend LifecycleStatus = tostring(column_ifexists("LifecycleStatus", ""))
-| where LifecycleStatus != "Deleted"
-| extend AgentName = tostring(column_ifexists("AgentName", "")), OldName = tostring(column_ifexists("Name", ""))
-| project AgentId, AgentName = iff(isnotempty(AgentName), AgentName, OldName),
-    Platform = tostring(column_ifexists("Platform", "")), SourceAgentId = tostring(column_ifexists("SourceAgentId", "")),
-    EntraAgentId = tostring(column_ifexists("EntraAgentId", "")), EntraBlueprintId = tostring(column_ifexists("EntraBlueprintId", "")),
-    Availability = tostring(column_ifexists("Availability", "")), PublishedStatus = tostring(column_ifexists("PublishedStatus", "")),
-    LifecycleStatus, CreatedDateTime = column_ifexists("CreatedDateTime", datetime(null)),
-    LastUpdatedDateTime = column_ifexists("LastUpdatedDateTime", datetime(null)),
-    OwnerCount = array_length(column_ifexists("Owners", dynamic([]))),
-    McpServerUrls = strcat_array(extract_all(@'(https?://[^\s"\],}]+)', tostring(column_ifexists("McpServers", dynamic([])))), ";"),
-    SkillCount = array_length(column_ifexists("Skills", dynamic([]))), ToolCount = array_length(column_ifexists("DeclaredTools", dynamic([])))
-'@
+# A column the tenant doesn't have is left out of the query, so it comes back blank for every agent.
+function Get-DefenderAgent($Columns) {
+    if (-not $Columns) { $Columns = @("AgentName", "Platform", "SourceAgentId", "EntraAgentId", "EntraBlueprintId", "Availability", "PublishedStatus", "LifecycleStatus", "CreatedDateTime", "LastUpdatedDateTime", "Owners", "McpServers", "Skills", "DeclaredTools") }
+    # Output field = source column and KQL expression.
+    $fields = [ordered]@{
+        Platform            = "Platform", "tostring(Platform)"
+        SourceAgentId       = "SourceAgentId", "tostring(SourceAgentId)"
+        EntraAgentId        = "EntraAgentId", "tostring(EntraAgentId)"
+        EntraBlueprintId    = "EntraBlueprintId", "tostring(EntraBlueprintId)"
+        Availability        = "Availability", "tostring(Availability)"
+        PublishedStatus     = "PublishedStatus", "tostring(PublishedStatus)"
+        LifecycleStatus     = "LifecycleStatus", "tostring(LifecycleStatus)"
+        CreatedDateTime     = "CreatedDateTime", "CreatedDateTime"
+        LastUpdatedDateTime = "LastUpdatedDateTime", "LastUpdatedDateTime"
+        OwnerCount          = "Owners", "array_length(Owners)"
+        McpServerUrls       = "McpServers", 'strcat_array(extract_all(@''(https?://[^\s"\],}]+)'', tostring(McpServers)), ";")'
+        SkillCount          = "Skills", "array_length(Skills)"
+        ToolCount           = "DeclaredTools", "array_length(DeclaredTools)"
+    }
+    $nameColumn = if ("AgentName" -in $Columns) { "AgentName" } elseif ("Name" -in $Columns) { "Name" } else { "AgentId" }
+    $project = @("AgentId", "AgentName = tostring($nameColumn)") + @($fields.Keys | Where-Object { $fields[$_][0] -in $Columns } | ForEach-Object { "$_ = $($fields[$_][1])" })
+    $kql = @(
+        "AgentsInfo"
+        "| summarize arg_max(Timestamp, *) by AgentId"
+        if ("LifecycleStatus" -in $Columns) { '| where LifecycleStatus != "Deleted"' }
+        "| project $($project -join ', ')"
+    ) -join "`n"
     $activity = Get-DefenderActivity
     Invoke-HuntingQuery $kql | ForEach-Object {
         # CloudAppEvents names agents by their Entra appId. For Agent ID agents that equals EntraAgentId.
@@ -662,23 +683,43 @@ function Get-RegistryKey($Packages) {
     $keys
 }
 
-function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry) {
+# A field that's blank for every agent is a column this tenant's AgentsInfo doesn't have (a real
+# owner count is 0, not blank). Checks that need it are skipped rather than read blank as "none".
+function Test-DefenderField($Agents, [string]$Field) {
+    [bool](@($Agents) | Where-Object { "$($_.$Field)" -ne "" } | Select-Object -First 1)
+}
+
+function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry, $Columns) {
+    $has = @{}
+    "AgentName", "OwnerCount", "EntraAgentId", "SourceAgentId", "Availability" | ForEach-Object { $has[$_] = Test-DefenderField $Agents $_ }
+    if ($Columns) {
+        $has["EntraAgentId"] = "EntraAgentId" -in $Columns
+        $has["OwnerCount"]   = "Owners" -in $Columns
+        $has["AgentName"]    = ("AgentName" -in $Columns) -or ("Name" -in $Columns)
+    }
     $cloud = @($Agents | Where-Object { $_.Platform -ne "LocalAgents" -and $_.LifecycleStatus -ne "Uninstalled" })
+    # If no Defender agent matches any registry package, the IDs aren't comparable in this tenant (for
+    # example SourceAgentId and EntraAgentId missing), not every agent unregistered. Skip the registry checks.
+    $matchRegistry = $HaveRegistry
+    if ($HaveRegistry -and $cloud -and -not ($cloud | Where-Object { @($_.AgentId, $_.SourceAgentId, $_.EntraAgentId) | Where-Object { $_ -and $RegistryKeys["$_"] } } | Select-Object -First 1)) {
+        Write-Warning "None of Defender's $($cloud.Count) agents match an Agent 365 package by ID, so the 'not in the registry' checks are skipped."
+        $matchRegistry = $false
+    }
     $cloud | ForEach-Object {
         $name = if ($_.AgentName) { "$($_.AgentName) ($($_.Platform))" } else { "$($_.AgentId) ($($_.Platform))" }
         $inRegistry = [bool](@($_.AgentId, $_.SourceAgentId, $_.EntraAgentId) | Where-Object { $_ -and $RegistryKeys["$_"] })
-        if ($HaveRegistry -and -not $inRegistry) {
+        if ($matchRegistry -and -not $inRegistry) {
             New-Finding "Discovered agents" $name "Medium" "Found by Defender, but not in the Agent 365 registry" "Add it to the registry (registry sync) with an owner, or remove it"
             if ("$($_.Availability)" -match "all") { New-Finding "Discovered agents" $name "High" "Not in the registry, and available to all users" "Limit it to a group, then register it" }
-            if (-not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "Not in the registry, and no owner" "Find who built it and make them the owner, or remove it" }
+            if ($has["OwnerCount"] -and -not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "Not in the registry, and no owner" "Find who built it and make them the owner, or remove it" }
         }
         if (-not $HaveRegistry) {
             # No Agent 365 catalog: use Defender's inventory as the agent list.
             if ("$($_.Availability)" -match "all") { New-Finding "Discovered agents" $name "High" "Available to all users" "Make it available to specific groups" }
-            if (-not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "No owner" "Find who built it and make them the owner, or remove it" }
-            if (Test-UnclearName $_.AgentName) { New-Finding "Discovered agents" $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
+            if ($has["OwnerCount"] -and -not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "No owner" "Find who built it and make them the owner, or remove it" }
+            if ($has["AgentName"] -and (Test-UnclearName $_.AgentName)) { New-Finding "Discovered agents" $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
         }
-        if (-not $_.EntraAgentId) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls" }
+        if ($has["EntraAgentId"] -and -not $_.EntraAgentId) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls" }
         $known = @($_.AgentId, $_.SourceAgentId, $_.EntraAgentId) | Where-Object { $_ -and $RegistryKeys["$_"] } | ForEach-Object { $RegistryKeys["$_"] }
         Test-AgentTools "Discovered agents" $name $_.McpServerUrls (@($known) -join ";")
     }
@@ -778,11 +819,13 @@ if (-not $SkipPackages) {
     $packages | Export-Csv (Join-Path $OutputFolder "Packages.csv") -NoTypeInformation -Encoding UTF8
 }
 $defenderAgents = @()
+$defenderColumns = @()
 $haveDefender = $false
 if (-not $SkipDefender) {
     Write-Host "Reading Microsoft Defender's agent inventory (AgentsInfo)..."
     try {
-        $defenderAgents = @(Get-DefenderAgent)
+        $defenderColumns = @(Get-DefenderColumn)
+        $defenderAgents = @(Get-DefenderAgent $defenderColumns)
         $haveDefender = $true
         $defenderAgents | Export-Csv (Join-Path $OutputFolder "DefenderAgents.csv") -NoTypeInformation -Encoding UTF8
     }
@@ -850,7 +893,7 @@ $findings = @(
     $blueprints | ForEach-Object { Test-Blueprint $_ $principals[$_.appId] @($children[$_.appId]) $signIns $roleNames }
     Test-Tenant
     if ($copilotUsage) { Test-CopilotAgentUsage $copilotUsage @($packages | Where-Object kind -eq "Agent").Count }
-    if ($haveDefender) { Test-DefenderAgent $defenderAgents (Get-RegistryKey $packages) ([bool]$packages) }
+    if ($haveDefender) { Test-DefenderAgent $defenderAgents (Get-RegistryKey $packages) ([bool]$packages) $defenderColumns }
     $classicAgents | ForEach-Object { Test-ClassicAgent $_ $signIns }
     $tenantId = (Get-MgContext).TenantId
     $connectors | ForEach-Object { Test-Connector $_ $tenantId }
