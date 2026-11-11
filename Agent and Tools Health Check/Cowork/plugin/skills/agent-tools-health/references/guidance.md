@@ -38,13 +38,15 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | Group with fewer than two owners | 5.1, 6.1 | Accountability |
 | Group with no description | 6.1 | Accountability |
 | No sponsor; sponsor or owner disabled or gone; one sponsor and no owner; no owner | 5.1, 5.5 | Accountability |
-| High-privilege or tenant-wide write Graph permissions | 3.3, 5.4 | Privilege |
+| High-privilege or tenant-wide write Graph permissions; delegated permissions people consented to themselves | 3.3, 5.4 | Privilege |
+| Agent at risk in Identity Protection | 6.7, 13.1 | Behavioral |
+| Agent skill exposed to Copilot in a package available to everyone | 6.1, 6.8 | Privilege |
 | Inheritable permissions set to All allowed | 3.3, 6.8 | Privilege, structural (one blueprint passes access to every agent built on it) |
 | Client secret, expired or expiring credential | 4.1 | Design and configuration |
 | Agent user account | 5.5 | Privilege |
 | No Conditional Access policy for agents, or only report-only | 4.1, 6.7 | Design and configuration |
 | No policy blocking high-risk agents | 6.7 | Behavioral |
-| Unclear name, missing description | 2.1, 5.5 | Accountability |
+| Unclear name, missing description (including an agent skill's description) | 2.1, 5.5 | Accountability |
 | Not used or no sign-in for the stale period; blueprint with nothing active | 5.3, 6.2 | Accountability |
 | Agents exist, but almost no licensed Microsoft 365 Copilot user used one in 90 days (Copilot usage report) | 5.3, 6.2 | Accountability |
 | Pending request older than 14 days; blocked but still has a pending request | 6.1 | None |

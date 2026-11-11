@@ -1,0 +1,47 @@
+name: Maester pack coverage
+
+# Fails when a test in chadmcox/maester-ai-governance-pack isn't mapped to a rule in the
+# Agent and Tools or Billing health check rules.md. Runs weekly too, because new pack tests
+# don't trigger a run here.
+on:
+  pull_request:
+    paths:
+      - "Agent and Tools Health Check/**"
+      - "Billing Health Check/**"
+      - ".github/scripts/Test-MaesterCoverage.ps1"
+      - ".github/maester-not-covered.txt"
+      - ".github/workflows/maester-coverage.yml"
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 14 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: chadmcox/maester-ai-governance-pack
+          path: .maester-pack
+
+      - name: Check the health check scripts parse
+        shell: pwsh
+        run: |
+          $bad = 0
+          Get-ChildItem "Agent and Tools Health Check", "Billing Health Check" -Recurse -Filter *.ps1 | ForEach-Object {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$errors) | Out-Null
+            $errors | ForEach-Object { $bad = 1; Write-Host "::error file=$($_.Extent.File),line=$($_.Extent.StartLineNumber)::$($_.Message)" }
+          }
+          exit $bad
+
+      - name: Check every pack test is in a health check
+        shell: pwsh
+        run: ./.github/scripts/Test-MaesterCoverage.ps1 -PackPath .maester-pack -RepoPath .
