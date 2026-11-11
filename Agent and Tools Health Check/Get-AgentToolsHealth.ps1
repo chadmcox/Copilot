@@ -926,7 +926,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           @{ n = "fix"; e = { if ($_.Reference) { "$($_.Fix) [$($_.Reference)]" } else { $_.Fix } } })
         fixFirst     = @($findings | Where-Object Severity -in "High", "Medium" | Group-Object Fix |
                           Sort-Object @{ e = { @("High", "Medium").IndexOf($_.Group[0].Severity) } }, @{ e = { $_.Count }; Descending = $true } |
-                          Select-Object -First 3 | ForEach-Object { "$($_.Name): $($_.Count) $(if ($_.Count -eq 1) { 'item' } else { 'items' }) ($(($_.Group | ForEach-Object Item | Select-Object -Unique -First 3) -join ', ')$(if ($_.Count -gt 3) { ', …' }))." })
+                          Select-Object -First 3 | ForEach-Object { "$($_.Name): $($_.Count) $(if ($_.Count -eq 1) { 'item' } else { 'items' }) ($(($_.Group | ForEach-Object Item | Select-Object -Unique -First 3) -join ', ')$(if ($_.Count -gt 3) { ', ...' }))." })
         manualChecks = @(
                           "Entra > Entra ID > Users > User settings: Users can register agent identity blueprints (docs: Users can create agent blueprints) is No."
                           "Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID (Preview): the default inactivity policy is on."
