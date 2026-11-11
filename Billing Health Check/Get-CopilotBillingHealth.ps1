@@ -258,7 +258,8 @@ function Test-Unlimited($Quantity) { "$($Quantity.'@odata.type')" -like "*unlimi
 
 function Test-Policy($P) {
     if ($P.AllUsers) { New-Finding $P.Name "Policy" "High" $P.Name "Covers all users" "Limit it to a security group" }
-    if ($P.Status -ne "enabled") { New-Finding $P.Name "Policy" "High" $P.Name "Status is $($P.Status)" "Link a group, or recreate the policy" }
+    # A policy that isn't enabled can't spend anything, so report that once instead of every setting on it.
+    if ($P.Status -ne "enabled") { return New-Finding $P.Name "Policy" "High" $P.Name "Status is $($P.Status)" "Turn it on with the right group, or delete it if it's no longer needed" }
     if (-not $P.AllUsers -and $P.GroupIds.Count -eq 0) { New-Finding $P.Name "Policy" "High" $P.Name "No group linked" "Link the policy's group" }
     if ((Test-Unlimited $P.PerUser) -and (Test-Unlimited $P.PeriodLimit)) { New-Finding $P.Name "Policy" "High" $P.Name "No per-user limit and no monthly limit" "Set a monthly limit" }
     if (-not (Test-Unlimited $P.PerUser) -and [double]$P.PerUser.value -lt $MinPerUserLimit) { New-Finding $P.Name "Policy" "Medium" $P.Name "Per-user limit $($P.PerUser.value) is under $MinPerUserLimit" "Raise it to at least $MinPerUserLimit credits" }
@@ -602,7 +603,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           @{ n = "target"; e = { $_.Target } }, @{ n = "check"; e = { $_.Check } }, @{ n = "fix"; e = { $_.Fix } })
         fixFirst     = @($findings | Where-Object Severity -in "High", "Medium" | Group-Object Fix |
                           Sort-Object @{ e = { @("High", "Medium").IndexOf($_.Group[0].Severity) } }, @{ e = { $_.Count }; Descending = $true } |
-                          Select-Object -First 3 | ForEach-Object { "$($_.Name): $($_.Count) $(if ($_.Count -eq 1) { 'item' } else { 'items' }) ($(($_.Group.Target | Select-Object -First 3) -join ', ')$(if ($_.Count -gt 3) { ', …' }))." })
+                          Select-Object -First 3 | ForEach-Object { "$($_.Name): $($_.Count) $(if ($_.Count -eq 1) { 'item' } else { 'items' }) ($(($_.Group.Target | Select-Object -First 3) -join ', ')$(if ($_.Count -gt 3) { ', ...' }))." })
         manualChecks = @(
                           "Allow new Agents and services is off on every policy except the pilot one."
                           "Each Cowork policy has the right model profile."
@@ -621,7 +622,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "Ready for Cowork means: working Copilot license, active in $Period, in an enabled Cowork spending policy that has a billing method."
                           if ($concealed) { "The Copilot usage report hides names, so activity can't be matched to people. 'Active in Copilot' is left out of the funnel, and readiness is measured against everyone with Copilot turned on. $activeCount people had Copilot activity in $Period (count only). To match people, turn off 'Display concealed user, group, and site names in all reports' in Microsoft 365 admin center > Settings > Org settings > Reports." }
                           if (-not $coworkPolicies) { "No enabled spending policy selects Cowork, so nobody can use Cowork yet." }
-                          (Get-GraphOptional "$cm/getTenantCreditBalance").billingMethodBalances | Where-Object { $_ } | ForEach-Object { "Tenant credits ($($_.billingMethod)): $($_.remainingQuantity) left of $($_.purchasedQuantity)." })
+                          (Get-GraphOptional "$cm/getTenantCreditBalance").billingMethodBalances | Where-Object { $_ -and ("$($_.remainingQuantity)" -or "$($_.purchasedQuantity)") } | ForEach-Object { "Tenant credits ($($_.billingMethod)): $($_.remainingQuantity) left of $($_.purchasedQuantity)." })
         prompt       = $coworkPrompt
     }
     # "</" inside the JSON would end the script block early, so escape it.

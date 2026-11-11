@@ -11,7 +11,7 @@ Thresholds: per-user minimum 2,000 credits, inactive after 90 days. The user can
 | Check | Severity | Fix | Maester |
 | --- | --- | --- | --- |
 | Scope is All users | High | Limit it to a security group | MP.AIGOV.1025 |
-| Status isn't `enabled` | High | Link the group, or recreate the policy | MP.AIGOV.1025 |
+| Status isn't `enabled`. Report only this for that policy: it can't spend, so its other settings don't matter | High | Turn it on with the right group, or delete it if it's no longer needed | MP.AIGOV.1025 |
 | Scope is Groups but no group is listed | High | Link the policy's group | MP.AIGOV.1025 |
 | Per-user limit and monthly limit are both Unlimited | High | Set a monthly limit | MP.AIGOV.1013 |
 | Per-user limit under 2,000 | Medium | Raise it to at least 2,000 credits | MP.AIGOV.1025 |

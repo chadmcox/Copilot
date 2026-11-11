@@ -31,7 +31,7 @@ jobs:
           repository: chadmcox/maester-ai-governance-pack
           path: .maester-pack
 
-      - name: Check the health check scripts parse
+      - name: Check the health check scripts parse and are ASCII
         shell: pwsh
         run: |
           $bad = 0
@@ -39,6 +39,9 @@ jobs:
             $errors = $null
             [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$errors) | Out-Null
             $errors | ForEach-Object { $bad = 1; Write-Host "::error file=$($_.Extent.File),line=$($_.Extent.StartLineNumber)::$($_.Message)" }
+            # Windows PowerShell 5.1 reads a UTF-8 file without a BOM as ANSI, so keep scripts ASCII.
+            $file = $_.FullName
+            Select-String -Path $file -Pattern '[^\x00-\x7F]' | ForEach-Object { $bad = 1; Write-Host "::error file=$file,line=$($_.LineNumber)::Non-ASCII character; Windows PowerShell 5.1 will garble it" }
           }
           exit $bad
 
