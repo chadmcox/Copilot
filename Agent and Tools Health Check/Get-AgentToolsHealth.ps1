@@ -39,6 +39,8 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
         (read from each package's AgentConnectors definition): reached without TLS, on a host
         outside this script's Microsoft domains, with no authentication or a static secret, and
         tools that change data or reach outside sources in a package available to everyone.
+        Agent skills (read from each package's AgentSkills definition): a missing or too-short
+        description, and skills exposed to Copilot in a package available to everyone.
         Access and MCP checks only cover packages users can reach: a package that's blocked, or
         available to no one (availableTo allowedForNone), is skipped.
       - Connectors: synced Copilot connectors (external connections) users can search (state
@@ -46,7 +48,9 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
         owned by another organization, can write content users get back from Copilot. Also flags
         a full index and a missing description. Use -SkipConnectors to skip.
       - Agent identities: no sponsor, sponsor or owner disabled or gone, high-privilege
-        permissions, single sponsor, unclear names, stale or never signed in, agent user accounts.
+        permissions, permissions people consented to themselves, single sponsor, unclear names,
+        stale or never signed in, agent user accounts, and agents Identity Protection says are at
+        risk. Use -SkipRiskyAgents to skip the risk check.
       - Blueprints: All allowed inheritable permissions, no sponsor or owner, client secrets,
         expiring secrets, unclear names, no description, nothing active under them.
       - Tenant: Conditional Access for agent identities and for risky agents.
@@ -78,7 +82,9 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
     User.Read.All, Group.Read.All, Policy.Read.All (Conditional Access), ThreatHunting.Read.All
     (Defender advanced hunting; Security Reader role), Reports.Read.All (Microsoft 365 Copilot
     usage report; Reports Reader role), ExternalConnection.Read.All (synced Copilot connectors;
-    AI Administrator). Use -SkipDefender without Defender,
+    AI Administrator), IdentityRiskyAgent.Read.All (Identity Protection for agents; Security
+    Reader). Use -SkipDefender without Defender, -SkipRiskyAgents without Identity Protection
+    for agents,
     -SkipCopilotUsage without Reports Reader or Microsoft 365 Copilot licenses, -SkipConnectors
     without access to Copilot connectors.
 
@@ -86,7 +92,7 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
     .\Get-AgentToolsHealth.ps1
     .\Get-AgentToolsHealth.ps1 -StaleDays 60
     .\Get-AgentToolsHealth.ps1 -PackagesOnly
-    .\Get-AgentToolsHealth.ps1 -SkipPackages -SkipDefender -SkipCopilotUsage -SkipConnectors
+    .\Get-AgentToolsHealth.ps1 -SkipPackages -SkipDefender -SkipCopilotUsage -SkipConnectors -SkipRiskyAgents
 #>
 [CmdletBinding()]
 param(
@@ -98,6 +104,9 @@ param(
     [switch]$SkipDefender,
     [switch]$SkipCopilotUsage,
     [switch]$SkipConnectors,
+    [switch]$SkipRiskyAgents,
+    # A skill's description is what Copilot reads to decide when to use it. Shorter than this is flagged.
+    [int]$MinSkillDescriptionLength = 40,
     [string]$OutputFolder = ".\AgentToolsHealth-$(Get-Date -Format yyyyMMdd-HHmm)",
 
     # Words that make a name unclear. Matched at the start of a word, so "demo" also catches "demoe".
@@ -117,6 +126,7 @@ $scopes = @(
     if (-not $SkipDefender) { "ThreatHunting.Read.All" }
     if (-not $PackagesOnly -and -not $SkipCopilotUsage) { "Reports.Read.All" }
     if (-not $SkipConnectors) { "ExternalConnection.Read.All" }
+    if (-not $PackagesOnly -and -not $SkipRiskyAgents) { "IdentityRiskyAgent.Read.All" }
 )
 # Which Microsoft cloud to sign in to. GCC uses Global, GCC High is USGov, DoD is USGovDoD.
 # Not every Copilot or agent API exists in every national cloud; check Microsoft's docs for yours.
@@ -199,13 +209,13 @@ function Get-Category([string]$Check) {
     switch -Regex ($Check) {
         'can write content'                                { "Security"; break }
         'Index is full'                                    { "Usage"; break }
-        'Conditional Access|high-risk'                     { "Security"; break }
+        'Conditional Access|high-risk|Identity Protection' { "Security"; break }
         'sponsor|owner'                                    { "Ownership"; break }
         'Agent ID|classic service principal'               { "Identity"; break }
         'Defender|registry|Local AI agent'                 { "Inventory"; break }
         'MCP server|MCP tool'                              { "Tools"; break }
         'permission|secret|credential|agent user'          { "Permissions"; break }
-        "^Group '|Available|Installed|Assigned|Blocked"   { "Access"; break }
+        "^Group '|Available|Installed|Assigned|Blocked|exposed to Copilot" { "Access"; break }
         'name|description'                                 { "Naming"; break }
         default                                            { "Usage" }
     }
@@ -226,7 +236,9 @@ function Get-Reference([string]$Check) {
         '\(Agent ID\)|not an Agent ID'                        { "CIS 5.5, 5.6 | CISA: design and configuration, accountability"; break }
         'No sponsor|no longer exists|is disabled|One sponsor|No owner|no owner' { "CIS 5.1, 5.5 | CISA: accountability"; break }
         "^Group '.*owner"                                        { "CIS 5.1, 6.1 | CISA: accountability"; break }
-        'High-privilege|Tenant-wide write'                       { "CIS 3.3, 5.4 | CISA: privilege"; break }
+        'High-privilege|Tenant-wide write|User-consented'        { "CIS 3.3, 5.4 | CISA: privilege"; break }
+        'Identity Protection'                                    { "CIS 6.7, 13.1 | CISA: behavioral"; break }
+        'exposed to Copilot'                                     { "CIS 6.1, 6.8 | CISA: privilege"; break }
         'Inheritable permissions'                                { "CIS 3.3, 6.8 | CISA: privilege, structural"; break }
         'client secret|credential'                               { "CIS 4.1 | CISA: design and configuration"; break }
         'agent user account'                                     { "CIS 5.5 | CISA: privilege"; break }
@@ -285,6 +297,19 @@ function Get-McpServer($Detail) {
         } | Where-Object { $_ -and $_.mcpServerUrl }
 }
 
+# The agent skills a package carries: each AgentSkills element's definition is a JSON string with
+# expose_skill_to_copilot and frontmatter.name / frontmatter.description (the SKILL.md frontmatter).
+function Get-AgentSkill($Detail) {
+    @($Detail.elementDetails) | Where-Object { $_ -and $_.elementType -eq "AgentSkills" } |
+        ForEach-Object { @($_.elements) } | Where-Object { $_ -and $_.definition } | ForEach-Object {
+            try { $_.definition | ConvertFrom-Json -ErrorAction Stop }
+            catch { Write-Warning "Couldn't read an agent skill definition for '$($Detail.displayName)'." }
+        } | Where-Object { $_ } |
+        Select-Object @{ n = "name"; e = { if ("$($_.frontmatter.name)".Trim()) { "$($_.frontmatter.name)".Trim() } else { "(no name)" } } },
+            @{ n = "description"; e = { "$($_.frontmatter.description)".Trim() } },
+            @{ n = "exposed"; e = { $_.expose_skill_to_copilot -eq $true } }
+}
+
 # Scheme and host only, never the path or query (they can carry tenant or tool identifiers).
 function Get-SchemeHost([string]$Url) {
     $uri = $Url -as [uri]
@@ -294,12 +319,15 @@ function Get-SchemeHost([string]$Url) {
 # One row per package, with the detail call's usage and access fields. This is Packages.csv.
 # mcpServers: scheme://host;... mcpAuth: scheme://host=authorization type;... (Unspecified when there's
 # none). mcpRiskyTools: tools whose annotations set destructiveHint or openWorldHint.
+# skills: agent skill names. skillsWeakDescription: skills whose description is shorter than
+# -MinSkillDescriptionLength. skillsExposed: skills with expose_skill_to_copilot set.
 function Get-PackageRow {
     process {
         $p = $_
         $d = Get-GraphOptional "$graph/copilot/admin/catalog/packages/$([uri]::EscapeDataString($p.id))"
         if (-not $d) { Write-Warning "Couldn't read details for '$($p.displayName)'."; $d = $p }
         $mcp = @(Get-McpServer $d)
+        $skills = @(Get-AgentSkill $d)
         $allowed = @($d.allowedUsersAndGroups) + @($d.acquireUsersAndGroups) | Where-Object { $_ }
         $d | Select-Object id, displayName,
             @{ n = "kind";             e = { Get-PackageKind $_.elementTypes } },
@@ -314,7 +342,10 @@ function Get-PackageRow {
             @{ n = "sessions30d";      e = { $_.totalSessions } },
             @{ n = "mcpServers";       e = { @($mcp | ForEach-Object { Get-SchemeHost $_.mcpServerUrl } | Sort-Object -Unique) -join ";" } },
             @{ n = "mcpAuth";          e = { @($mcp | ForEach-Object { "$(Get-SchemeHost $_.mcpServerUrl)=$(if ("$($_.authorization.type)") { $_.authorization.type } else { 'Unspecified' })" } | Sort-Object -Unique) -join ";" } },
-            @{ n = "mcpRiskyTools";    e = { @($mcp | ForEach-Object { @($_.mcpToolDescription.tools) } | Where-Object { $_ -and ($_.annotations.destructiveHint -eq $true -or $_.annotations.openWorldHint -eq $true) } | ForEach-Object name | Sort-Object -Unique) -join ";" } }
+            @{ n = "mcpRiskyTools";    e = { @($mcp | ForEach-Object { @($_.mcpToolDescription.tools) } | Where-Object { $_ -and ($_.annotations.destructiveHint -eq $true -or $_.annotations.openWorldHint -eq $true) } | ForEach-Object name | Sort-Object -Unique) -join ";" } },
+            @{ n = "skills";           e = { @($skills | ForEach-Object name | Sort-Object -Unique) -join ";" } },
+            @{ n = "skillsWeakDescription"; e = { @($skills | Where-Object { $_.description.Length -lt $MinSkillDescriptionLength } | ForEach-Object name | Sort-Object -Unique) -join ";" } },
+            @{ n = "skillsExposed";    e = { @($skills | Where-Object exposed | ForEach-Object name | Sort-Object -Unique) -join ";" } }
     }
 }
 
@@ -345,6 +376,13 @@ function Test-Package($P, $ActivityByKey) {
         if ($everyone -and $P.mcpRiskyTools) {
             New-Finding $area $name "High" "MCP tool(s) that change data or reach outside sources, in a package available to everyone: $($P.mcpRiskyTools -replace ';', ', ')" "Limit the package to a group that needs these tools, or remove the tools"
         }
+        # Microsoft's own packages are theirs to describe and roll out, like the name and description checks.
+        if ($custom -and $everyone -and $P.skillsExposed) {
+            New-Finding $area $name "Medium" "Skill(s) exposed to Copilot in a package available to everyone: $($P.skillsExposed -replace ';', ', ')" "Limit the package to a group, or turn off expose to Copilot until the skill is reviewed"
+        }
+    }
+    if ($custom -and $P.skillsWeakDescription) {
+        New-Finding $area $name "Medium" "Skill(s) with a missing or too-short description: $($P.skillsWeakDescription -replace ';', ', ')" "Describe when Copilot should use the skill and what it does (at least $MinSkillDescriptionLength characters)"
     }
     if ($P.directUsers -gt 0) { New-Finding $area $name "Medium" "Assigned to $($P.directUsers) $(if ($P.directUsers -eq 1) { 'person' } else { 'people' }) directly, not through a group" "Assign it to a group instead" }
     @($P.groupIds -split ";") | Where-Object { $_ } | ForEach-Object {
@@ -384,12 +422,30 @@ function Get-GraphRoleNames {
     $index
 }
 
-# Permission names an agent (identity or blueprint principal) holds on Microsoft Graph.
-function Get-GraphPermission([string]$ServicePrincipalId, $RoleNames) {
+# Delegated permission grants for an agent (identity or blueprint principal). consentType is
+# AllPrincipals (admin consent for everyone) or Principal (one person consented for themselves).
+function Get-PermissionGrant([string]$ServicePrincipalId) {
+    @(Get-GraphAllOptional "$graph/oauth2PermissionGrants?`$filter=$([uri]::EscapeDataString("clientId eq '$ServicePrincipalId'"))&`$select=resourceId,consentType,principalId,scope")
+}
+
+# Permission names an agent holds on Microsoft Graph: app roles, and admin-consented delegated grants.
+# Grants people consented to themselves are checked separately (Test-UserConsent).
+function Get-GraphPermission([string]$ServicePrincipalId, $RoleNames, $Grants) {
     @(Get-GraphAllOptional "$graph/servicePrincipals/$ServicePrincipalId/appRoleAssignments?`$select=appRoleId,resourceId") |
         Where-Object { $_.resourceId -eq $RoleNames["__id"] } | ForEach-Object { $RoleNames[$_.appRoleId] }
-    @(Get-GraphAllOptional "$graph/oauth2PermissionGrants?`$filter=$([uri]::EscapeDataString("clientId eq '$ServicePrincipalId'"))") |
-        Where-Object { $_.resourceId -eq $RoleNames["__id"] } | ForEach-Object { $_.scope -split " " } | Where-Object { $_ }
+    @($Grants) | Where-Object { $_ -and $_.resourceId -eq $RoleNames["__id"] -and $_.consentType -ne "Principal" } |
+        ForEach-Object { $_.scope -split " " } | Where-Object { $_ }
+}
+
+# Delegated permissions people consented to for an agent themselves, on any API. High when a scope is
+# on this script's high-privilege list, Medium otherwise.
+function Test-UserConsent([string]$Area, [string]$Name, $Grants) {
+    $userGrants = @(@($Grants) | Where-Object { $_ -and $_.consentType -eq "Principal" })
+    if (-not $userGrants) { return }
+    $scopes = @($userGrants | ForEach-Object { $_.scope -split " " } | Where-Object { $_ } | Sort-Object -Unique)
+    $people = @($userGrants | ForEach-Object principalId | Sort-Object -Unique).Count
+    $severity = if ($scopes | Where-Object { $_ -match $HighPrivilegePattern }) { "High" } else { "Medium" }
+    New-Finding $Area $Name $severity "User-consented delegated permissions ($people $(if ($people -eq 1) { 'person' } else { 'people' })): $($scopes -join ', ')" "Revoke the user consents, grant only what it needs through admin consent, and turn off user consent for apps if it's on"
 }
 
 function Test-Permission([string]$Area, [string]$Name, [string[]]$Permissions) {
@@ -416,7 +472,9 @@ function Test-Identity($I, $SignIns, $RoleNames) {
     $last = ConvertTo-Utc $SignIns[$I.appId]
     $created = ConvertTo-Utc $I.createdDateTime
     Test-People "Agent identities" $name $I.sponsors @(Get-GraphAllOptional "$graph/servicePrincipals/$($I.id)/owners?`$select=id")
-    Test-Permission "Agent identities" $name @(Get-GraphPermission $I.id $RoleNames)
+    $grants = Get-PermissionGrant $I.id
+    Test-Permission "Agent identities" $name @(Get-GraphPermission $I.id $RoleNames $grants)
+    Test-UserConsent "Agent identities" $name $grants
     if (Test-UnclearName ($name -replace '\s*\(Microsoft Copilot Studio\)$', '')) { New-Finding "Agent identities" $name "Medium" "Unclear name" "Rename the agent so people can tell what it does and who owns it" }
     if ($I.accountEnabled -and $last -and $last -lt $cutoff) { New-Finding "Agent identities" $name "Medium" "No sign-in for $StaleDays days" "Ask the sponsor if it's still needed, or run Agent and Tools Cleanup" }
     if ($I.accountEnabled -and -not $last -and $created -lt $cutoff) { New-Finding "Agent identities" $name "Low" "No sign-in recorded, created more than $StaleDays days ago" "Ask the sponsor if it's still needed" }
@@ -430,7 +488,7 @@ function Test-Blueprint($B, $Principal, $Children, $SignIns, $RoleNames) {
             $resource = if ($_.resourceAppId -eq "00000003-0000-0000-c000-000000000000") { "Microsoft Graph" } else { $_.resourceAppId }
             New-Finding "Blueprints" $name "High" "Inheritable permissions set to All allowed for $resource" "List only the scopes its agents need (enumerated scopes)"
         }
-    if ($Principal) { Test-Permission "Blueprints" $name @(Get-GraphPermission $Principal.id $RoleNames) }
+    if ($Principal) { Test-Permission "Blueprints" $name @(Get-GraphPermission $Principal.id $RoleNames (Get-PermissionGrant $Principal.id)) }
     if ($B.passwordCredentials) { New-Finding "Blueprints" $name "Medium" "Uses a client secret" "Use a certificate or a federated credential (managed identity) instead" }
     @($B.passwordCredentials) + @($B.keyCredentials) | Where-Object { $_ -and $_.endDateTime } | ForEach-Object {
         $end = ConvertTo-Utc $_.endDateTime
@@ -443,6 +501,17 @@ function Test-Blueprint($B, $Principal, $Children, $SignIns, $RoleNames) {
     $lastBp = ConvertTo-Utc $SignIns[$B.appId]
     if (-not $active -and (-not $lastBp -or $lastBp -lt $cutoff) -and (ConvertTo-Utc $B.createdDateTime) -lt $cutoff) {
         New-Finding "Blueprints" $name "Low" "No active agents and no sign-in for $StaleDays days" "Check it's still needed, or run Agent and Tools Cleanup"
+    }
+}
+
+# Agents Identity Protection flags as at risk and nobody has remediated or dismissed yet.
+# Confirmed compromised, confirmed safe, dismissed and remediated agents have already been handled.
+function Test-RiskyAgent($Risky, $Identities) {
+    $Risky | Where-Object { $_.riskState -eq "atRisk" -and -not $_.isDeleted } | ForEach-Object {
+        $r = $_
+        $match = $Identities | Where-Object id -eq $r.id | Select-Object -First 1
+        $name = if ($match) { $match.displayName } elseif ($r.agentDisplayName) { $r.agentDisplayName } else { $r.id }
+        New-Finding "Agent identities" $name "High" "At risk in Identity Protection (risk level $($r.riskLevel), $($r.riskDetail))" "Investigate its sign-ins and activity, then confirm it compromised (blocks it) or dismiss the risk"
     }
 }
 
@@ -732,6 +801,16 @@ $blueprints = @(Get-GraphAllOptional "$graph/applications/microsoft.graph.agentI
 $principals = @{}
 Get-GraphAllOptional "$graph/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal?`$select=id,appId,displayName" | ForEach-Object { $principals[$_.appId] = $_ }
 $agentUsers = @(Get-GraphAllOptional "$graph/users/microsoft.graph.agentUser?`$select=id,displayName,identityParentId")
+$riskyAgents = @()
+$haveRiskyAgents = $false
+if (-not $SkipRiskyAgents) {
+    Write-Host "Reading risky agents (Identity Protection)..."
+    try {
+        $riskyAgents = @(Get-GraphAll "$graph/identityProtection/riskyAgents?`$select=id,agentDisplayName,riskState,riskLevel,riskDetail,isDeleted")
+        $haveRiskyAgents = $true
+    }
+    catch { Write-Warning "Couldn't read risky agents. It needs IdentityRiskyAgent.Read.All and the Security Reader role. Run with -SkipRiskyAgents to skip it. $($_.Exception.Message)" }
+}
 $agentObjectIds = @{}
 @($identities.id) + @($principals.Values | ForEach-Object id) | Where-Object { $_ } | ForEach-Object { $agentObjectIds[$_] = $true }
 Write-Host "Looking for agents without Agent ID..."
@@ -743,6 +822,7 @@ $findings = @(
     $activityByKey = Get-ActivityByKey $defenderAgents
     $packages | ForEach-Object { Test-Package $_ $activityByKey }
     $identities | ForEach-Object { Write-Host "  $($_.displayName)"; Test-Identity $_ $signIns $roleNames }
+    Test-RiskyAgent $riskyAgents $identities
     $agentUsers | ForEach-Object {
         $parent = $identities | Where-Object id -eq $_.identityParentId | Select-Object -First 1
         New-Finding "Agent identities" $(if ($parent) { $parent.displayName } else { $_.displayName }) "Low" "Has an agent user account ($($_.displayName))" "Keep it only if the agent needs a mailbox or Teams presence"
@@ -805,7 +885,7 @@ $scorecard | Export-Csv (Join-Path $OutputFolder "Scorecard.csv") -NoTypeInforma
 $coworkPrompt = @"
 Run the agent and tools health check. Count anything unused for $StaleDays days as stale.
 
-Use the attached Packages.csv for agents and tools (including the mcpServers, mcpAuth and mcpRiskyTools columns), the attached DefenderAgents.csv for agents Microsoft Defender found, and the attached Connectors.csv for synced Copilot connectors if there is one. Use the Microsoft MCP Server for Enterprise to read: service principals tagged as agents that aren't agent identities (agents without Agent ID); every agent identity with its sponsors, owners, Microsoft Graph permissions and last sign-in; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); the Conditional Access policies; and, for each authorized app in Connectors.csv, its service principal (display name and owning organization).
+Use the attached Packages.csv for agents and tools (including the mcpServers, mcpAuth, mcpRiskyTools, skillsWeakDescription and skillsExposed columns), the attached DefenderAgents.csv for agents Microsoft Defender found, and the attached Connectors.csv for synced Copilot connectors if there is one. Use the Microsoft MCP Server for Enterprise to read: service principals tagged as agents that aren't agent identities (agents without Agent ID); every agent identity with its sponsors, owners, Microsoft Graph permissions (app roles, and delegated grants with their consent type) and last sign-in; risky agents in Identity Protection; every agent identity blueprint with its sponsors, owners, inheritable permissions, credentials and description; agent user accounts; the groups listed in Packages.csv (owners and description); the Conditional Access policies; and, for each authorized app in Connectors.csv, its service principal (display name and owning organization).
 
 This is read-only. Don't change anything in the tenant, and don't send any email or Teams message.
 
@@ -859,7 +939,8 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           "GET /beta/copilot/admin/catalog/packages (+ /{id} for each, including elementDetails for MCP servers)"
                           "GET /beta/external/connections (+ GET /beta/servicePrincipals?`$filter=appId eq '{id}' for each authorized app)"
                           "GET /beta/servicePrincipals/microsoft.graph.agentIdentity?`$expand=sponsors (+ owners, appRoleAssignments)"
-                          "GET /beta/oauth2PermissionGrants?`$filter=clientId eq '{id}'"
+                          "GET /beta/oauth2PermissionGrants?`$filter=clientId eq '{id}' (consentType Principal = a person consented for themselves)"
+                          "GET /beta/identityProtection/riskyAgents (riskState atRisk)"
                           "GET /beta/applications/microsoft.graph.agentIdentityBlueprint?`$expand=sponsors (+ owners, inheritablePermissions)"
                           "GET /beta/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal"
                           "GET /beta/users/microsoft.graph.agentUser"
@@ -877,6 +958,7 @@ function New-HtmlReport([string]$Template, [string]$Path) {
                           if ($SkipPackages -or -not $packages) { "Agents and tools weren't checked: the Agent 365 catalog wasn't read." }
                           if (-not $haveDefender) { "Discovered agents weren't checked: the Defender hunting query didn't run (needs ThreatHunting.Read.All and Security Reader)." }
                           if ($SkipCopilotUsage -or -not $copilotUsage) { "Copilot agent adoption wasn't checked: the Copilot usage report wasn't read, or didn't have an agent activity column." }
+                          if (-not $haveRiskyAgents) { "Risky agents weren't checked: -SkipRiskyAgents, or Identity Protection for agents couldn't be read (needs IdentityRiskyAgent.Read.All and Security Reader)." }
                           if (-not $haveConnectors) { "Synced Copilot connectors weren't checked: -SkipConnectors, or external connections couldn't be read (needs ExternalConnection.Read.All)." }
                           "Access and MCP checks skip packages users can't reach: blocked, or available to no one."
                           if ($haveDefender -and -not $packages) { "The Agent 365 registry wasn't read, so Defender's AgentsInfo inventory was used as the agent list." }

@@ -55,7 +55,9 @@ the call returns 403). Get it from a file the user attaches:
   availableTo, deployedTo, requestStatus, requestType, groupIds, groups, directUsers,
   lastModifiedDateTime, lastUsedDateTime, activeUsers30d, sessions30d, mcpServers (scheme://host,
   semicolon-separated), mcpAuth (scheme://host=authorization type; Unspecified when there's none),
-  mcpRiskyTools (tools whose annotations set destructiveHint or openWorldHint).
+  mcpRiskyTools (tools whose annotations set destructiveHint or openWorldHint), skills (agent skill
+  names), skillsWeakDescription (skills whose description is under 40 characters), skillsExposed
+  (skills with expose_skill_to_copilot on). All three skill columns are semicolon-separated.
 
 Also attach **Connectors.csv** (same script) for synced Copilot connectors users can search (state
 ready or limitExceeded). Columns: id, name, description, state, connectorId, contentCategory,
@@ -103,7 +105,8 @@ fails, stop and tell the user the connector can't read the tenant, with the erro
 | Owners of an identity | `GET /beta/servicePrincipals/{id}/owners?$select=id` |
 | App permissions of an identity or blueprint principal | `GET /beta/servicePrincipals/{id}/appRoleAssignments?$select=appRoleId,resourceId,resourceDisplayName` |
 | Microsoft Graph app role names (once) | `GET /beta/servicePrincipals(appId='00000003-0000-0000-c000-000000000000')?$select=id,appRoles` and match `appRoleId` to `appRoles[].id` → `value` |
-| Delegated grants | `GET /beta/oauth2PermissionGrants?$filter=clientId eq '{id}'` and read `scope` where `resourceId` is the Microsoft Graph service principal |
+| Delegated grants | `GET /beta/oauth2PermissionGrants?$filter=clientId eq '{id}'&$select=resourceId,consentType,principalId,scope`. For the permission checks, read `scope` where `resourceId` is the Microsoft Graph service principal and `consentType` is `AllPrincipals`. Grants with `consentType` `Principal` (a person consented for themselves) are their own check, on any API |
+| Risky agents (Identity Protection) | `GET /beta/identityProtection/riskyAgents?$select=id,agentDisplayName,riskState,riskLevel,riskDetail,isDeleted` (IdentityRiskyAgent.Read.All, Security Reader). Match `id` to an agent identity. If it returns 403, say the risk check was skipped |
 | Last sign-in | `GET /beta/reports/servicePrincipalSignInActivities?$filter=appId eq '{appId}'` (for an agent identity, `appId` equals `id`). Empty means no sign-in recorded |
 | Blueprints registered here | `GET /beta/applications/microsoft.graph.agentIdentityBlueprint?$select=id,appId,displayName,description,createdDateTime,passwordCredentials,keyCredentials&$expand=sponsors($select=id)` |
 | Owners of a blueprint | `GET /beta/applications/{id}/owners?$select=id` |
