@@ -280,11 +280,16 @@ function Get-AreaScore {
 # Agents and tools (Agent 365 catalog)
 # ---------------------------------------------------------------------------
 
+# The catalog's element types include DeclarativeCopilots, CustomEngineCopilots, Bots, AgentMetadatas
+# (Copilot Studio agents shared in the tenant), SuperAppAgent and AgenticUserTemplates for agents.
+# A package with only DeclarativeCopilots plus tool elements (an MCP server with a declarative wrapper)
+# stays a Tool. Office add-ins, tabs and message extensions on their own are Apps.
 function Get-PackageKind($ElementTypes) {
     $types = @($ElementTypes) -join " "
-    if ($types -match 'declarativeAgent|customEngine|bot')     { "Agent" }
-    elseif ($types -match 'skill|connector|mcp|plugin|action') { "Tool" }
-    else                                                       { "App" }
+    if ($types -match 'declarativeAgent|customEngine|bot|agentMetadata|superAppAgent|agenticUserTemplate') { "Agent" }
+    elseif ($types -match 'skill|connector|mcp|plugin|action')                                         { "Tool" }
+    elseif ($types -match 'declarativeCopilot')                                                         { "Agent" }
+    else                                                                                                { "App" }
 }
 
 # The MCP servers a package calls: each AgentConnectors element's definition is a JSON string with
