@@ -23,7 +23,8 @@
   },
   "accentColor": "#2B579A",
   "agentSkills": [
-    { "folder": "./skills/agent-tools-health" }
+    { "folder": "./skills/agent-tools-health" },
+    { "folder": "./skills/agent-admin-settings" }
   ],
   "agentConnectors": [
     {

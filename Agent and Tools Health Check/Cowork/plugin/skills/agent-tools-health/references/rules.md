@@ -150,8 +150,11 @@ Well governed % = step 5 ÷ step 1.
 - Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID (Preview): the **default inactivity policy** (preview) is on. It notifies at 60 days, disables at 90, deletes at 455.
 - Microsoft 365 admin center > Agents > Settings > **Agent and plugin access**: **Allow agents and plugins built by external publishers** is off, or reviewed.
 - Microsoft 365 admin center > Agents > Settings > **Sharing**: Specific users, not All users (applies only to Agent Builder agents).
-- Agents > Tools > Registry: standalone MCP servers and skills have clear names, owners and group-scoped availability.
+- Microsoft 365 admin center > Agents > Settings > **User access**: Specific users or groups (your Copilot users), not All users. It's the ceiling for every agent, plugin and connector.
+- Microsoft 365 admin center > Agents > Settings > Agent and plugin access: **Allow agents and plugins built by Microsoft** is a decision: Microsoft-built federated connectors (some reach outside services) are on by default.
+- Agents > Tools > Registry: write, delete, send and payment tools are turned off on MCP servers that support per-tool control.
+- Copilot > Connectors > Your connections: each federated connector you don't need is disabled, and the rest are staged to the groups that need them.
 - Copilot > Connectors > Your connections: each synced connector is rolled out to the right people, and none is set so every user sees all content.
 - Sponsors attested each agent in the last 12 months (Microsoft suggests every 6 to 12 months) (the attestation API isn't readable through the Enterprise MCP).
 
-If the browser is available in Cowork, read these pages and report what you see. Never change a setting.
+If the browser is available in Cowork, read these pages and report what you see. Never change a setting. The **agent-admin-settings** skill does this as a scored check (references/settings.md in that skill).
