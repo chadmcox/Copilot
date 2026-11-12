@@ -619,7 +619,7 @@ That rule is what makes tiers work, and it's also what breaks chargeback if you 
 
 #### The pattern
 
-1. **One Azure subscription per cost center** (or per division, if that's what finance charges back). Link each to the billing account. The money shows up per subscription in Azure Cost Management. *From Microsoft docs:* the Cost management dashboard reports Copilot Credits, not money. Use Azure Cost Management or the Azure invoice for the actual charges.
+1. **One Azure subscription per cost center** (or per division, if that's what finance charges back). Each spending policy is billed to the Azure subscription you pick as its billing method, so this is what turns a policy into a chargeback line (see Link each policy to its cost center's Azure subscription, below). The money shows up per subscription in Azure Cost Management. *From Microsoft docs:* the Cost management dashboard reports Copilot Credits, not money. Use Azure Cost Management or the Azure invoice for the actual charges.
 2. **One base group per cost center, with dynamic membership.** Build the rule on an attribute your HR system fills in, and match exact values:
    - Use `-eq` or `-in`, never `-contains`. `user.department -contains "Sales"` also matches "Telesales", which puts people in the wrong cost center.
    - Add `user.accountEnabled -eq true` and `user.userType -eq "Member"`.
@@ -641,6 +641,28 @@ That rule is what makes tiers work, and it's also what breaks chargeback if you 
 6. **Keep central pools on purpose.** Some groups should be paid for centrally: **Copilot Pilot Ring**, a program team or super-user group, and **Copilot + Cowork Spend Unlimited Temp**. Bill those to IT's subscription and accept that their usage isn't charged back.
 7. **Moving up a tier.** Use access packages, one for each higher-tier group, with the cost center owner (the budget holder) as the approver. Give them Elevated tier settings (180 days, reviewed every 3 months). The base tier needs no package, because the dynamic rule handles it. *Not checked:* build the packages in a later run than the groups. A brand-new group can fail when added to a catalog straight away.
 8. **Don't nest the base groups** into Copilot Access, the Cowork spend groups or each other. Assign every group to its policy directly. *From Microsoft docs:* group-based licensing ignores nested groups, and the spending policy docs say nothing about nested groups either way.
+
+#### Link each policy to its cost center's Azure subscription
+
+> **You can tie every spending policy to its own Azure subscription.** This is the piece that makes chargeback work. The billing method on a spending policy is an Azure subscription, and the credits that policy's people use are billed to that subscription. Give each cost center its own subscription, set it as the billing method on that cost center's policies, and each cost center's Copilot spending lands on its own line in Azure Cost Management.
+
+*From Microsoft docs ([Configure billing method](https://learn.microsoft.com/copilot/implement/usage-based-billing-copilot-credits-setup#configure-billing-method)):*
+
+1. Go to **Copilot** → **Cost management** → **Configuration**, and open the policy (or create it with **Add spending policy**).
+2. On the **Billing method** step, open the **Subscription** list. It shows the subscriptions linked to your billing account that you can see. Hover over one to see its subscription ID.
+3. Pick the cost center's subscription. To make a new one, select **Create new**. Creating a subscription from here needs the Global Administrator role.
+4. Finish or save the policy.
+
+Things to know:
+
+- **New policies start on the default billing method.** Change it on every cost-center policy, or the credits land on the default subscription.
+- **You can change it later.** Updating a policy's billing method keeps its groups, limits, alerts and services, so you don't need to delete and recreate the policy.
+- **Pre-purchased credits sit on a subscription.** A Copilot Credit Pre-Purchase Plan (P3) is bought for one subscription. That subscription's P3 credits are used first, then pay-as-you-go. If one cost center prepays, buy its P3 on its own subscription. A central P3 only discounts the policies billed to the central subscription.
+- **The Consumption tab shows it.** The **Policies** view lists each policy's billing method next to its credit usage, so you can confirm which subscription each cost center is billed to.
+- **Who can set it.** Global Administrator and Billing Administrator can add or change billing methods. AI Administrator and License Administrator can edit billing methods on existing policies (see Who can manage the policies). People also need access to the Azure subscription itself to pick it.
+- **Copilot Studio too.** Resource policies for agents and environments have the same billing method choice, so an environment can bill to the cost center that owns it.
+
+**Pick the subscription in the admin center.** *From Microsoft docs ([spendingPolicy resource type](https://learn.microsoft.com/microsoft-365/copilot/extensibility/api/admin-settings/cost-management/resources/spendingpolicy)):* the Graph API's `billingMethods` property only says how a policy is funded (`prepaidCredits`, `payAsYouGo` or both). It has no Azure subscription field. So `New-CopilotSpendingPolicies.ps1 -BillingMethods` sets the funding type, but you still choose each policy's subscription in the admin center.
 
 #### How it fits the groups already in this guide
 
