@@ -326,6 +326,15 @@ function Get-SchemeHost([string]$Url) {
 # none). mcpRiskyTools: tools whose annotations set destructiveHint or openWorldHint.
 # skills: agent skill names. skillsWeakDescription: skills whose description is shorter than
 # -MinSkillDescriptionLength. skillsExposed: skills with expose_skill_to_copilot set.
+# Every catalog package: agents, and standalone tools. An unfiltered list returns only titles that contain
+# an agent, so MCP servers, Microsoft and partner connectors, and skills that ship without an agent need a
+# second call filtered on the tool element types. The two lists overlap, so keep each package once.
+function Get-CatalogPackage {
+    $toolFilter = [uri]::EscapeDataString("elementTypes/any(e:e eq 'AgentConnectors' or e eq 'AgentSkills')")
+    @(Get-GraphAll "$graph/copilot/admin/catalog/packages") + @(Get-GraphAll "$graph/copilot/admin/catalog/packages?`$filter=$toolFilter") |
+        Where-Object { $_ } | Sort-Object id -Unique
+}
+
 function Get-PackageRow {
     process {
         $p = $_
@@ -814,7 +823,7 @@ New-Item -ItemType Directory -Path $OutputFolder -Force | Out-Null
 $packages = @()
 if (-not $SkipPackages) {
     Write-Host "Reading the Agent 365 catalog (one detail call per package)..."
-    try { $packages = @(Get-GraphAll "$graph/copilot/admin/catalog/packages" | Get-PackageRow) }
+    try { $packages = @(Get-CatalogPackage | Get-PackageRow) }
     catch { Write-Warning "Couldn't read the Agent 365 catalog. It needs an Agent 365 license and the AI Administrator role. Run with -SkipPackages to skip it. $($_.Exception.Message)" }
     $packages | Export-Csv (Join-Path $OutputFolder "Packages.csv") -NoTypeInformation -Encoding UTF8
 }
@@ -992,13 +1001,15 @@ function New-HtmlReport([string]$Template, [string]$Path) {
         manualChecks = @(
                           "Entra > Entra ID > Users > User settings: Users can register agent identity blueprints (docs: Users can create agent blueprints) is No."
                           "Entra > ID Governance > Lifecycle Workflows > Lifecycle Policies > Agent ID (Preview): the default inactivity policy is on."
-                          "Microsoft 365 admin center > Agents > Settings > Agent and plugin access: Allow agents and plugins built by external publishers is off, or reviewed."
+                          "Microsoft 365 admin center > Agents > Settings > Agent and plugin access: Allow agents and plugins built by external publishers is off, or reviewed. Allow agents and plugins built by Microsoft is a decision too: Microsoft-built federated connectors (for example HubSpot or Confluence) are on by default and reach outside services. (Not in Graph.)"
+                          "Microsoft 365 admin center > Agents > Settings > User access: Specific users or groups (your Copilot users), not All users. It's the ceiling for every agent, plugin and connector. (Not in Graph.)"
+                          "Copilot > Connectors > Your connections: each federated connector you don't need is disabled, and the rest are staged to the groups that need them. (Not in Graph.)"
                           "Microsoft 365 admin center > Agents > Settings > Sharing: Specific users, not All users (applies to Agent Builder agents only)."
-                          "Agents > Tools > Registry: standalone MCP servers and skills (no API) have clear names, owners and group-scoped availability."
+                          "Agents > Tools > Registry: high-risk tools (write, delete, payments) are turned off on MCP servers that support per-tool control."
                           "Copilot > Connectors > Your connections: each synced connector is rolled out to the right people, and none is set so every user sees all content (rollout audience and item access aren't in Graph)."
                           "Sponsors attested each agent in the last 12 months (access review or attestation).")
         graphCalls   = @(
-                          "GET /beta/copilot/admin/catalog/packages (+ /{id} for each, including elementDetails for MCP servers)"
+                          "GET /beta/copilot/admin/catalog/packages, and again with $filter=elementTypes/any(e:e eq 'AgentConnectors' or e eq 'AgentSkills') for standalone tools (+ /{id} for each, including elementDetails for MCP servers)"
                           "GET /beta/external/connections (+ GET /beta/servicePrincipals?`$filter=appId eq '{id}' for each authorized app)"
                           "GET /beta/servicePrincipals/microsoft.graph.agentIdentity?`$expand=sponsors (+ owners, appRoleAssignments)"
                           "GET /beta/oauth2PermissionGrants?`$filter=clientId eq '{id}' (consentType Principal = a person consented for themselves)"
