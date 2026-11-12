@@ -142,6 +142,8 @@ Some settings have no API (blueprint creation, the inactivity policy, external p
 
 The skill itself lives in [../Cowork/plugin/skills/agent-tools-health](../Cowork/plugin/skills/agent-tools-health/SKILL.md), so Cowork and GitHub Copilot always use the same rules.
 
+The installer also adds **agent-admin-settings** (`/agent-admin-settings`), which checks the admin center settings Graph can't read. It needs a browser signed in to the admin centers; VS Code's browser tools can stand in for the Cowork browser, and without one it gives you a checklist to read by hand and scores what you tell it.
+
 ## Privacy
 
 The results name agents, sponsors, groups and permissions. Keep the output folder out of source control (this repo's `.gitignore` already skips the usual file names) and share it only with the people who need it. GitHub Copilot sends what it reads to its model to answer you, so follow your organization's rules for GitHub Copilot and tenant data.

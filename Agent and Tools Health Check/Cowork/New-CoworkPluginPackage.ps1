@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.10
+.VERSION 2026.11
 .GUID 62b831c9-9940-4244-997a-b86987e30def
 .AUTHOR Chad Cox
     https://blogs.technet.microsoft.com/chadcox/
@@ -38,8 +38,9 @@ url: Build plugins for Copilot Cowork - https://learn.microsoft.com/copilot/cowo
     Two kinds of zip:
       - Plugin (default): the skill plus the Enterprise MCP connector. Upload it in Cowork under
         Customize > Plugins > Upload plugin, or in the admin center under Agents > Tools > Registry.
-      - Skill only (-SkillOnly): just the skill, in one folder. Upload it in Cowork under
-        Customize > Skills > Add > Upload skill. No connector, so Cowork works from the files you attach.
+      - Skill only (-SkillOnly): one zip per skill, each holding one folder (agent-tools-health.zip and
+        agent-admin-settings.zip). Upload each in Cowork under Customize > Skills > Add > Upload skill.
+        No connector, so Cowork works from the files you attach and, for agent-admin-settings, the browser.
 
 .EXAMPLE
     .\New-CoworkPluginPackage.ps1 -ReferenceId "<OAuth client registration ID>"
@@ -50,6 +51,7 @@ param(
     [Parameter(Mandatory, ParameterSetName = "Plugin")][string]$ReferenceId,
     [Parameter(Mandatory, ParameterSetName = "Skill")][switch]$SkillOnly,
     [string]$AppId = [guid]::NewGuid().ToString(),
+    # The plugin zip. With -SkillOnly, the skill zips are written to this file's folder, one per skill.
     [string]$OutputFile = $(if ($SkillOnly) { ".\agent-tools-health.zip" } else { ".\AgentToolsHealth-Cowork.zip" }),
     [string]$GitHubBaseUrl = "https://raw.githubusercontent.com/chadmcox/Copilot/main/Agent%20and%20Tools%20Health%20Check/Cowork/plugin"
 )
@@ -65,8 +67,13 @@ $pluginFiles = @(
     "skills/agent-tools-health/SKILL.md",
     "skills/agent-tools-health/references/rules.md",
     "skills/agent-tools-health/references/guidance.md",
-    "skills/agent-tools-health/assets/report-template.html"
+    "skills/agent-tools-health/assets/report-template.html",
+    "skills/agent-admin-settings/SKILL.md",
+    "skills/agent-admin-settings/references/settings.md"
 )
+
+# Each skill folder under skills/. -SkillOnly makes one zip per skill.
+$skillNames = @("agent-tools-health", "agent-admin-settings")
 
 function Copy-PluginFolder([string]$Destination) {
     Copy-Item (Join-Path $PSScriptRoot "plugin") $Destination -Recurse
@@ -128,8 +135,14 @@ else {
 
 if ($SkillOnly) {
     # The skill upload wants one folder holding SKILL.md and its references, and nothing else.
-    New-ZipFile (Join-Path $work "skills/agent-tools-health") $OutputFile "agent-tools-health/"
-    Write-Host "Saved $OutputFile. In Copilot Cowork, open Customize > Skills > Add > Upload skill and choose it."
+    $outFolder = Split-Path $OutputFile
+    if (-not $outFolder) { $outFolder = "." }
+    $skillNames | ForEach-Object {
+        $zip = Join-Path $outFolder "$_.zip"
+        New-ZipFile (Join-Path $work "skills/$_") $zip "$_/"
+        Write-Host "Saved $zip."
+    }
+    Write-Host "In Copilot Cowork, open Customize > Skills > Add > Upload skill and upload each zip."
 }
 else {
     Set-ManifestValues (Join-Path $work "manifest.json")

@@ -147,7 +147,10 @@ Build the well-governed funnel for agent identities from rules.md.
 
 List the manual checks from rules.md. If the browser is available and the user allows it, open each
 admin center page, read the setting and say what it's set to. Read only: never select Save, Block,
-Delete or any button that changes a setting.
+Delete or any button that changes a setting. For a full, scored check of these settings (including
+each connector's status and staged rollout, and write tools on MCP servers), suggest the
+**agent-admin-settings** skill in the same plugin; it writes AdminSettings.csv in the Findings.csv
+columns.
 
 ## Step 6: Report
 

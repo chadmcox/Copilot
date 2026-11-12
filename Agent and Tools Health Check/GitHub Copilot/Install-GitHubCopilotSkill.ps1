@@ -54,7 +54,7 @@ param(
 # Stop at the first error, so a failed download never leaves a half-installed skill.
 $ErrorActionPreference = "Stop"
 
-$skillNames = @("agent-tools-health")
+$skillNames = @("agent-tools-health", "agent-admin-settings")
 $mcpUrl = "https://mcp.svc.cloud.microsoft/enterprise"
 
 # Every file to install: where it is in this solution folder, and where it goes under the skills folder.
@@ -63,7 +63,9 @@ $files = @(
     @{ Source = "Cowork/plugin/skills/agent-tools-health/references/rules.md"; Target = "agent-tools-health/references/rules.md" },
     @{ Source = "Cowork/plugin/skills/agent-tools-health/references/guidance.md"; Target = "agent-tools-health/references/guidance.md" },
     @{ Source = "Cowork/plugin/skills/agent-tools-health/assets/report-template.html"; Target = "agent-tools-health/assets/report-template.html" },
-    @{ Source = "Get-AgentToolsHealth.ps1"; Target = "agent-tools-health/scripts/Get-AgentToolsHealth.ps1" }
+    @{ Source = "Get-AgentToolsHealth.ps1"; Target = "agent-tools-health/scripts/Get-AgentToolsHealth.ps1" },
+    @{ Source = "Cowork/plugin/skills/agent-admin-settings/SKILL.md"; Target = "agent-admin-settings/SKILL.md" },
+    @{ Source = "Cowork/plugin/skills/agent-admin-settings/references/settings.md"; Target = "agent-admin-settings/references/settings.md" }
 )
 
 function Get-SkillsFolder {
@@ -128,7 +130,7 @@ $files | Install-SkillFile $skillsFolder
 if ($Scope -eq "Workspace" -and -not $NoMcpConfig) { Set-WorkspaceMcpConfig }
 
 Write-Host ""
-Write-Host "Installed the skill in $skillsFolder."
+Write-Host "Installed the skills ($($skillNames -join ', ')) in $skillsFolder."
 if ($Scope -eq "User") {
     Write-Host "To use the Enterprise MCP in VS Code, add it once: Command Palette > MCP: Add Server > HTTP > $mcpUrl"
 }

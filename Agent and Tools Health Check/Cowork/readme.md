@@ -183,14 +183,16 @@ In the **Microsoft 365 admin center > Agents > Tools > Registry**, select **Uplo
 
 If tool calls fail, check that the base URL, the "Any Teams app" setting and the registration ID all match. Microsoft's [plugin authentication troubleshooting](https://learn.microsoft.com/microsoft-365/copilot/extensibility/plugin-authentication-troubleshooting) lists the common causes.
 
-### Optional: let Cowork read the manual checks in the browser
+### Optional: let Cowork check the settings Graph can't read, in the browser
 
-Some settings have no API (blueprint creation, the inactivity policy, external publishers, sharing). With browser access on, Cowork can open those admin center pages and report what they're set to; the skill tells it to read only. Turn it on in **Microsoft 365 admin center > Copilot > Settings > View all > Cowork settings > Allow browser access**, limited to the admins who run this check. The person needs Cowork in a browser, Edge 152 or later signed in with the same work account, and an admin role activated in PIM.
+Some settings have no API: Agent and plugin access (including Microsoft-built connectors, which are on by default), User access, Sharing, each connector's status and staged rollout, per-tool control on MCP servers, Cowork browser access, blueprint registration and the Agent ID inactivity policy. The plugin's second skill, **agent-admin-settings**, opens those admin center pages in the browser, reads them, scores them with the same columns as Findings.csv and saves **AdminSettings.csv**. It only reads: it never selects Save, Block, Enable, Deploy or any toggle. Ask Cowork: *Check the agent and connector admin settings.*
+
+To use it, turn browser access on in **Microsoft 365 admin center > Copilot > Settings > View all > Cowork settings > Allow browser access**, limited to the admins who run this check. The person needs Cowork on the web in Edge 152 or later, signed in with the same work account, and a reader role (Global Reader, or AI Reader for the Microsoft 365 pages) activated in PIM. Without the browser, the skill gives you the checklist to read by hand and scores what you tell it.
 
 ## Way B: skill only
 
-1. Build the skill zip: `.\New-CoworkPluginPackage.ps1 -SkillOnly`. It writes **agent-tools-health.zip**, which holds one folder with SKILL.md and its references.
-2. In Copilot Cowork, open **Customize > Skills**, select the arrow next to **Add**, then **Upload skill**, and choose the zip.
+1. Build the skill zips: `.\New-CoworkPluginPackage.ps1 -SkillOnly`. It writes **agent-tools-health.zip** and **agent-admin-settings.zip**, each holding one folder with SKILL.md and its references.
+2. In Copilot Cowork, open **Customize > Skills**, select the arrow next to **Add**, then **Upload skill**, and choose a zip. Upload each one you want.
 3. Start a new Cowork task. The skill loads on its own when you ask about the agent and tools health check.
 
 > **"That archive has files outside the folder containing SKILL.md"** means you uploaded the plugin zip under Skills. The plugin zip goes under **Customize > Plugins > Upload plugin** (way A). The skills box only takes the `-SkillOnly` zip.
@@ -205,6 +207,8 @@ Without the Enterprise MCP connector, Cowork works only from the files you attac
 | [plugin/skills/agent-tools-health/SKILL.md](plugin/skills/agent-tools-health/SKILL.md) | The steps Cowork follows, with the exact Graph calls |
 | [plugin/skills/agent-tools-health/references/rules.md](plugin/skills/agent-tools-health/references/rules.md) | The rules, severities, scoring and manual checks |
 | [plugin/skills/agent-tools-health/assets/report-template.html](plugin/skills/agent-tools-health/assets/report-template.html) | The HTML report template. Cowork and the PowerShell script fill in its data block |
+| [plugin/skills/agent-admin-settings/SKILL.md](plugin/skills/agent-admin-settings/SKILL.md) | The browser check of settings Graph can't read |
+| [plugin/skills/agent-admin-settings/references/settings.md](plugin/skills/agent-admin-settings/references/settings.md) | The pages to read, the rules, and the checklist for reading by hand |
 | [New-CoworkPluginPackage.ps1](New-CoworkPluginPackage.ps1) | Builds the zip with your registration ID |
 
 ## Privacy
