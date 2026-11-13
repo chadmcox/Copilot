@@ -2,6 +2,26 @@
 
 [Back to the guide](readme.md)
 
+## What changed on Nov 13, 2026
+
+I checked the admin centers again. These are the differences from the Nov 10 version:
+
+| Guide said | What the admin center shows |
+| --- | --- |
+| Spending policy wizard has five steps | **Six** steps. **Model template** is new, between **Limits and alerts** and **Billing method** |
+| Microsoft docs no longer mention model profiles | **Configuration** has a **Model templates (Preview)** tab, and the wizard has a **Model template** step |
+| Code wasn't in the wizard | **Code** is under **Microsoft Copilot**, next to Cowork |
+| Opal and Intelligent call delegation weren't in the wizard | Both are there. **Intelligent Call Delegation** is the only service not checked by default |
+| — | New services in the wizard: **Sales Development Agent** and **Teams Interpreter** |
+| SpaceXAI is only on the independent processors page | SpaceXAI is also on the **subprocessors** page, **Disabled by default** |
+| **Choose which users can access Anthropic models** | **Choose who can use models operated by Anthropic** (same for OpenAI and SpaceXAI) |
+| App creation paths: **Set up**, then limit Copilot Studio to a group | **Review settings**. Copilot Studio is only **On** or **Off**; use pac to limit it to a group |
+| Code page lists **Add allowed domains for GitHub** | Not shown. The Code page is a getting-started page |
+| Teams → Transcript API access → **WorkIQ access** | Only **Microsoft Graph access** was shown. Use `Set-CsTeamsMeetingConfiguration -EnableWorkIQTranscriptAccess` |
+| — | New **Copilot Release preferences: General Availability** setting (Standard or Deferred) |
+
+**Design change:** Cowork and Work IQ API spending now uses four tiers (Bronze, Silver, Gold, Platinum) instead of Limited, Unlimited and Temporary Unlimited. Use one set for the organization, or one set per line of business or cost center. The scripts still build the older layout.
+
 ## What changed on Oct 23, 2026
 
 I checked each step against the admin centers. These are the differences from the earlier version:
