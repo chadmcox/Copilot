@@ -8,6 +8,13 @@ Use GitHub Copilot in VS Code instead? The same skill works there, with a much s
 
 > Microsoft changes Cowork, plugins and the Enterprise MCP server often, and parts are in preview. Test this in your own tenant first.
 
+## Short version
+
+1. Pick a way. **A:** an admin sets up the plugin once and Cowork runs the whole report live. **B:** skill only, about 2 minutes per person; Cowork explains findings you exported from an earlier report.
+2. Set it up: [Way A](#way-a-admin-setup-once-per-tenant) (admin, once per tenant) or [Way B](#way-b-skill-only).
+3. Paste [the prompt](#the-prompt) into Cowork.
+4. Open the HTML report. Start with the lowest-scoring area; every finding has a fix tied to the guide section.
+
 ## What Cowork can read
 
 Everything comes live from the Enterprise MCP. No files to attach. Tested against a live tenant on Nov 1, 2026:

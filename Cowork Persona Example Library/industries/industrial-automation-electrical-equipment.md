@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Field Service Engineer, hand-off:** a commissioning job pack for tomorrow's site built from emails, drawings and service history. → [jump](#8-field-servicerepair)
 2. **Product Compliance Engineer, recurring:** every Monday, certification expirations, upcoming audits and certifier correspondence in one watch list. → [jump](#15-industry-specific-product-compliance--certification)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Applications Engineer chosen because engineered-to-order configuration drives quotes and wins; Product Compliance Engineer chosen because UL/CE/IEC certification gates every product shipment.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Plant Controller | Manage plant cost accounting, standard costs, and monthly close variances. |
-| 2 | [HR](#2-hr) | HR Business Partner – Manufacturing | Support plant staffing, labor relations, and skilled-trades workforce planning. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Electrical Assembler | Assemble and wire control panels per drawings and work instructions. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Supervisor | Lead assembly shift to meet safety, quality, delivery, and cost targets. |
-| 5 | [Quality](#5-quality) | Quality Engineer | Drive CAPA, NCR disposition, and UL/CE compliance for products. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Commodity Buyer – Electronics | Source semiconductors, PCBs, and components; manage supplier performance. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager | Lead plant safety programs, arc-flash compliance, and environmental permits. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Engineer | Commission, troubleshoot, and repair drives, PLCs, and switchgear on-site. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Regional Sales Manager – Automation | Grow OEM, systems integrator, and distributor revenue in territory. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service Representative – Order Management | Manage orders, expedites, RMAs, and delivery commitments for customers. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Manager | Run plant operations, capacity, budget, and continuous improvement. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Controls / Product Design Engineer | Design control products and firmware; manage ECNs and certifications. |
-| 13 | [Executive](#13-executive) | VP Operations / Business Unit GM | Own BU P&L, plant network performance, and growth strategy. |
-| 14 | [Industry-Specific: Applications/Solutions Engineer](#14-industry-specific-applicationssolutions-engineer) | Applications Engineer | Configure drive, PLC, and switchgear solutions to customer specs. |
-| 15 | [Industry-Specific: Product Compliance & Certification](#15-industry-specific-product-compliance--certification) | Product Compliance Engineer | Maintain UL, CE, IEC certifications and regulatory documentation. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Plant Controller |
+| 2 | [HR](#2-hr) | HR Business Partner – Manufacturing |
+| 3 | [Frontline Worker](#3-frontline-worker) | Electrical Assembler |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Supervisor |
+| 5 | [Quality](#5-quality) | Quality Engineer |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Commodity Buyer – Electronics |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Engineer |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Regional Sales Manager – Automation |
+| 10 | [Customer Service](#10-customer-service) | Customer Service Representative – Order Management |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Controls / Product Design Engineer |
+| 13 | [Executive](#13-executive) | VP Operations / Business Unit GM |
+| 14 | [Industry-Specific: Applications/Solutions Engineer](#14-industry-specific-applicationssolutions-engineer) | Applications Engineer |
+| 15 | [Industry-Specific: Product Compliance & Certification](#15-industry-specific-product-compliance--certification) | Product Compliance Engineer |
 
 ## Personas and example asks
 

@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **General Manager, recurring:** every morning, the flash report, arrivals, open guest issues and overnight incidents in one operations summary. → [jump](#11-operationsfacilities)
 2. **Director of Revenue Management, hand-off:** the weekly revenue meeting deck built from pickup, comp-set rates and group displacement. → [jump](#14-industry-specific-revenue-management)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Revenue Management and Events & Catering are core hotel profit drivers with distinct workflows.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Hotel Financial Controller | Manage hotel accounting, forecasting, payroll and P&L reporting. |
-| 2 | [HR](#2-hr) | Director of Human Resources | Lead hotel recruitment, onboarding, training and associate relations. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Room Attendant | Clean and prepare guest rooms to brand standards. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Housekeeping Supervisor | Inspect rooms, assign boards and lead room attendants. |
-| 5 | [Quality](#5-quality) | Quality & Brand Standards Manager | Run brand audits, guest feedback programs and corrective actions. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Purchasing Manager | Source F&B, amenities and operating supplies within budget. |
-| 7 | [Safety/EHS](#7-safetyehs) | Director of Security & Safety | Oversee guest and associate safety, incidents and emergency readiness. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance Engineer | Repair and maintain rooms, HVAC, plumbing and building systems. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Director of Sales & Marketing | Drive group, corporate and leisure revenue through sales and campaigns. |
-| 10 | [Customer Service](#10-customer-service) | Front Office Manager | Lead front desk, guest relations and service recovery. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | General Manager | Lead hotel operations, guest experience and financial results. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | IT Manager | Support hotel systems, networks and guest technology. |
-| 13 | [Executive](#13-executive) | Regional Vice President of Operations | Lead regional portfolio performance, owners and brand standards. |
-| 14 | [Industry-Specific: Revenue Management](#14-industry-specific-revenue-management) | Director of Revenue Management | Optimize pricing, inventory and distribution to maximize RevPAR. |
-| 15 | [Industry-Specific: Events & Catering](#15-industry-specific-events--catering) | Director of Catering & Events | Sell and execute banquets, meetings and weddings. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Hotel Financial Controller |
+| 2 | [HR](#2-hr) | Director of Human Resources |
+| 3 | [Frontline Worker](#3-frontline-worker) | Room Attendant |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Housekeeping Supervisor |
+| 5 | [Quality](#5-quality) | Quality & Brand Standards Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Purchasing Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | Director of Security & Safety |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance Engineer |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Director of Sales & Marketing |
+| 10 | [Customer Service](#10-customer-service) | Front Office Manager |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | General Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | IT Manager |
+| 13 | [Executive](#13-executive) | Regional Vice President of Operations |
+| 14 | [Industry-Specific: Revenue Management](#14-industry-specific-revenue-management) | Director of Revenue Management |
+| 15 | [Industry-Specific: Events & Catering](#15-industry-specific-events--catering) | Director of Catering & Events |
 
 ## Personas and example asks
 

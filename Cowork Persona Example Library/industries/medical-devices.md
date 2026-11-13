@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Clinical Specialist, recurring:** every afternoon, tomorrow's case coverage brief with procedures, surgeon preferences and device notes. → [jump](#15-industry-specific-clinicalfield-clinical-specialist)
 2. **Quality Engineer – Design/Production, hand-off:** complaint trends on a device with a Pareto of failure modes, ready for the CAPA effectiveness review. → [jump](#5-quality)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Regulatory Affairs Specialist chosen because FDA/EU MDR submissions gate market access; Clinical Specialist chosen because case coverage and surgeon support drive adoption and feedback.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Plant Controller | Manage plant costing, inventory reserves, and monthly close. |
-| 2 | [HR](#2-hr) | HR Business Partner – Operations | Support plant staffing, training compliance, and retention. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Cleanroom Assembly Technician | Assemble devices in cleanroom per work instructions and DHR. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Manufacturing Supervisor | Lead cleanroom production to meet quality, compliance, and output targets. |
-| 5 | [Quality](#5-quality) | Quality Engineer – Design/Production | Drive CAPA, nonconformance, and ISO 13485/FDA QMSR compliance. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Strategic Sourcing Manager | Source components and sterilization services; manage supplier quality. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager | Lead site safety, EtO/chemical handling, and environmental compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Engineer – Capital Equipment | Install, maintain, and repair imaging or surgical systems at hospitals. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Territory Sales Manager | Grow device sales with hospitals, IDNs, and surgeons in territory. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service Representative | Manage orders, backorders, and returns for hospitals and distributors. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Site Operations Director | Run site production, cleanroom facilities, and validation readiness. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | R&D Design Engineer | Design devices under design controls; maintain DHF and risk files. |
-| 13 | [Executive](#13-executive) | VP Operations / General Manager | Own business P&L, compliance posture, and growth. |
-| 14 | [Industry-Specific: Regulatory Affairs](#14-industry-specific-regulatory-affairs) | Regulatory Affairs Specialist | Prepare 510(k)/EU MDR submissions and manage regulatory changes. |
-| 15 | [Industry-Specific: Clinical/Field Clinical Specialist](#15-industry-specific-clinicalfield-clinical-specialist) | Clinical Specialist | Support surgeons and clinical staff during device procedures. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Plant Controller |
+| 2 | [HR](#2-hr) | HR Business Partner – Operations |
+| 3 | [Frontline Worker](#3-frontline-worker) | Cleanroom Assembly Technician |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Manufacturing Supervisor |
+| 5 | [Quality](#5-quality) | Quality Engineer – Design/Production |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Strategic Sourcing Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Engineer – Capital Equipment |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Territory Sales Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Service Representative |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Site Operations Director |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | R&D Design Engineer |
+| 13 | [Executive](#13-executive) | VP Operations / General Manager |
+| 14 | [Industry-Specific: Regulatory Affairs](#14-industry-specific-regulatory-affairs) | Regulatory Affairs Specialist |
+| 15 | [Industry-Specific: Clinical/Field Clinical Specialist](#15-industry-specific-clinicalfield-clinical-specialist) | Clinical Specialist |
 
 ## Personas and example asks
 

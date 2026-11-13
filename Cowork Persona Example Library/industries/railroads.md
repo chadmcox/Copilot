@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Train Dispatcher, recurring:** at every desk change, a dispatcher turnover note with line-of-road delays, open track authorities and work windows. → [jump](#14-train-dispatching)
 2. **Craft Labor Relations Manager, hand-off:** a year of crew time claims grouped by agreement article and terminal, ready for the negotiation briefing. → [jump](#2-hr)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Train dispatchers and intermodal terminal managers run core rail-specific workflows (line capacity and container throughput) not covered by the standard personas.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Revenue Accounting Manager | Manage freight revenue, interline settlements, and demurrage billing. |
-| 2 | [HR](#2-hr) | Craft Labor Relations Manager | Administer collective bargaining agreements, crew claims, and union relations. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Conductor | Oversee train operations, paperwork, switching, and crew safety on assignments. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Trainmaster / Yardmaster | Supervise crews, yard operations, and on-time train performance. |
-| 5 | [Quality](#5-quality) | Quality / Rules Compliance Manager | Audit operating rules, FRA compliance, and corrective actions. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Procurement Manager (Rail Materials) | Source ties, rail, ballast, and locomotive parts. |
-| 7 | [Safety/EHS](#7-safetyehs) | Director of Safety & Environmental | Lead injury prevention, hazmat compliance, and environmental programs. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Carman / Locomotive Machinist | Inspect, repair, and maintain railcars and locomotives. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Marketing & Sales Manager (Carload/Intermodal) | Grow shipper volume across carload, intermodal and bulk markets. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service Representative | Handle car orders, shipment tracing, and customer inquiries. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Engineering Track Supervisor (Facilities) | Maintain track, bridges, signals and right-of-way. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Network Planning / Technology Manager | Design operating plan, PTC systems, and rail technology. |
-| 13 | [Executive](#13-executive) | Chief Operating Officer | Lead rail operations, safety, service, and operating ratio. |
-| 14 | [Train Dispatching](#14-train-dispatching) | Train Dispatcher | Direct train movements, issue track authorities, manage line capacity. |
-| 15 | [Intermodal Terminal](#15-intermodal-terminal) | Intermodal Terminal Manager | Manage container lifts, gate operations, and terminal throughput. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Revenue Accounting Manager |
+| 2 | [HR](#2-hr) | Craft Labor Relations Manager |
+| 3 | [Frontline Worker](#3-frontline-worker) | Conductor |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Trainmaster / Yardmaster |
+| 5 | [Quality](#5-quality) | Quality / Rules Compliance Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Procurement Manager (Rail Materials) |
+| 7 | [Safety/EHS](#7-safetyehs) | Director of Safety & Environmental |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Carman / Locomotive Machinist |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Marketing & Sales Manager (Carload/Intermodal) |
+| 10 | [Customer Service](#10-customer-service) | Customer Service Representative |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Engineering Track Supervisor (Facilities) |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Network Planning / Technology Manager |
+| 13 | [Executive](#13-executive) | Chief Operating Officer |
+| 14 | [Train Dispatching](#14-train-dispatching) | Train Dispatcher |
+| 15 | [Intermodal Terminal](#15-intermodal-terminal) | Intermodal Terminal Manager |
 
 ## Personas and example asks
 

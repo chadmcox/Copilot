@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Fleet Safety & Compliance Manager, recurring:** every morning, open recall vehicles still available or on rent, by branch, with a hold reminder drafted for each branch manager. → [jump](#7-safetyehs)
 2. **Customer Care Specialist, hand-off:** a damage-claim case file built from rental agreement, check-in photos, emails and repair invoice. → [jump](#10-customer-service)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Revenue Management/Pricing drives daily rate decisions that make or break rental margin; Fleet Lease Account Manager owns the long-term B2B leasing relationship distinct from daily rental.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Fleet Finance Manager | Manage fleet depreciation, residual values, and branch P&L. |
-| 2 | [HR](#2-hr) | HR Business Partner, Branch Operations | Recruit and retain rental agents, porters, and technicians. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Rental Sales Agent / Counter Representative | Process rentals, returns, and upgrades at the counter. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Branch Manager / Station Manager | Run branch fleet availability, staff, and customer satisfaction. |
-| 5 | [Quality](#5-quality) | Vehicle Quality & Damage Control Lead | Ensure vehicle readiness, inspection accuracy, and damage claim quality. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Fleet Acquisition & Remarketing Manager | Buy vehicles from OEMs and remarket de-fleeted units. |
-| 7 | [Safety/EHS](#7-safetyehs) | Fleet Safety & Compliance Manager | Manage recalls, driver safety, and environmental compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Fleet Maintenance Technician / Shop Lead | Perform preventive maintenance, repairs, and vehicle prep. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Commercial Fleet & Leasing Sales Manager | Win corporate rental and fleet leasing accounts. |
-| 10 | [Customer Service](#10-customer-service) | Customer Care Specialist | Resolve billing, damage, and reservation issues for renters. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Regional Fleet Operations Manager | Balance fleet, manage lots, and run airport facilities. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Telematics & Connected Fleet Product Manager | Manage telematics, keyless, and EV charging technology. |
-| 13 | [Executive](#13-executive) | Regional Vice President / General Manager | Lead P&L, fleet strategy, and customer growth. |
-| 14 | [Fleet Planning & Pricing Analyst](#14-fleet-planning--pricing-analyst) | Revenue Management / Pricing Analyst | Set rental rates and forecast demand by location and class. |
-| 15 | [Lease & Fleet Account Manager](#15-lease--fleet-account-manager) | Fleet Lease Account Manager | Manage corporate lease portfolios, renewals, and end-of-term. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Fleet Finance Manager |
+| 2 | [HR](#2-hr) | HR Business Partner, Branch Operations |
+| 3 | [Frontline Worker](#3-frontline-worker) | Rental Sales Agent / Counter Representative |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Branch Manager / Station Manager |
+| 5 | [Quality](#5-quality) | Vehicle Quality & Damage Control Lead |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Fleet Acquisition & Remarketing Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | Fleet Safety & Compliance Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Fleet Maintenance Technician / Shop Lead |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Commercial Fleet & Leasing Sales Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Care Specialist |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Regional Fleet Operations Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Telematics & Connected Fleet Product Manager |
+| 13 | [Executive](#13-executive) | Regional Vice President / General Manager |
+| 14 | [Fleet Planning & Pricing Analyst](#14-fleet-planning--pricing-analyst) | Revenue Management / Pricing Analyst |
+| 15 | [Lease & Fleet Account Manager](#15-lease--fleet-account-manager) | Fleet Lease Account Manager |
 
 ## Personas and example asks
 

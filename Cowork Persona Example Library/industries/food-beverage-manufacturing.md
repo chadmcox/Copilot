@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Sanitation Supervisor, recurring:** before each night shift, the master sanitation schedule with assignments, open zone 1 swab follow-ups and chemical changes. → [jump](#14-sanitation-lead-industry-specific)
 2. **Food Safety & Quality Manager, hand-off:** 90 days of Listeria swab results, holds and complaints pulled into the SQF audit-readiness deck. → [jump](#5-quality)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Sanitation Supervisor: sanitation drives food safety and downtime in F&B plants. Demand & S&OP Planner: short shelf life and promotions make planning critical.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Plant Controller | Manage plant cost accounting, variances, and month-end close. |
-| 2 | [HR](#2-hr) | HR Business Partner – Plant | Support plant workforce, staffing, labor relations, and retention. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Production Line Operator | Operate filling/packaging lines, perform checks, record batch data. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Shift Supervisor | Lead shift crew to hit OEE, safety, and food safety targets. |
-| 5 | [Quality](#5-quality) | Food Safety & Quality Manager | Own HACCP, SQF/BRCGS compliance, holds, and audits. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Ingredients & Packaging Buyer | Source ingredients and packaging, manage suppliers and contracts. |
-| 7 | [Safety/EHS](#7-safetyehs) | Plant EHS Manager | Drive worker safety, environmental permits, and OSHA compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance Technician | Maintain and repair processing and packaging equipment. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Key Account Manager – Retail | Manage retail and foodservice accounts, promotions, and volume. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service & Order Desk Rep | Process orders, resolve shortages, deductions, and customer inquiries. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Manager | Run plant operations, output, cost, safety, and food safety. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Product Development Scientist | Develop formulations, run pilot trials, and scale to plant. |
-| 13 | [Executive](#13-executive) | VP Manufacturing Operations | Lead network manufacturing performance, capital, and strategy. |
-| 14 | [Sanitation Lead (industry-specific)](#14-sanitation-lead-industry-specific) | Sanitation Supervisor | Lead sanitation crews, master sanitation schedule, pre-op inspection. |
-| 15 | [Demand Planner (industry-specific)](#15-demand-planner-industry-specific) | Demand & S&OP Planner | Forecast demand, run S&OP, and balance production plans. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Plant Controller |
+| 2 | [HR](#2-hr) | HR Business Partner – Plant |
+| 3 | [Frontline Worker](#3-frontline-worker) | Production Line Operator |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Shift Supervisor |
+| 5 | [Quality](#5-quality) | Food Safety & Quality Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Ingredients & Packaging Buyer |
+| 7 | [Safety/EHS](#7-safetyehs) | Plant EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance Technician |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Key Account Manager – Retail |
+| 10 | [Customer Service](#10-customer-service) | Customer Service & Order Desk Rep |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Product Development Scientist |
+| 13 | [Executive](#13-executive) | VP Manufacturing Operations |
+| 14 | [Sanitation Lead (industry-specific)](#14-sanitation-lead-industry-specific) | Sanitation Supervisor |
+| 15 | [Demand Planner (industry-specific)](#15-demand-planner-industry-specific) | Demand & S&OP Planner |
 
 ## Personas and example asks
 

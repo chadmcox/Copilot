@@ -6,6 +6,14 @@ This guide shows where to use each Copilot group. The scripts in this folder cre
 
 > **Next step: the Agent Delegation Guide.** After you set up these groups, follow the [Copilot Agent Delegation Guide](../Agents/readme.md). It covers who can build, share, publish and receive agents.
 
+## Short version
+
+1. Run `New-CopilotGroups.ps1 -WhatIf`, then without `-WhatIf`.
+2. Do the same with `New-CopilotAdminPim.ps1 -ApproverGroupName "<group>"`, then `New-CopilotAccessPackages.ps1`.
+3. Work through [Do these first](#do-these-first), overdue items at the top.
+4. Point each admin center setting at its group, using the sections below. You do this once.
+5. From then on, add and remove people with access packages, not in the admin centers.
+
 ## How to read the labels
 
 Every step has one of these labels:
@@ -33,7 +41,7 @@ There are three setup scripts, one for each job. Each one checks the tenant agai
 | 5 | `Get-CopilotSpendingReport.ps1` | **Preview, read-only.** Shows the credit balance and every spending policy with its groups, services, limits and alerts, and flags problems. Add `-UserPrincipalName` to see which policy covers a person and how much they have left |
 | 6 | (by hand) | Point each admin center setting at its group, using the steps below |
 
-Each script asks which Microsoft cloud to sign in to: **Global** (also GCC), **USGov** (GCC High) or **USGovDoD**. China isn't offered: the Copilot and agent APIs these scripts use aren't expected to work there. Press Enter for Global, or pass `-Environment` to skip the question. Not every Copilot or agent API exists in every national cloud, so check Microsoft's docs for yours. The Enterprise MCP server that the Cowork setup uses is [global cloud only](https://learn.microsoft.com/graph/mcp-server/overview), so in GCC High and DoD use the scripts.
+**Cloud:** each script asks for **Global** (also GCC), **USGov** (GCC High) or **USGovDoD**. Press Enter for Global, or pass `-Environment`. China isn't offered, and not every Copilot API exists in every national cloud. Check Microsoft's docs for yours.
 
 ```powershell
 .\New-CopilotGroups.ps1 -WhatIf
@@ -136,6 +144,14 @@ Copilot Platform Admin, Copilot Delegated Admin, Copilot Agent Management Admin,
 Copilot Platform Admin is made by `New-CopilotGroups.ps1`, gets its roles from `New-CopilotAdminPim.ps1`, and has no access package.
 
 ## Do these first
+
+**At a glance, as of Nov 13, 2026:**
+
+- **Overdue:** [1. Agent and plugin access](#1-check-agent-and-plugin-access-date-passed-do-it-now), [2. Advanced package uploads](#2-limit-who-can-upload-advanced-agent-and-plugin-packages), [3. Agent blueprints](#3-stop-every-user-from-creating-agent-blueprints-in-entra), [8. SharePoint](#8-sharepoint), [9. Agents that create their own identities](#9-find-agents-that-create-their-own-entra-agent-identities-date-passed-do-it-now)
+- **This week:** [11. Frontier members](#11-check-who-is-in-frontier-do-it-this-week), [12. Work IQ transcript access (Nov 14)](#12-turn-on-work-iq-transcript-access-if-apps-need-it-by-nov-14-2026), [16. Intelligent call delegation (Nov 17)](#16-keep-intelligent-call-delegation-working-as-early-as-nov-17-2026), [17. Power Platform connectors for Cowork (mid-Nov)](#17-review-power-platform-connectors-for-cowork-by-mid-november), [15. Opal spending policy (since Nov 9)](#15-give-opal-users-a-spending-policy-from-nov-9-2026)
+- **This month:** [10. App Builder (Nov 30)](#10-tell-makers-to-move-apps-off-app-builder-by-nov-30-2026), [14. Copilot Studio spending (from Nov 20)](#14-decide-if-copilot-studio-spending-moves-to-cost-management-from-nov-20-2026)
+- **No date, do once:** [4. Auto-apply new services](#4-turn-off-automatic-new-services-in-your-spending-policies), [5. Spending minimums](#5-check-your-spending-limits-meet-microsofts-new-minimums), [6. Usage-based billing requests](#6-choose-who-can-ask-for-usage-based-billing-experiences), [7. Copilot Code controls](#7-set-the-copilot-code-controls-frontier)
+- **December:** [13. Teams AI meeting policies](#13-get-ready-for-the-new-teams-ai-meeting-policies-december)
 
 ### 1. Check Agent and plugin access (date passed, do it now)
 
@@ -863,101 +879,9 @@ Members also need a Microsoft 365 Copilot license and Cowork access to run the r
 
 *From Microsoft docs ([Manage plugins for Copilot Cowork](https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-manage-plugins)):* Copilot and Cowork plugin activity is in Microsoft Purview audit, under **Copilot activities**, not in Entra audit logs.
 
-## What changed on Oct 23, 2026
+## Change history
 
-I checked each step against the admin centers. These are the differences from the earlier version:
-
-| Old guide said | What the admin center shows |
-| --- | --- |
-| **Users can create agent blueprints** | **Users can register agent identity blueprints** |
-| **Auto-apply new services** | **Allow new Agents and services as they become available**. On by default in a new policy, with every service checked |
-| SpaceXAI is on the subprocessors page | SpaceXAI is on **AI providers operating as independent processors**. Still use Copilot SpaceXAI Models Access for it |
-| **AI providers for other large language models** | **AI providers operating as independent processors** |
-| **Copilot → Settings → View all → Cowork settings** → **Allow Cowork to use the Microsoft Edge browser** | **Browser use in Microsoft Copilot** → **Allow local browser use** |
-| **Access to usage-based billing experiences** with a group picker | Couldn't find it. The closest is **AI experiences enabled by usage-based billing**, with one checkbox and no group picker |
-| **Copilot → Cost Management → Configuration → Model profiles** | Not shown on the **Configuration** tab |
-| **Copilot → Cost Management → Credit requests** | **Copilot → Cost management → Overview → View requests** |
-| **Agents → Tools → \[plugin\] → Installed for** | Plugin has **Users** (**Available to**) and an **Install** button |
-| Frontier: no user count | Panel shows an estimate of how many of 10,000 assignments you've used |
-
-## Other Message Center changes
-
-Every Copilot post that changes this guide. The newest ones are at the top. Rows above the line were checked on Oct 26, 2026; the rest come from earlier versions of this guide.
-
-**New on Nov 9, 2026:**
-
-| Change | Post | What it means for you |
-| --- | --- | --- |
-| Opal needs usage-based billing and a spending policy, from Nov 9 | MC1540330 | See Do these first, step 15 |
-| Intelligent call delegation moves to public preview and uses Copilot Credits, as early as Nov 17 | MC1537490 | See Do these first, step 16. New group: Copilot Intelligent Call Delegation Access |
-| Power Platform connectors work in Cowork. Power Platform DLP doesn't apply to Cowork. Rollout done by mid-November | MC1542062 | See Do these first, step 17 and the Agent Delegation Guide |
-| Standalone Word, Excel and PowerPoint agents go away, mid-November to late December. People ask Chat instead | MC1536062 | Tell users and the help desk. Copilot Anthropic Models Access is no longer tied to those agents |
-| Workforce Insights custom data moves to the Microsoft 365 profile endpoint by Nov 18 | MC1542066 | Only if you send custom data. See the Agent Delegation Guide |
-| Work IQ MCP can read a person's memory profile, early December. A new policy is on by default | MC1539004 | See the Agent Delegation Guide |
-| Copilot connectors can be used through Work IQ APIs, late November to late December | MC1538999 | Existing connector controls still apply. No action |
-| Planner plugin for Cowork, GA in November. Assign it like any other plugin | MC1540339 | See Cowork plugins |
-| Accounting capabilities in Excel and Cowork. GA Nov 13, Frontier not required after that | MC1536053 | No group change. Tell finance teams |
-| Notebooks are renamed Workspaces. Projects added to Home | MC1535647 | Check who is in a Cowork spending policy. Update training |
-| Older models in prompts (including Anthropic and Grok) move to newer GPT models on Dec 2. Applies to Copilot Studio, Power Automate and Power Apps prompts | MC1536101 | Tell makers to test prompts before Dec 2. Your model groups don't change |
-| Teams AI meeting policies moved later: Targeted Release in December, everyone in January 2027 | MC1532253 (updated Nov 3) | See Do these first, step 13 |
-| Usage-based models in Chat and Office apps: everyone moved to early to mid-December | MC1519122 (updated Nov 4) | People still need a Copilot license, usage-based billing and credits |
-| Copilot Studio replacement models changed for the Nov 12 retirement | MC1506318 (updated Nov 3) | Tell agent owners to test before Nov 12 |
-
-**New on Nov 2, 2026:**
-
-| Change | Post | What it means for you |
-| --- | --- | --- |
-| Frontier now gives public previews in Teams, new Outlook, OneDrive and SharePoint. A Copilot license isn't needed to enroll. Targeted release retires in January 2027 | MC1529472, MC1490899 | See Do these first, step 11 |
-| **MeetingAI** and **TranscriptionWithMeetingAI** replace the Copilot meeting policy, Targeted Release in December, everyone in January 2027 | MC1532253 | See Do these first, step 13. Keep using Copilot Teams Policy Exceptions |
-| Copilot Studio spending can move to Cost management, by agent or environment. GA by Nov 20 | MC1530368 | See Do these first, step 14 |
-| Grok 4.6 comes to Chat as a usage-based model in early November, for Frontier tenants with the SpaceXAI subprocessor setting on | MC1474124 (updated Oct 28) | Copilot SpaceXAI Models Access decides who gets it. People also need credits |
-| Copilot Code post updated. Cloud sessions are on, local sessions are off, and policies with the new-services setting already include Code | MC1519871 (updated Oct 28) | Matches this guide. See Do these first, step 7 |
-| Engage plugin for Cowork and Autopilot, GA Nov 16, off by default | MC1530609 | See Cowork plugins |
-| AI Builder credits are retiring. New or renewed licenses have none from Nov 1. Usage then falls back to Copilot Credits, and runs stop if neither is left | MC1526652 | Check your contracts in the Power Platform admin center. Buy Copilot Credits before yours run out |
-| The taskbar pin setting adds a paid Copilot license option, early to mid-December | MC1530612 | It makes its own license group, so the admin needs rights to create groups. Or use **Pin for selected groups** with Copilot Access |
-| Office in the Copilot app, mid-November | MC1530611 | No admin action. Tell users |
-| DSPM classic and DSPM for AI classic retire in March 2027 | MC1481315 (updated Oct 30) | Move to Purview → **Solutions** → **DSPM**. Affects Copilot Compliance Admin |
-| Authoritative sources for Copilot Search, up to 100 SharePoint sites | MC1526676 | Only Global Administrator and Global Reader see it. Nothing to change in your groups |
-| Teams meeting memory files move to January 2027. On by default, kept 5 years | MC1429018 (updated Oct 30) | Review **Meeting Memory** in Teams meeting policies when it appears |
-| People can see which memories shaped a Copilot answer | MC1530959 | No new setting. You can still turn memory off by group with Enhanced Personalization |
-| Scheduled prompts in Agent Builder, connected agents, and the Evaluation Viewer role | MC1302906, MC1478975, MC1532073 | See the Agent Delegation Guide |
-
-**Earlier:**
-
-| Change | Post | What it means for you |
-| --- | --- | --- |
-| Graph APIs for Copilot cost management (beta) | MC1521616 | New. See Set spending policies with Graph, and run `New-CopilotSpendingPolicies.ps1` |
-| Copilot Code is rolling out in Frontier. Code is now a usage-based service | MC1519871 | See Copilot Code: turn it on, and Do these first, step 7 |
-| From Oct 30 the Copilot Connectors page follows **Agent and plugin access** (Allowed agent types). The old CLI switch is gone | MC1454973 (updated Oct 23) | See Do these first, step 1 |
-| The Cowork settings panel is now called **Browser use in Microsoft Copilot** | MC1515930 | Only a name change. See Copilot + Cowork Browser Access |
-| Critique and Council retire from Researcher by mid-November | MC1515927 | Tell Frontier users. Nothing to change in your groups. Action by Nov 14, 2026 |
-| Admin controls for Business Applications in Work IQ, preview by Nov 17 | MC1518036 | Review which Power Platform environments Work IQ can read. Affects Copilot Work IQ API Access |
-| Usage-based models in Chat and Word, Excel and PowerPoint, Frontier early to mid-November, everyone early to mid-December (updated Nov 4). GPT-6 Astra and Claude Fable 5.1 become usage-based models | MC1519122 | People need a Copilot license, usage-based billing on and credits. Your model groups still decide which providers they get |
-| Insights Agent V2 in Frontier adds **Agents** → **Settings** → **Agent feedback sharing** (default **No agents**) | MC1520901 | Decide whether agent owners see user feedback. See the Agent Delegation Guide |
-| Clipchamp "Create a video" gets a Cloud Policy control, late November to early December | MC1518034 | A new policy to scope with Copilot Cloud Policy Exceptions |
-| Teams admin center gets a simpler app enablement flow (**Teams apps** → **Manage apps** → **Manage access**) | MC1515931 | Your settings don't change. Update your runbook |
-| Teams Phone Agent GA guidance: one security group and one spending policy per budget | MC1482800 (updated Oct 23) | Matches this design. Keep resource accounts in Copilot Teams Phone Agent Accounts |
-| Copilot Studio adds topics, connected agents, evaluations and monitoring for Copilot Chat agents (GA Oct 26) | MC1518233 | For makers. Nothing to change in your groups |
-| Outlook Copilot Prioritize retires from Oct 26 | MC1519861 | Tell users. Nothing to change in your groups |
-| Agents that create their own Entra agent identities need an admin grant from Nov 4 | MC1506728 | See Do these first, step 9 |
-| App Builder agent and vibe.powerapps.com retire on Nov 30. New apps there are already blocked | MC1505609 | Makers build apps in Cowork or Copilot Studio. Copilot App Builder Access still limits Copilot Studio |
-| Copilot Studio app building can be limited to groups in the M365 admin center | MC1469329 | See Copilot App Builder Access |
-| The Copilot Studio app in Teams goes away: no editing from January 2027, removed in February 2027 | MC1511056 | Tell makers to use copilotstudio.microsoft.com. Nothing to change in your groups |
-| Researcher and Analyst are no longer pinned by default in the Copilot app | MC1479277 | If you want them pinned, pin them yourself. See the Agent Delegation Guide |
-| Usage numbers for Microsoft-built agents no longer need an Agent 365 license (late November) | MC1506727 | Copilot AI Reader members can see agent activity in **Agents** → **All agents** |
-| Sensitivity labels can be put on Entra security groups (mid-November) | MC1508238 | Don't label the Copilot groups yet. A label can't be changed or removed once it's on a security group |
-| Older GPT models in Copilot Studio move to GPT Chat Latest on Nov 12 | MC1506318 | Tell agent owners to test their agents. Your model groups don't change |
-| Spending policies can use a model profile (Cowork only) | MC1479276 | See Model profiles |
-| Credit requests can go to your own approval process | MC1470425 | See Credit requests |
-| Credits follow a person when they move between policies | MC1470425 | Test the 30-day temporary tier with one person first |
-| Autopilot (formerly Scout) uses a spending policy; admin settings not out yet | MC1479277, MC1332811 | Keep the Autopilot group |
-| Cowork browser use can be limited to groups | MC1474461 | See Copilot + Cowork Browser Access |
-| SpaceXAI setting can be limited to groups | MC1474124 | See Copilot SpaceXAI Models Access |
-| GPT-6.1 Sol and Claude Sonnet 5.5 follow the OpenAI and Anthropic settings | MC1483844 | Your model groups still decide who gets them |
-| A **Plugins** button replaces the Agents, Agents & Skills and Customize buttons | MC1484008 | Admins still deploy plugins from **Agents** → **Tools**. Update user training |
-| The **Microsoft Copilot with Graph-grounded chat** service plan now controls full vs basic Copilot | MC1405498 | Don't turn that plan off in the Copilot Access license |
-| Legal plugins in Word and Cowork; the Legal Agent is retiring | MC1509799 | You can only turn these on or off for everyone |
-| Advanced package uploads can be limited to groups | MC1472007 | See Do these first, step 2 |
+What changed in the admin centers on Oct 23, 2026, and every Message Center post that changed this guide: [changes.md](changes.md).
 
 ## Sources
 

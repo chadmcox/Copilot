@@ -15,6 +15,13 @@ Use GitHub Copilot in VS Code instead? The same skill works there, with a much s
 
 > Microsoft changes Cowork, plugins and the Enterprise MCP server often, and parts are in preview. Test this in your own tenant first.
 
+## Short version
+
+1. Pick a way. **A:** an admin sets up the plugin once and Cowork runs the whole review live. **B:** skill only, about 2 minutes per person; Cowork explains the CSVs from `Get-AgentToolsReport.ps1`.
+2. Set it up: [Way A](#way-a-admin-setup-once-per-tenant) (admin, once per tenant) or [Way B](#way-b-skills-only).
+3. Attach `Packages.csv` if you have it, and paste [the prompt](#the-prompt) into Cowork.
+4. Review the recommendations. To block or disable anything, run `Invoke-AgentToolsCleanup.ps1` with `-WhatIf` first (see the [main README](../README.md)).
+
 ## What Cowork can read through the Enterprise MCP
 
 Tested against a live tenant on Oct 31, 2026:

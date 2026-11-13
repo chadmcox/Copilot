@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Turnaround (TAR) Manager, recurring:** every evening during a turnaround, the daily TAR report with progress, critical path, safety events and late materials. → [jump](#15-turnaround-manager-industry-specific)
 2. **HSE Manager, hand-off:** Tier 1/Tier 2 PSE trends, overdue MOCs and PSSRs, and emissions vs. permit pulled into the monthly PSM review. → [jump](#7-safetyehs)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Added Production/Process Operations Engineer because uptime and hydrocarbon accounting drive refinery and upstream economics, and Turnaround (TAR) Manager because planned shutdowns are the largest controllable cost and safety exposure.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Refinery Controller / Upstream Cost Accountant | Manage AFE tracking, LOE reporting, and month-end close for assets. |
-| 2 | [HR](#2-hr) | HR Business Partner – Operations | Support shift workforce planning, competency, and labor relations at sites. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Field / Console Operator | Run process units, perform rounds, and respond to alarms safely. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Shift Supervisor / Operations Foreman | Lead shift crews, manage handovers, permits, and production targets. |
-| 5 | [Quality](#5-quality) | Lab / Product Quality Manager | Ensure product specs, lab results, and certificate of analysis compliance. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Crude & Feedstock Scheduler / Procurement Lead | Plan crude slates, manage contracts, and source MRO materials. |
-| 7 | [Safety/EHS](#7-safetyehs) | HSE Manager | Lead process safety, environmental compliance, and incident investigation. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance / Reliability Technician (Rotating Equipment) | Inspect, repair, and maintain pumps, compressors, and static equipment. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Fuels Marketing / Commercial Manager | Manage wholesale, rack, and contract customers and pricing. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service / Order-to-Cash Representative | Handle orders, lifting schedules, BOL issues, and invoice disputes. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Operations Manager / Plant Manager | Deliver safe throughput, margin, and reliability across units. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Engineer | Optimize unit performance, troubleshoot, and support MOCs. |
-| 13 | [Executive](#13-executive) | VP Operations / Refinery General Manager | Set strategy, safety culture, and financial performance for assets. |
-| 14 | [Production/Process Operations Engineer (industry-specific)](#14-productionprocess-operations-engineer-industry-specific) | Production Engineer (Upstream) | Optimize well performance, deferment, and artificial lift. |
-| 15 | [Turnaround Manager (industry-specific)](#15-turnaround-manager-industry-specific) | Turnaround (TAR) Manager | Plan and execute shutdowns on scope, schedule, and budget. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Refinery Controller / Upstream Cost Accountant |
+| 2 | [HR](#2-hr) | HR Business Partner – Operations |
+| 3 | [Frontline Worker](#3-frontline-worker) | Field / Console Operator |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Shift Supervisor / Operations Foreman |
+| 5 | [Quality](#5-quality) | Lab / Product Quality Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Crude & Feedstock Scheduler / Procurement Lead |
+| 7 | [Safety/EHS](#7-safetyehs) | HSE Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance / Reliability Technician (Rotating Equipment) |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Fuels Marketing / Commercial Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Service / Order-to-Cash Representative |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Operations Manager / Plant Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Engineer |
+| 13 | [Executive](#13-executive) | VP Operations / Refinery General Manager |
+| 14 | [Production/Process Operations Engineer (industry-specific)](#14-productionprocess-operations-engineer-industry-specific) | Production Engineer (Upstream) |
+| 15 | [Turnaround Manager (industry-specific)](#15-turnaround-manager-industry-specific) | Turnaround (TAR) Manager |
 
 ## Personas and example asks
 

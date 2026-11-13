@@ -6,6 +6,13 @@ Run the Entra ID operations report from **GitHub Copilot in VS Code** (agent mod
 
 > GitHub Copilot, VS Code and the Enterprise MCP server change often, and parts are in preview. Test this in your own tenant first.
 
+## Short version
+
+1. [Set up](#set-up-each-person-about-5-minutes) (about 5 minutes): get the files and run `Install-GitHubCopilotSkill.ps1` from this folder.
+2. For the live report, add the Enterprise MCP server. An admin does the [tenant setup](#tenant-setup-for-the-enterprise-mcp-admin-once-per-tenant) once.
+3. Open VS Code agent mode or the Copilot CLI and [ask Copilot to run it](#run-it). Copilot reads the tenant live through the Enterprise MCP.
+4. Open the HTML report. Start with the lowest-scoring area; every finding has a fix tied to the guide section.
+
 ## Why use GitHub Copilot instead of Cowork
 
 | | GitHub Copilot | Copilot Cowork |

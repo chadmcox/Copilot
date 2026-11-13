@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Tailings / Environmental Compliance Engineer, recurring:** every morning, overnight piezometer and monitoring alerts on the tailings facility, with anything past a trigger level flagged. → [jump](#15-tailingsenvironmental-compliance-engineer-industry-specific)
 2. **Metallurgist / Grade Control Lead, hand-off:** mine vs. mill grade reconciliation for the month with recovery vs. head grade and the likely causes of the gap. → [jump](#5-quality)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Added Mine Planner/Geologist because ore-body knowledge and mine plans drive value, and Tailings/Environmental Compliance Engineer because tailings governance (e.g., GISTM) is a critical license-to-operate risk.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Site Controller | Manage site cost reporting, unit costs, and capital project accounting. |
-| 2 | [HR](#2-hr) | HR Business Partner – Site | Support FIFO rosters, training, and labor relations. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Haul Truck / Plant Operator | Operate mobile equipment or processing plant safely and productively. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Shift Supervisor / Pit Supervisor | Lead crews, manage production targets, and safety on shift. |
-| 5 | [Quality](#5-quality) | Metallurgist / Grade Control Lead | Manage ore grade, recovery, and product specs. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Supply Chain / Procurement Manager | Source consumables, spares, and manage logistics to site. |
-| 7 | [Safety/EHS](#7-safetyehs) | HSE Manager | Lead critical risk controls, incident investigation, and compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Heavy Diesel Fitter / Maintenance Technician | Maintain mobile and fixed plant equipment. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Marketing / Concentrate Sales Manager | Manage offtake contracts, pricing, and customer relationships. |
-| 10 | [Customer Service](#10-customer-service) | Shipping / Customer Service Coordinator | Coordinate shipments, documentation, and customer queries. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Mine / Processing Plant Manager | Deliver safe production, recovery, and cost targets. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process / Mining Engineer | Optimize processes, design improvements, and support projects. |
-| 13 | [Executive](#13-executive) | General Manager / COO | Set strategy, safety culture, and site performance. |
-| 14 | [Mine Planner/Geologist (industry-specific)](#14-mine-plannergeologist-industry-specific) | Mine Planner / Geologist | Develop mine plans, schedules, and resource models. |
-| 15 | [Tailings/Environmental Compliance Engineer (industry-specific)](#15-tailingsenvironmental-compliance-engineer-industry-specific) | Tailings / Environmental Compliance Engineer | Monitor TSF performance and environmental permit compliance. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Site Controller |
+| 2 | [HR](#2-hr) | HR Business Partner – Site |
+| 3 | [Frontline Worker](#3-frontline-worker) | Haul Truck / Plant Operator |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Shift Supervisor / Pit Supervisor |
+| 5 | [Quality](#5-quality) | Metallurgist / Grade Control Lead |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Supply Chain / Procurement Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | HSE Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Heavy Diesel Fitter / Maintenance Technician |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Marketing / Concentrate Sales Manager |
+| 10 | [Customer Service](#10-customer-service) | Shipping / Customer Service Coordinator |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Mine / Processing Plant Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process / Mining Engineer |
+| 13 | [Executive](#13-executive) | General Manager / COO |
+| 14 | [Mine Planner/Geologist (industry-specific)](#14-mine-plannergeologist-industry-specific) | Mine Planner / Geologist |
+| 15 | [Tailings/Environmental Compliance Engineer (industry-specific)](#15-tailingsenvironmental-compliance-engineer-industry-specific) | Tailings / Environmental Compliance Engineer |
 
 ## Personas and example asks
 

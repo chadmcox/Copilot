@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Clinical Trial Manager, recurring:** every Monday, a study status digest with site activation, enrollment vs. plan and open monitoring findings. → [jump](#15-clinical-operations-industry-specific)
 2. **QA Manager / Qualified Person, hand-off:** deviations, CAPA effectiveness checks and past inspection observations pulled into the inspection readiness pack. → [jump](#5-quality)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Regulatory Affairs and Clinical Operations are added because submissions and trials drive time-to-market and are uniquely regulated in this industry.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Plant Controller / R&D Finance Manager | Manage site cost accounting, R&D budgets, and clinical trial accruals. |
-| 2 | [HR](#2-hr) | HR Business Partner, R&D & Manufacturing | Support workforce planning, GMP training compliance, and talent programs. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Manufacturing Technician / Aseptic Operator | Execute batch records and operate filling, granulation, or packaging equipment. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Shift Supervisor (GMP Manufacturing) | Lead shift operations, batch schedule adherence, and right-first-time execution. |
-| 5 | [Quality](#5-quality) | QA Manager / Qualified Person | Oversee deviations, CAPA, batch disposition, and inspection readiness. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Supply Planner / Strategic Sourcing Manager (API & Excipients) | Plan materials, manage CMO/CDMO suppliers, and secure critical API supply. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager | Manage lab and plant safety, potent compound handling, and environmental permits. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Engineer (Diagnostic Instruments) | Install, maintain, and repair analyzers at hospital and reference labs. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Key Account Manager / Brand Manager | Grow accounts and execute brand plans within promotional compliance. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service / Medical Information Specialist | Handle order, complaint, and product inquiry intake with compliant routing. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Site Operations / Facilities & Utilities Manager | Maintain cleanrooms, HVAC, water, and utility systems in validated state. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Development Scientist / Validation Engineer | Develop, scale up, and validate processes, methods, and equipment. |
-| 13 | [Executive](#13-executive) | Site Head / VP Operations | Lead site performance, compliance, and portfolio supply. |
-| 14 | [Regulatory Affairs (industry-specific)](#14-regulatory-affairs-industry-specific) | Regulatory Affairs Manager | Prepare submissions, manage health authority queries, and maintain registrations. |
-| 15 | [Clinical Operations (industry-specific)](#15-clinical-operations-industry-specific) | Clinical Trial Manager | Oversee study start-up, site performance, and CRO delivery. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Plant Controller / R&D Finance Manager |
+| 2 | [HR](#2-hr) | HR Business Partner, R&D & Manufacturing |
+| 3 | [Frontline Worker](#3-frontline-worker) | Manufacturing Technician / Aseptic Operator |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Shift Supervisor (GMP Manufacturing) |
+| 5 | [Quality](#5-quality) | QA Manager / Qualified Person |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Supply Planner / Strategic Sourcing Manager (API & Excipients) |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Engineer (Diagnostic Instruments) |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Key Account Manager / Brand Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Service / Medical Information Specialist |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Site Operations / Facilities & Utilities Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Development Scientist / Validation Engineer |
+| 13 | [Executive](#13-executive) | Site Head / VP Operations |
+| 14 | [Regulatory Affairs (industry-specific)](#14-regulatory-affairs-industry-specific) | Regulatory Affairs Manager |
+| 15 | [Clinical Operations (industry-specific)](#15-clinical-operations-industry-specific) | Clinical Trial Manager |
 
 ## Personas and example asks
 

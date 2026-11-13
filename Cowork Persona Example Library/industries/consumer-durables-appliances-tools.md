@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Product Safety & Regulatory Manager, recurring:** every morning, new consumer incident reports screened for possible safety risk, with the ones to review flagged. → [jump](#14-product-safety--compliance-industry-specific)
 2. **Retail Account Manager, hand-off:** a line review prep for a retailer from POS sell-through, weeks of supply and in-stock issues. → [jump](#9-salesmarketing)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Product Safety & Regulatory Manager (recall and certification risk is industry-defining) and Demand Planner (retail seasonality drives S&OP).
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Product Line Finance Manager | Manages P&L, landed cost, and promotional spend by product category. |
-| 2 | [HR](#2-hr) | HR Business Partner, Manufacturing & Distribution | Supports staffing, retention, and engagement across plants and DCs. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Assembly Line Associate | Assembles appliances or tools to work instructions and takt time. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Assembly Team Leader | Leads assembly cell to meet takt, quality, and safety goals. |
-| 5 | [Quality](#5-quality) | Product Quality Engineer | Drives product reliability, test compliance, and field defect resolution. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Global Sourcing Manager | Manages contract manufacturers and component suppliers across regions. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager | Leads workplace safety, product stewardship, and environmental compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Technician | Diagnoses and repairs appliances in homes under warranty. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Retail Account Manager | Manages big-box and e-commerce retail accounts and promotions. |
-| 10 | [Customer Service](#10-customer-service) | Consumer Care Agent | Resolves consumer product questions, warranty claims, and service requests. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Operations Manager | Leads plant output, cost, safety, and continuous improvement. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Product Design Engineer | Designs and validates new appliance and tool products. |
-| 13 | [Executive](#13-executive) | General Manager, Consumer Products | Owns brand P&L, growth strategy, and operating performance. |
-| 14 | [Product Safety & Compliance (industry-specific)](#14-product-safety--compliance-industry-specific) | Product Safety & Regulatory Manager | Manages CPSC reporting, certifications, and recall readiness. |
-| 15 | [Demand Planning (industry-specific)](#15-demand-planning-industry-specific) | Demand Planner | Forecasts SKU demand and drives S&OP for seasonal peaks. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Product Line Finance Manager |
+| 2 | [HR](#2-hr) | HR Business Partner, Manufacturing & Distribution |
+| 3 | [Frontline Worker](#3-frontline-worker) | Assembly Line Associate |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Assembly Team Leader |
+| 5 | [Quality](#5-quality) | Product Quality Engineer |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Global Sourcing Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Technician |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Retail Account Manager |
+| 10 | [Customer Service](#10-customer-service) | Consumer Care Agent |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Operations Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Product Design Engineer |
+| 13 | [Executive](#13-executive) | General Manager, Consumer Products |
+| 14 | [Product Safety & Compliance (industry-specific)](#14-product-safety--compliance-industry-specific) | Product Safety & Regulatory Manager |
+| 15 | [Demand Planning (industry-specific)](#15-demand-planning-industry-specific) | Demand Planner |
 
 ## Personas and example asks
 

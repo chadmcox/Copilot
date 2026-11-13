@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Distribution & Logistics Manager, recurring:** every afternoon, tomorrow's flatbed loads checked against carrier confirmations and jobsite delivery windows. → [jump](#14-logistics-industry-specific)
 2. **Technical Service Representative, hand-off:** a site-visit brief for a project built from prior warranty claims, installer notes and inspection photos. → [jump](#8-field-servicerepair)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Logistics Manager (heavy, seasonal jobsite deliveries drive cost and service) and Specification Manager (architect specification determines demand).
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Plant Controller | Manages plant cost accounting, variances, and month-end close. |
-| 2 | [HR](#2-hr) | Plant HR Business Partner | Supports hiring, retention, and labor relations for manufacturing sites. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Production Line Operator | Operates extrusion, molding, or batching lines to spec and rate. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Shift Supervisor | Leads shift crew to meet safety, quality, and output targets. |
-| 5 | [Quality](#5-quality) | Plant Quality Manager | Owns product testing, ASTM/code compliance, and nonconformance resolution. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Raw Materials Buyer | Sources aggregates, resins, cement, and packaging at target cost. |
-| 7 | [Safety/EHS](#7-safetyehs) | Plant EHS Manager | Leads OSHA compliance, dust/silica control, and environmental permits. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Technical Service Representative | Supports contractors on installation, jobsite issues, and warranty claims. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Territory Sales Manager | Grows sales with dealers, distributors, and contractors in territory. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service Representative | Handles dealer orders, delivery scheduling, and claims inquiries. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Manager | Leads plant safety, output, cost, and people performance. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Product Development Engineer | Develops and tests products to building codes and performance standards. |
-| 13 | [Executive](#13-executive) | President, Building Products Division | Sets strategy and P&L for the building products business. |
-| 14 | [Logistics (industry-specific)](#14-logistics-industry-specific) | Distribution & Logistics Manager | Manages outbound freight, yard, and jobsite delivery performance. |
-| 15 | [Specification (industry-specific)](#15-specification-industry-specific) | Architectural Specification Manager | Gets products specified by architects, engineers, and building owners. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Plant Controller |
+| 2 | [HR](#2-hr) | Plant HR Business Partner |
+| 3 | [Frontline Worker](#3-frontline-worker) | Production Line Operator |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Shift Supervisor |
+| 5 | [Quality](#5-quality) | Plant Quality Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Raw Materials Buyer |
+| 7 | [Safety/EHS](#7-safetyehs) | Plant EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Technical Service Representative |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Territory Sales Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Service Representative |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Product Development Engineer |
+| 13 | [Executive](#13-executive) | President, Building Products Division |
+| 14 | [Logistics (industry-specific)](#14-logistics-industry-specific) | Distribution & Logistics Manager |
+| 15 | [Specification (industry-specific)](#15-specification-industry-specific) | Architectural Specification Manager |
 
 ## Personas and example asks
 

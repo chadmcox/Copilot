@@ -2,18 +2,13 @@
 
 Updated Nov 9, 2026 · @Chad Cox
 
-> **Start here: do the Access Governance Guide first.**
-> This guide is step 2. It uses groups and admin roles that the [Copilot Access Governance Guide](../Access%20Governance%20Guide/readme.md) sets up.
-> 1. Follow the [Access Governance Guide](../Access%20Governance%20Guide/readme.md). Run its scripts to create the Copilot groups, access packages and PIM admin groups.
-> 2. Then come back here to control who can build, share, publish and receive agents.
+> **Do the [Access Governance Guide](../Access%20Governance%20Guide/readme.md) first.** This guide is step 2 and uses the groups and admin roles its scripts create.
 
-This guide explains who can **build** Copilot agents, who can **share and publish** them, and how to **give agents to people** in Microsoft 365.
-
-Microsoft changes these settings often. Check each path in your own tenant before you rely on it.
+Who can **build**, **share**, **publish** and **receive** Copilot agents in Microsoft 365. Microsoft changes these settings often, so check each path in your own tenant before you rely on it.
 
 ## The big idea
 
-**You can't fully stop people from building agents.** Anyone with a Microsoft Copilot license can open Agent Builder and Copilot Studio. What you *can* control is where an agent goes after it's built:
+**You can't fully stop people from building agents.** Anyone with a Microsoft Copilot license can open Agent Builder and Copilot Studio. What you can control is where an agent goes after it's built:
 
 1. **Build.** Who can create agents, and with which tools.
 2. **Share.** Who can share an agent with other people.
@@ -24,23 +19,40 @@ Lock down steps 2 to 4, and a badly built agent stays with the one person who bu
 
 ## Do these first
 
-| # | Where | What to do | By | Why |
-| --- | --- | --- | --- | --- |
-| 1 | M365 admin center → **Agents → Settings → Agent and plugin access** | Leave **Built by Microsoft** and **Built by your organization** on. Turn off **Built by external publishers** until you've reviewed them. Select **Save** | **Date passed (Oct 30, 2026). Do it now** | The Copilot Connectors page now follows this setting, and the old `setFederatedConnectors` command is gone. Microsoft docs also call this page **Allowed agent types** (MC1454973, updated Oct 23, 2026) |
-| 2 | M365 admin center → **Copilot → Settings → View all → Advanced package uploads** | Select **Specific users or groups**. Add **Copilot Advanced Package Upload Access**. Select **Save** | **Date passed (Oct 25, 2026). Do it now** | If you do nothing, everyone can upload agents and plugins that run actions or MCP servers (MC1472007) |
-| 3 | Entra admin center → **Entra ID → Users → User settings** | Set **Users can register agent identity blueprints** to **No**. Select **Save**. Put agent developers in **Copilot Agent ID Developers** | **Date passed (Nov 4, 2026). Do it now** | If you do nothing, every user can create agent identities in Entra (MC1506733). From Nov 4, agents that make their own identities need an admin grant (MC1506728) |
-| 4 | M365 admin center → **Agents → Settings → Sharing** | Select **Specific users**. Add **Copilot Agent Sharing Access**. Select **Save** | Now | Stops everyone from sharing Agent Builder agents with the whole organization |
-| 5 | M365 admin center → **Agents → Settings → Agent feedback sharing** | Decide: **No agents** (the default), **All agents**, or **Selected agents**. Select **Save** | Now | New setting. It decides whether agent owners see the ratings and comments users leave (MC1520901) |
-| 6 | SharePoint | Tell site owners that new SharePoint agents use Agent Builder from mid-November, and that `.agent` files stop working in April 2027 | Mid-Nov 2026 | See [SharePoint agents are changing](#sharepoint-agents-are-changing) (MC1511052) |
-| 7 | Teams admin center → **Meetings → Meeting settings → Transcript API access** | If an agent or app reads live meeting transcripts through Work IQ, turn **WorkIQ access** to **On**. If not, leave it off | **Nov 14, 2026** | The setting is off by default and takes effect on Nov 14. Apps that use this stop working until you turn it on |
-| 8 | Your maker guidance | Tell Agent Builder makers about scheduled prompts. There's no admin switch to review yet | Mid-Nov 2026 | Scheduled prompts are on by default and run for the person who made them, on published agents only (MC1302906) |
-| 9 | M365 admin center → **Agents → All agents → [agent] → Connected agents** | When you review an agent, check this tab before you approve it | Now | Agents can now call Agent 365 agents that use the Agent2Agent protocol. Only admins can install those agents (MC1478975) |
-| 10 | M365 admin center → **Agents → Tools → Connectors** | Review the Power Platform connectors. Block the ones your data policies would block. Select **Save** | **Mid-Nov 2026** | Cowork can now use them, and Power Platform DLP doesn't apply to Cowork. Blocks also stop connections already made and Cowork Automations (MC1542062) |
-| 11 | Microsoft 365 Organizational Data Service (MODS) | Only if you send custom data to the Workforce Insights endpoint: switch to the **Microsoft 365 profile** endpoint. For non-public data, join the private preview first | **Nov 18, 2026** | That endpoint is retiring. Your old selection doesn't carry over (MC1542066) |
-| 12 | M365 admin center → **Agents → Tools → Registry → Work IQ MCP → Policies** | Decide if agents may read a person's memory. Turn the memory read policy off if not | Early Dec 2026 | Agents can read a user's memory profile through Work IQ MCP. The policy is on by default (MC1539004) |
-| 13 | Your user guidance | Tell people the standalone Word, Excel and PowerPoint agents are going away. They ask Chat instead | Mid-Nov to late Dec 2026 | Those agents leave the left rail and agent list. Old chats stay readable, but can't continue (MC1536062) |
+### Overdue: do now
 
-The admin center calls the blueprint switch **Users can register agent identity blueprints**. Microsoft docs call it **Users can create agent blueprints**. It's the same switch.
+| Where | What to do | Why |
+| --- | --- | --- |
+| M365 admin center → **Agents → Settings → Agent and plugin access** | Leave **Built by Microsoft** and **Built by your organization** on. Turn off **Built by external publishers** until you've reviewed them. **Save** | Since Oct 30, the Copilot Connectors page follows this setting. Docs also call it **Allowed agent types** (MC1454973) |
+| M365 admin center → **Copilot → Settings → View all → Advanced package uploads** | **Specific users or groups** → add **Copilot Advanced Package Upload Access**. **Save** | Since Oct 25, everyone can upload agents and plugins that run actions or MCP servers unless you limit it (MC1472007) |
+| Entra admin center → **Entra ID → Users → User settings** | Set **Users can register agent identity blueprints** to **No**. **Save**. Put agent developers in **Copilot Agent ID Developers** | Otherwise every user can create agent identities (MC1506733). Since Nov 4, agents that make their own identities need an admin grant (MC1506728) |
+
+Docs call the blueprint switch **Users can create agent blueprints**. It's the same switch.
+
+### No deadline: do now
+
+| Where | What to do | Why |
+| --- | --- | --- |
+| M365 admin center → **Agents → Settings → Sharing** | **Specific users** → add **Copilot Agent Sharing Access**. **Save** | Stops everyone from sharing Agent Builder agents with the whole organization |
+| M365 admin center → **Agents → Settings → Agent feedback sharing** | Pick **No agents** (default), **All agents** or **Selected agents**. **Save** | Decides whether agent owners see users' ratings and comments (MC1520901) |
+| M365 admin center → **Agents → All agents → [agent] → Connected agents** | Check this tab before you approve an agent | Agents can now call Agent 365 agents over Agent2Agent. Only admins can install those (MC1478975) |
+
+### Dated: Nov 14 to early Dec 2026
+
+| By | Where | What to do | Why |
+| --- | --- | --- | --- |
+| **Nov 14** | Teams admin center → **Meetings → Meeting settings → Transcript API access** | Turn **WorkIQ access** **On** only if an agent or app reads live meeting transcripts through Work IQ | Off by default from Nov 14. Apps that use it stop working until you turn it on |
+| **Mid-Nov** | M365 admin center → **Agents → Tools → Connectors** | Block the Power Platform connectors your data policies would block. **Save** | Cowork can now use them, and Power Platform DLP doesn't apply to Cowork. Blocks also stop existing connections and Cowork Automations (MC1542062) |
+| **Nov 18** | Microsoft 365 Organizational Data Service (MODS) | Only if you send custom data to the Workforce Insights endpoint: switch to the **Microsoft 365 profile** endpoint. For non-public data, join the private preview first | That endpoint is retiring and your old selection doesn't carry over (MC1542066) |
+| **Early Dec** | M365 admin center → **Agents → Tools → Registry → Work IQ MCP → Policies** | Turn the memory read policy off if agents shouldn't read a person's memory | On by default (MC1539004) |
+
+### Tell people
+
+| When | Who | Message |
+| --- | --- | --- |
+| Mid-Nov 2026 | SharePoint site owners | New SharePoint agents use Agent Builder, and `.agent` files stop working in April 2027. See [SharePoint agents are changing](#sharepoint-agents-are-changing) (MC1511052) |
+| Mid-Nov 2026 | Agent Builder makers | Scheduled prompts are on by default and run for the person who made them, on published agents only. There's no admin switch yet (MC1302906) |
+| Mid-Nov to late Dec 2026 | Everyone | The standalone Word, Excel and PowerPoint agents are leaving. Ask Chat instead. Old chats stay readable but can't continue (MC1536062) |
 
 ## 1. Who can build agents
 
@@ -109,9 +121,7 @@ Rules of thumb:
 - **Pin sparingly.** Pin only agents that are deployed. Pins can take up to 6 hours to show up.
 - **Need a group just for one agent?** Name it `Copilot <Agent name> Agent Access`, like the other groups in this repo. Give it through an access package so it gets reviewed.
 
-**New Microsoft plugins:** the Planner plugin (MC1540339) and the Engage plugin (GA Nov 16, off by default, MC1530609) are assigned the same way.
-
-**Cowork plugins are assigned elsewhere:** go to **Agents → Tools → [plugin] → Installed for**. Pick the Cowork spend groups (Limited, Unlimited and Temp), because those groups are the people who can use Cowork. No single tenant setting turns off plugin sharing. The **Engage** plugin arrives on Nov 16, 2026 and is off by default (MC1530609).
+**Cowork plugins are assigned elsewhere:** go to **Agents → Tools → [plugin] → Installed for**. Pick the Cowork spend groups (Limited, Unlimited and Temp), because those are the people who can use Cowork. No single tenant setting turns off plugin sharing. New Microsoft plugins are assigned the same way: Planner (MC1540339) and Engage (GA Nov 16, off by default, MC1530609).
 
 **Plugins replace the Agents button.** From late October to late November 2026, users see a **Plugins** button instead of **Agents**, **Agents & Skills** or **Customize** (MC1484008). You still manage agents in the same admin pages.
 
@@ -190,11 +200,11 @@ From mid-November 2026, **Create an agent** in SharePoint and OneDrive opens Age
 | Setting | What it does | This guide |
 | --- | --- | --- |
 | **Agent management rules** | Bulk actions on agents | See Keeping agents tidy |
-| **Agent and plugin access** | Which kinds of agents and plugins people can install: Microsoft, your organization, external publishers. Also called **Allowed agent types** | Do these first, step 1 |
+| **Agent and plugin access** | Which kinds of agents and plugins people can install: Microsoft, your organization, external publishers. Also called **Allowed agent types** | Do these first: overdue |
 | **Security templates** (policy templates) | A set of security policies you put on new agents | Use one, then apply it to old agents with a rule |
-| **Sharing** | Who can share Agent Builder agents with the whole organization | Do these first, step 4 |
+| **Sharing** | Who can share Agent Builder agents with the whole organization | Do these first: no deadline |
 | **User access** | Which users or groups can use agents and plugins at all | Set this before you limit one agent to a group |
-| **Agent feedback sharing** | Whether agent owners see user ratings and comments. Default **No agents** | Do these first, step 5 (MC1520901) |
+| **Agent feedback sharing** | Whether agent owners see user ratings and comments. Default **No agents** | Do these first: no deadline (MC1520901) |
 | **Tags** | Labels for finding and sorting agents. Up to 50. Deleting a tag removes it from every agent | Tag agents by owner team and by data they read |
 
 ## Admin roles for agents
