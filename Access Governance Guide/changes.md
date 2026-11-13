@@ -20,7 +20,9 @@ I checked the admin centers again. These are the differences from the Nov 10 ver
 | Teams → Transcript API access → **WorkIQ access** | Only **Microsoft Graph access** was shown. Use `Set-CsTeamsMeetingConfiguration -EnableWorkIQTranscriptAccess` |
 | — | New **Copilot Release preferences: General Availability** setting (Standard or Deferred) |
 
-**Design change:** Cowork and Work IQ API spending now uses four tiers (Bronze, Silver, Gold, Platinum) instead of Limited, Unlimited and Temporary Unlimited. Use one set for the organization, or one set per line of business or cost center. The scripts still build the older layout.
+**Design change:** Cowork and Work IQ API spending now uses four tiers (Bronze, Silver, Gold, Platinum) instead of Limited, Unlimited and Temporary Unlimited. Use one set for the organization, or one set per line of business or cost center. `New-CopilotGroups.ps1`, `New-CopilotAccessPackages.ps1` and `New-CopilotSpendingPolicies.ps1` now build the tiers, rename the old Limited/Unlimited/Temp groups, packages and policies, and take `-BusinessUnits`. `Get-CopilotSpendingReport.ps1` recognizes tier names and flags policies with no policy limit.
+
+**Admin center limit:** spending policies made with the Graph API can't be edited in the admin center ("cannot be modified through the legacy configuration-plan PATCH operation"). Use the Graph API.
 
 ## What changed on Oct 23, 2026
 

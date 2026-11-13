@@ -39,7 +39,7 @@ url: What is entitlement management? - https://learn.microsoft.com/entra/id-gove
          - Group in the package but not in the table: reports it (never removes it).
          - Request policy for its tier missing: creates it. Other policies on the package are
            reported, not removed (a tier change leaves the old policy for you to delete).
-    4. Links packages that can't be held together (Limited and Unlimited spend), both ways.
+    4. Links packages that can't be held together (the spend tiers: one tier per person), both ways.
     5. Optional -CreateAdminGroupReviews: quarterly access reviews on the admin groups.
 
     Tiers: Standard (manager, 365 days, review every 6 months), Elevated (manager then approver
@@ -49,6 +49,8 @@ url: What is entitlement management? - https://learn.microsoft.com/entra/id-gove
     HOW TO CHANGE THE DESIGN
       - New package: add a line to $packages. Its groups must be in New-CopilotGroups.ps1.
       - Grant another group: add it to the package's Groups.
+      - Renamed package: change Name and put the old name in OldNames. The next run renames it.
+      - Spend tiers: the rows with SpendTier. -BusinessUnits makes a copy per business unit.
       - Admin group: add it to $adminGroups (used by -IncludeAdminPackages and -CreateAdminGroupReviews).
 
     Requirements:
@@ -63,6 +65,12 @@ url: What is entitlement management? - https://learn.microsoft.com/entra/id-gove
 
 .PARAMETER AdminApproverGroupName
     Approves Admin-tier packages and reviews admin groups. Use a group that isn't granted by these packages.
+
+.PARAMETER BusinessUnits
+    Also checks a set of tier packages for each business unit, granting the
+    "Copilot Spend <business unit> <tier>" groups. Run New-CopilotGroups.ps1 -BusinessUnits first,
+    with the same names. Every tier package (all business units) is incompatible with every other,
+    so a person holds one tier in one business unit.
 
 .PARAMETER IncludeCodePackages
     Also checks the Copilot Code packages (MC1519871). Run New-CopilotGroups.ps1 -IncludeCodeGroups first.
@@ -81,6 +89,7 @@ url: What is entitlement management? - https://learn.microsoft.com/entra/id-gove
     .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -WhatIf
     .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>"
     .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -IncludeCodePackages
+    .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -BusinessUnits "Finance", "Revenue" -WhatIf
     .\New-CopilotAccessPackages.ps1 -ApproverGroupName "<approver group>" -AdminApproverGroupName "<security group>" -IncludeAdminPackages -CreateAdminGroupReviews
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
@@ -91,6 +100,7 @@ param(
     [switch]$IncludeAdminPackages,
     [switch]$CreateAdminGroupReviews,
     [switch]$IncludeCodePackages,
+    [ValidatePattern('^[A-Za-z0-9 ]+$')][string[]]$BusinessUnits,
     [ValidateSet("Global", "USGov", "USGovDoD")][string]$Environment
 )
 
@@ -99,8 +109,10 @@ param(
 # ---------------------------------------------------------------------------
 # The design. Change these tables, not the code below.
 #   Groups       = groups the package grants (prerequisites included)
-#   Incompatible = package a person can't hold at the same time
-#   AllowedGroup = only members of this group can see and request the package
+#   Incompatible = packages a person can't hold at the same time
+#   AllowedGroup = only members of these groups can see and request the package
+#   OldNames     = earlier package names; a package found under one of them is renamed
+#   SpendTier    = spend tier row; tier packages are incompatible with each other (set at run time)
 #   Code         = only with -IncludeCodePackages
 # ---------------------------------------------------------------------------
 $tiers = @{
@@ -113,11 +125,15 @@ $tiers = @{
 
 $packages = @(
     @{ Name = "Copilot Access";                      Tier = "Standard"; Groups = @("Copilot Access") }
-    # Cowork access comes from the spend groups (spending policies); no separate Cowork access group.
-    @{ Name = "Copilot + Cowork Access (Limited)";   Tier = "Standard"; Groups = @("Copilot Access", "Copilot + Cowork Spend Limit"); Incompatible = "Copilot + Cowork Access (Unlimited)" }
-    @{ Name = "Copilot + Cowork Access (Unlimited)"; Tier = "Elevated"; Groups = @("Copilot Access", "Copilot + Cowork Spend Unlimited") }
-    # Only members of the Spend Limit group can see/request this; it grants only the Temp spend group.
-    @{ Name = "Copilot + Cowork Access (Temporary Unlimited, 30 days)"; Tier = "Temporary"; Groups = @("Copilot + Cowork Spend Unlimited Temp"); AllowedGroup = "Copilot + Cowork Spend Limit"; Incompatible = "Copilot + Cowork Access (Unlimited)" }
+    # Spend tiers (Cowork and Work IQ API). One tier per person: the tier packages are made incompatible
+    # with each other at run time. The old Limited, Unlimited and Temporary packages are renamed.
+    @{ Name = "Copilot Spend Bronze";   SpendTier = "Bronze";   Tier = "Standard"; Groups = @("Copilot Access", "Copilot Spend Bronze") }
+    @{ Name = "Copilot Spend Silver";   SpendTier = "Silver";   Tier = "Standard"; Groups = @("Copilot Access", "Copilot Spend Silver"); OldNames = @("Copilot + Cowork Access (Limited)") }
+    @{ Name = "Copilot Spend Gold";     SpendTier = "Gold";     Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Spend Gold") }
+    @{ Name = "Copilot Spend Platinum"; SpendTier = "Platinum"; Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Spend Platinum"); OldNames = @("Copilot + Cowork Access (Unlimited)") }
+    # Only Silver and Gold members can see/request this; it grants only the Temp group, for 30 days.
+    @{ Name = "Copilot Spend Platinum (Temporary, 30 days)"; SpendTier = "Platinum Temp"; Tier = "Temporary"; Groups = @("Copilot Spend Platinum Temp")
+       AllowedGroup = @("Copilot Spend Silver", "Copilot Spend Gold"); Incompatible = @("Copilot Spend Platinum"); OldNames = @("Copilot + Cowork Access (Temporary Unlimited, 30 days)") }
     @{ Name = "Copilot + Cowork Browser Access";     Tier = "Elevated"; Groups = @("Copilot + Cowork Browser Access") }
     @{ Name = "Copilot SharePoint OneDrive Advanced Access"; Tier = "Standard"; Groups = @("Copilot Access", "Copilot SharePoint OneDrive Advanced Access") }
     @{ Name = "Copilot Work IQ API Access";          Tier = "Elevated"; Groups = @("Copilot Work IQ API Access") }
@@ -234,7 +250,7 @@ function New-PolicyBody([string]$PackageId, $Package) {
         }
     } else { @{ isEnabled = $false } }   # short fixed-term grant; expiration removes access
     $reviewText = if ($t.ReviewEveryMonths -gt 0) { "reviewed every $($t.ReviewEveryMonths) months" } else { "no extension; removed automatically at expiry" }
-    $who = if ($Package.AllowedGroup) { "Members of $($Package.AllowedGroup) request" } else { "Members request" }
+    $who = if ($Package.AllowedGroup) { "Members of $($Package.AllowedGroup -join ' or ') request" } else { "Members request" }
 
     $body = @{
         displayName        = "$($Package.Name) - $($Package.Tier) request policy"
@@ -254,7 +270,7 @@ function New-PolicyBody([string]$PackageId, $Package) {
     # Restrict who can see and request the package to members of one group.
     if ($Package.AllowedGroup) {
         $body.allowedTargetScope     = "specificDirectoryUsers"
-        $body.specificAllowedTargets = @(@{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = (Get-GroupId $Package.AllowedGroup); description = $Package.AllowedGroup })
+        $body.specificAllowedTargets = @($Package.AllowedGroup | ForEach-Object { @{ "@odata.type" = "#microsoft.graph.groupMembers"; groupId = (Get-GroupId $_); description = $_ } })
     }
     $body
 }
@@ -294,10 +310,25 @@ function Set-CopilotAccessPackage {
     param([Parameter(ValueFromPipeline = $true)][hashtable]$Package)
     process {
         $desc = "Grants: $($Package.Groups -join ', '). Tier: $($Package.Tier)."
-        $pkg = Get-Filtered "$em/accessPackages" "displayName eq '$(Esc $Package.Name)'" "&`$expand=catalog" |
-            Where-Object { $_.catalog.id -eq $catalog.id } | Select-Object -First 1
+        $find = { param($n) Get-Filtered "$em/accessPackages" "displayName eq '$(Esc $n)'" "&`$expand=catalog" |
+            Where-Object { $_.catalog.id -eq $catalog.id } | Select-Object -First 1 }
+        $pkg = & $find $Package.Name
+        $renamedFrom = $null
+        if (-not $pkg) {
+            foreach ($old in @($Package.OldNames | Where-Object { $_ })) {
+                $pkg = & $find $old
+                if ($pkg) { $renamedFrom = $old; break }
+            }
+        }
 
         $notes = @(
+            if ($renamedFrom) {
+                if ($PSCmdlet.ShouldProcess($Package.Name, "Rename from '$renamedFrom'")) {
+                    Invoke-Graph PATCH "$em/accessPackages/$($pkg.id)" @{ displayName = $Package.Name } | Out-Null
+                    "Renamed from '$renamedFrom'"
+                }
+                else { "WhatIf: rename from '$renamedFrom'" }
+            }
             if (-not $pkg) {
                 if ($PSCmdlet.ShouldProcess($Package.Name, "Create access package")) {
                     $pkg = Invoke-Graph POST "$em/accessPackages" @{ displayName = $Package.Name; description = $desc; isHidden = $false; catalog = @{ id = $catalog.id } }
@@ -363,13 +394,15 @@ function Set-IncompatiblePackage {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param([Parameter(ValueFromPipeline = $true)][hashtable]$Package)
     process {
-        $a = $packageIds[$Package.Name]; $b = $packageIds[$Package.Incompatible]
-        if (-not $a -or -not $b) { return }
-        foreach ($pair in @(@($a, $b), @($b, $a))) {
-            $existing = Get-AllPages "$em/accessPackages/$($pair[0])/incompatibleAccessPackages"
-            if ($existing | Where-Object { $_.id -eq $pair[1] }) { continue }
-            if ($PSCmdlet.ShouldProcess($Package.Name, "Mark incompatible with $($Package.Incompatible)")) {
-                Invoke-Graph POST "$em/accessPackages/$($pair[0])/incompatibleAccessPackages/`$ref" @{ "@odata.id" = "$em/accessPackages/$($pair[1])" } | Out-Null
+        foreach ($other in $Package.Incompatible) {
+            $a = $packageIds[$Package.Name]; $b = $packageIds[$other]
+            if (-not $a -or -not $b) { continue }
+            foreach ($pair in @(@($a, $b), @($b, $a))) {
+                $existing = Get-AllPages "$em/accessPackages/$($pair[0])/incompatibleAccessPackages"
+                if ($existing | Where-Object { $_.id -eq $pair[1] }) { continue }
+                if ($PSCmdlet.ShouldProcess($Package.Name, "Mark incompatible with $other")) {
+                    Invoke-Graph POST "$em/accessPackages/$($pair[0])/incompatibleAccessPackages/`$ref" @{ "@odata.id" = "$em/accessPackages/$($pair[1])" } | Out-Null
+                }
             }
         }
     }
@@ -420,10 +453,27 @@ $em    = "$graph/identityGovernance/entitlementManagement"
 $now = (Get-Date).ToUniversalTime()
 $reviewStart = (Get-Date -Year $now.Year -Month $now.Month -Day 1 -Hour 15 -Minute 0 -Second 0).AddMonths(1)
 
+# One set of tier packages per business unit, made from the SpendTier rows.
+$tierRows = @($packages | Where-Object SpendTier)
 $packages = @(
     $packages | Where-Object { $IncludeCodePackages -or -not $_.Code }
+    foreach ($bu in $BusinessUnits) {
+        $tierRows | ForEach-Object {
+            $row = $_
+            $p = @{ Name = $row.Name -replace '^Copilot Spend ', "Copilot Spend $bu "; SpendTier = $row.SpendTier; Tier = $row.Tier
+                    Groups = @($row.Groups | ForEach-Object { $_ -replace '^Copilot Spend ', "Copilot Spend $bu " }) }
+            if ($row.AllowedGroup) { $p.AllowedGroup = @($row.AllowedGroup | ForEach-Object { $_ -replace '^Copilot Spend ', "Copilot Spend $bu " }) }
+            if ($row.Incompatible) { $p.Incompatible = @($row.Incompatible | ForEach-Object { $_ -replace '^Copilot Spend ', "Copilot Spend $bu " }) }
+            $p
+        }
+    }
     if ($IncludeAdminPackages) { $adminGroups | ForEach-Object { @{ Name = $_; Tier = "Admin"; Groups = @($_) } } }
 )
+
+# One tier per person: every Bronze, Silver, Gold and Platinum package (all business units) is
+# incompatible with every other. The Temporary package keeps its own list.
+$fullTiers = @($packages | Where-Object { $_.SpendTier -and $_.SpendTier -ne "Platinum Temp" })
+$fullTiers | ForEach-Object { $self = $_.Name; $_.Incompatible = @($fullTiers.Name | Where-Object { $_ -ne $self }) }
 
 # 1. Every group the packages, approvers and reviews use must exist.
 $needed = @(

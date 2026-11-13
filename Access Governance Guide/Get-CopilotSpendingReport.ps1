@@ -43,11 +43,11 @@ url: Microsoft 365 Copilot Cost Management API overview - https://learn.microsof
     which policy Microsoft picked, how much they've used this month (UTC), what's left, and
     whether they can use the service right now. Use it to:
       - answer "why can't this person use Cowork?"
-      - test the 30-day temporary unlimited Cowork tier: check one person before, during and
+      - test the 30-day Temporary Platinum tier: check one person before, during and
         after their 30 days, to see which policy is picked and whether their usage carries over.
 
     What the API can't show: the "Allow new Agents and services as they become available"
-    switch, model profiles, and credit request policies. Check those in the admin center.
+    switch, model templates, and credit request policies. Check those in the admin center.
 
     Permissions (delegated): CopilotCostManagement.Read.All, CopilotCostManagement-Policy.Read.All,
     CopilotCostManagement-Assignment.Read.All, and CopilotCostManagement-UserData.Read.All for
@@ -91,11 +91,13 @@ $v1    = "$graphEndpoint/v1.0"
 $stamp = Get-Date -Format yyyyMMdd-HHmm
 
 # Policy names from the Copilot Access Governance Guide, used to flag anything unexpected.
+# Spend tiers can be org-wide ("Copilot Gold") or per business unit ("Copilot Finance Gold").
 $guidePolicies = @(
-    "Cowork Limited", "Cowork Unlimited", "Cowork Temporary Unlimited",
     "SharePoint OneDrive Advanced Work", "Work IQ API", "Managed Runtime", "Teams Phone Agent",
+    "Opal Frontier", "Intelligent Call Delegation",
     "Copilot New Services Pilot", "Code Limited", "Code Unlimited"
 )
+$tierPattern = '^Copilot( [A-Za-z0-9 ]+)? (Bronze|Silver|Gold|Platinum|Platinum Temporary)$'
 
 function Get-All([string]$Uri) {
     while ($Uri) {
@@ -150,7 +152,8 @@ $report = $policies | ForEach-Object {
         if ($p.status -ne "enabled")                       { "status is $($p.status)" }
         if (-not $isGroups)                                { "covers ALL users" }
         if ($isGroups -and $groups.Count -eq 0)            { "no group linked" }
-        if ($p.displayName -notin $guidePolicies)          { "not in the guide" }
+        if ($p.displayName -notin $guidePolicies -and $p.displayName -notmatch $tierPattern) { "not in the guide" }
+        if ("$($p.periodLimit.'@odata.type')" -like "*unlimited*") { "no policy limit" }
         if (-not $alert -or -not $alert.isEnabled)         { "no email alert" }
     )
 
@@ -186,7 +189,7 @@ if ($overlap) {
     $overlap | Select-Object @{ n = "Service"; e = { $_.Name } }, @{ n = "Policies"; e = { ($_.Group.Policy) -join "; " } } | Format-Table -AutoSize -Wrap
 }
 
-Write-Host "Check by hand in Copilot > Cost management > Configuration: the 'Allow new Agents and services' switch (off everywhere except Copilot New Services Pilot) and the model profile on each Cowork policy." -ForegroundColor Yellow
+Write-Host "Check by hand in Copilot > Cost management > Configuration: the 'Allow new Agents and services' switch (off everywhere except Copilot New Services Pilot) and the model template on each policy that includes Cowork." -ForegroundColor Yellow
 
 # ---------------------------------------------------------------------------
 # Per-person balances

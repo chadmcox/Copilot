@@ -34,10 +34,10 @@ There are three setup scripts, one for each job. Each one checks the tenant agai
 
 | Order | Script | What it checks and fixes |
 | --- | --- | --- |
-| 1 | `New-CopilotGroups.ps1` | **Groups.** Every group in the table below, including Copilot Platform Admin. Creates missing groups (admin groups as role-assignable), renames groups listed under an old name, and updates descriptions that don't match. Warns about admin groups that aren't role-assignable. Reports retired groups that are still in the tenant; `-RemoveRetiredGroups` deletes them after exporting members and owners to CSV. `-IncludeCodeGroups` adds the Copilot Code groups. `-SkipAdminGroups` leaves out the admin groups so Groups Administrator is enough |
+| 1 | `New-CopilotGroups.ps1` | **Groups.** Every group in the table below, including Copilot Platform Admin. Creates missing groups (admin groups as role-assignable), renames groups listed under an old name, and updates descriptions that don't match. Warns about admin groups that aren't role-assignable. Reports retired groups that are still in the tenant; `-RemoveRetiredGroups` deletes them after exporting members and owners to CSV. `-IncludeCodeGroups` adds the Copilot Code groups. `-SkipAdminGroups` leaves out the admin groups so Groups Administrator is enough. `-BusinessUnits` adds a set of spend tier groups per business unit |
 | 2 | `New-CopilotAdminPim.ps1` | **Admin roles and PIM.** Assigns any missing Entra roles to the admin groups and reports extra ones (never removes them). Sets each group's PIM for Groups policy. Needs `-ApproverGroupName`. `-SkipPimPolicy` checks only the roles, for tenants without PIM licensing. It doesn't create groups: run script 1 first |
-| 3 | `New-CopilotAccessPackages.ps1` | **Access packages.** Stops and lists any group it needs that isn't in the tenant. Creates the catalog and adds missing groups to it. Creates missing packages, updates their descriptions, adds missing groups and reports extra ones, creates the tier request policy and the incompatible links. `-IncludeAdminPackages`, `-IncludeCodePackages` and `-CreateAdminGroupReviews` are optional |
-| 4 | `New-CopilotSpendingPolicies.ps1` | **Preview.** Creates the spending policies with the new Graph cost management API (beta). Add `-UpdateExisting` to fix policies that already exist: it sets their limits, turns on missing services and links missing groups. It never turns anything off |
+| 3 | `New-CopilotAccessPackages.ps1` | **Access packages.** Stops and lists any group it needs that isn't in the tenant. Creates the catalog and adds missing groups to it. Creates missing packages, updates their descriptions, adds missing groups and reports extra ones, creates the tier request policy and the incompatible links. Renames packages listed under an old name. `-BusinessUnits`, `-IncludeAdminPackages`, `-IncludeCodePackages` and `-CreateAdminGroupReviews` are optional |
+| 4 | `New-CopilotSpendingPolicies.ps1` | **Preview.** Creates the spending policies with the new Graph cost management API (beta). Add `-UpdateExisting` to fix policies that already exist: it renames policies found under an old name, sets their limits, turns on missing services, links missing groups and, with `-AlertThresholdPercent`, turns on the alert. It never turns anything off. `-BusinessUnits` adds a set of tier policies per business unit |
 | 5 | `Get-CopilotSpendingReport.ps1` | **Preview, read-only.** Shows the credit balance and every spending policy with its groups, services, limits and alerts, and flags problems. Add `-UserPrincipalName` to see which policy covers a person and how much they have left |
 | 6 | (by hand) | Point each admin center setting at its group, using the steps below |
 
@@ -106,7 +106,7 @@ The access package script puts every package in a catalog named **Copilot Access
 
 **Changed on Nov 13, 2026: the spend tiers.** Cowork and Work IQ API spending now uses four tiers (Bronze, Silver, Gold, Platinum), one group and one policy per tier. Use them for the whole organization, or make a set per line of business or cost center (for example **Copilot Spend Finance Gold**). See [Spending tiers](#spending-tiers-bronze-silver-gold-platinum).
 
-**The scripts don't create the tier groups yet.** `New-CopilotGroups.ps1`, `New-CopilotAccessPackages.ps1` and `New-CopilotSpendingPolicies.ps1` still create the older **Copilot + Cowork Spend Limit**, **Spend Unlimited** and **Spend Unlimited Temp** groups, packages and policies. Until they're updated, create the tier groups and policies by hand.
+**Moving from the old design.** The scripts rename the old groups, packages and policies instead of making new ones, so members and links carry over: **Copilot + Cowork Spend Limit** becomes **Copilot Spend Silver**, **Spend Unlimited** becomes **Copilot Spend Platinum**, and **Spend Unlimited Temp** becomes **Copilot Spend Platinum Temp**. Bronze and Gold are new. Run each script with `-WhatIf` first. For business units, pass the same `-BusinessUnits` names to all three scripts, for example `-BusinessUnits "Finance", "Revenue"`.
 | Copilot SharePoint OneDrive Advanced Access | SharePoint OneDrive Advanced Work spending policy | Copilot SharePoint OneDrive Advanced Access (Standard) · Copilot Access |
 | Copilot Work IQ API Access | Work IQ API spending policy | Copilot Work IQ API Access (Elevated) |
 | Copilot Managed Runtime Access | Managed Runtime spending policy | Copilot Managed Runtime Access (Standard). No Copilot license needed, so it doesn't add Copilot Access |
@@ -569,7 +569,9 @@ The tiers, plus one policy for each service that isn't in a tier.
 
 For business-unit tiers, repeat the first five rows for each business unit.
 
-**By hand for now.** `New-CopilotSpendingPolicies.ps1` still creates the older Cowork Limited, Unlimited and Temporary Unlimited policies, not the tiers. It also doesn't create **Opal Frontier** or **Intelligent Call Delegation**, because Microsoft hasn't published their Graph service names. Both services are in the wizard now (Nov 13, 2026).
+**By hand for now.** `New-CopilotSpendingPolicies.ps1` creates the tier policies (and renames Cowork Limited, Unlimited and Temporary Unlimited to Copilot Silver, Platinum and Platinum Temporary). It doesn't create **Opal Frontier** or **Intelligent Call Delegation**, because Microsoft hasn't published their Graph service names. Both services are in the wizard now (Nov 13, 2026).
+
+**Policies made with the Graph API can only be changed with the Graph API.** *Checked in the admin center on Nov 13, 2026:* editing the limits or alerts of a policy made through Graph failed with "Spending policies cannot be modified through the legacy configuration-plan PATCH operation". Change those with `New-CopilotSpendingPolicies.ps1 -UpdateExisting`.
 
 Need different budgets for different phone agents? Make one group and one policy per budget. Keep the Teams Phone Agent group's owners to a few people, and don't put it in an access package, because its members are resource accounts.
 
@@ -611,7 +613,7 @@ People in Silver or Gold can ask for Platinum for 30 days. Entra removes it on d
 - **The policy limit and the alert are your safety net,** because there is no per-user limit for those 30 days.
 - **Test this with one person first.** Run `Get-CopilotSpendingReport.ps1 -UserPrincipalName <person>` before, during and after their 30 days. It shows which policy covers them for Cowork, how much they've used this month and how much is left.
 
-The scripts still build this for the older Limited group (**Copilot + Cowork Spend Unlimited Temp**, which only **Copilot + Cowork Spend Limit** members can ask for). Set up the tier version by hand until they're updated.
+`New-CopilotAccessPackages.ps1` builds this package and limits it to Silver and Gold members. `New-CopilotSpendingPolicies.ps1` builds the policy; set its monthly limit with `-TempPeriodLimit`.
 
 ### Model templates (Cowork)
 
@@ -694,8 +696,9 @@ What you still do by hand: the **Allow new Agents and services as they become av
 `New-CopilotSpendingPolicies.ps1` in this folder uses these APIs to create the policies in the table above. Run it with `-WhatIf` first.
 
 - **Already made your policies in the admin center?** Run `New-CopilotSpendingPolicies.ps1 -UpdateExisting -WhatIf`. It matches policies by name. Then it sets their limits, turns on missing services and links the right group. It only adds: extra services or groups are listed, not removed.
-- **Cowork Temporary Unlimited has no per-user limit,** so give it a smaller monthly limit with `-TempPeriodLimit`.
-- **The script still builds the older Cowork Limited, Unlimited and Temporary Unlimited layout,** not the Bronze to Platinum tiers. Create the tiers by hand for now.
+- **Copilot Platinum Temporary has no per-user limit,** so give it a monthly limit with `-TempPeriodLimit`. Silver, Gold and Platinum use `-TierPeriodLimit` (default 500,000); Bronze uses `-PeriodLimit`. Size them to the number of people in each group.
+- **Per-user limits are in the script's tier table:** Bronze 2,000, Silver 5,000, Gold 10,000, Platinum none. Change them there.
+- **Turn on alerts on existing policies** with `-UpdateExisting -AlertThresholdPercent 80 -AlertRecipientUpn "<budget owner UPN>"`.
 - **Check the result** with `Get-CopilotSpendingReport.ps1`. It flags policies that aren't on, have no group, cover all users, have no alert, or aren't in this guide.
 
 Things to know before you run it:
