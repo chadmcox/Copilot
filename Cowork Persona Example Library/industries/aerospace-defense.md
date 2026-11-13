@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Program Manager, recurring:** on the 1st of each month, the CDRLs due that month with status and owners, plus a draft status report to the customer. → [jump](#14-industry-specific-program-manager)
 2. **Quality Engineer – AS9100, hand-off:** open NCRs, MRB transcripts and supplier emails pulled into one disposition tracker with a Pareto of causes. → [jump](#5-quality)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Program Manager chosen because A&D work runs through contract programs with CDRLs and EVM; Export Compliance Specialist chosen because ITAR/EAR controls gate technical data and shipments.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Program Finance Manager | Manage program EAC, EVM reporting, and contract cost compliance. |
-| 2 | [HR](#2-hr) | HR Business Partner – Cleared Workforce | Support hiring, retention, and clearance-dependent staffing for programs. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Aircraft Structures Assembler | Perform structural assembly, drilling, and fastening per planning documents. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Supervisor – Final Assembly | Lead assembly crew to meet schedule, quality, FOD, and safety targets. |
-| 5 | [Quality](#5-quality) | Quality Engineer – AS9100 | Drive nonconformance, FAI, and AS9100 compliance across production. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Subcontract Administrator / Buyer | Manage suppliers, flowdowns, and delivery of flight-critical parts. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager | Lead site safety, hazardous materials, and environmental compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Representative / A&P Technician | Support customer aircraft maintenance, AOG events, and repairs. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Business Development / Capture Manager | Pursue contracts and lead capture strategy for programs. |
-| 10 | [Customer Service](#10-customer-service) | Customer Support Manager – Spares | Manage spares orders, AOG requests, and customer commitments. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Site Operations Director | Run site operations, capacity, facilities, and production rate. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Systems Engineer | Define requirements, interfaces, and verification for aircraft systems. |
-| 13 | [Executive](#13-executive) | Program Director / VP Programs | Own program cost, schedule, technical performance, and customer relationships. |
-| 14 | [Industry-Specific: Program Manager](#14-industry-specific-program-manager) | Program Manager | Lead integrated program schedule, risk, and customer deliverables (CDRLs). |
-| 15 | [Industry-Specific: Export Compliance](#15-industry-specific-export-compliance) | Export Compliance Specialist (ITAR/EAR) | Ensure technical data and shipments meet ITAR/EAR requirements. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Program Finance Manager |
+| 2 | [HR](#2-hr) | HR Business Partner – Cleared Workforce |
+| 3 | [Frontline Worker](#3-frontline-worker) | Aircraft Structures Assembler |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Supervisor – Final Assembly |
+| 5 | [Quality](#5-quality) | Quality Engineer – AS9100 |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Subcontract Administrator / Buyer |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Representative / A&P Technician |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Business Development / Capture Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Support Manager – Spares |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Site Operations Director |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Systems Engineer |
+| 13 | [Executive](#13-executive) | Program Director / VP Programs |
+| 14 | [Industry-Specific: Program Manager](#14-industry-specific-program-manager) | Program Manager |
+| 15 | [Industry-Specific: Export Compliance](#15-industry-specific-export-compliance) | Export Compliance Specialist (ITAR/EAR) |
 
 ## Personas and example asks
 

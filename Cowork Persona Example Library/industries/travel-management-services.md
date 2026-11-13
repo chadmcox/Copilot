@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Traveler Safety & Duty of Care Manager, recurring:** when a disruption alert hits, travelers in or booked to the affected region listed with contact status and client notices drafted. → [jump](#7-safetyehs)
 2. **Client Account Manager, hand-off:** a client QBR deck built from spend, savings, policy compliance and open service issues. → [jump](#10-customer-service)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Meetings & Events Planner covers group/MICE travel, a distinct revenue line with its own contracts; Travel Data & Savings Analyst owns the spend, savings, and emissions reporting that drives client renewals.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Travel Program Finance Manager | Manage client billing, supplier rebates, and travel spend reconciliation. |
-| 2 | [HR](#2-hr) | Talent & Agent Workforce Partner | Recruit, onboard, and retain travel counselors across contact centers. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Travel Counselor / Reservations Agent | Book, change, and ticket travel per client policy in GDS. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Contact Center Team Lead | Coach agents, manage queues, and meet service-level targets. |
-| 5 | [Quality](#5-quality) | Service Quality & Compliance Analyst | Audit bookings for accuracy, policy compliance, and duty-of-care standards. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Supplier Relations / Air & Hotel Sourcing Manager | Negotiate airline, hotel, and car programs for client and agency. |
-| 7 | [Safety/EHS](#7-safetyehs) | Traveler Safety & Duty of Care Manager | Track travelers, manage risk alerts, and coordinate crisis response. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Onsite Implant / Client Site Travel Coordinator | Deliver onsite travel support and resolve client-site issues. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Business Development Director, Corporate Travel | Win and grow managed-travel accounts and run RFP responses. |
-| 10 | [Customer Service](#10-customer-service) | Client Account Manager | Manage client relationships, QBRs, and travel program performance. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Travel Operations Manager | Run 24/7 service delivery, queues, and disruption response. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Travel Technology Product Manager | Manage booking tools, GDS integrations, and traveler apps. |
-| 13 | [Executive](#13-executive) | General Manager, Travel Management | Lead P&L, client growth, and service strategy. |
-| 14 | [Meetings & Events Planner](#14-meetings--events-planner) | Meetings & Events (MICE) Planner | Plan group travel, venues, and attendee logistics for events. |
-| 15 | [Travel Data & Savings Analyst](#15-travel-data--savings-analyst) | Travel Data & Savings Analyst | Report travel spend, savings, and benchmarks for clients. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Travel Program Finance Manager |
+| 2 | [HR](#2-hr) | Talent & Agent Workforce Partner |
+| 3 | [Frontline Worker](#3-frontline-worker) | Travel Counselor / Reservations Agent |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Contact Center Team Lead |
+| 5 | [Quality](#5-quality) | Service Quality & Compliance Analyst |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Supplier Relations / Air & Hotel Sourcing Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | Traveler Safety & Duty of Care Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Onsite Implant / Client Site Travel Coordinator |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Business Development Director, Corporate Travel |
+| 10 | [Customer Service](#10-customer-service) | Client Account Manager |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Travel Operations Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Travel Technology Product Manager |
+| 13 | [Executive](#13-executive) | General Manager, Travel Management |
+| 14 | [Meetings & Events Planner](#14-meetings--events-planner) | Meetings & Events (MICE) Planner |
+| 15 | [Travel Data & Savings Analyst](#15-travel-data--savings-analyst) | Travel Data & Savings Analyst |
 
 ## Personas and example asks
 

@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Paper Machine Superintendent, recurring:** every morning, machine efficiency, breaks and grade runs from the last 24 hours in a status update. → [jump](#15-paper-machine-superintendent-industry-specific)
 2. **Quality Manager, hand-off:** a customer complaint response drafted from reel holds, lab results and complaint history for the grade. → [jump](#5-quality)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Added Forester/Fiber Procurement Manager because wood fiber cost and sustainability certification drive margin, and Paper Machine Superintendent because machine efficiency is the core value driver.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Mill Controller | Manage mill cost accounting, inventory, and capital reporting. |
-| 2 | [HR](#2-hr) | HR Business Partner – Mill | Support shift staffing, training, and labor relations. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Machine Tender / Back Tender | Operate paper machine sections and monitor quality. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Shift Supervisor / Tour Boss | Lead shift crews, manage production and safety. |
-| 5 | [Quality](#5-quality) | Quality Manager | Ensure product specs, customer complaints, and certifications. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Supply Chain Planner | Plan production schedules, inventory, and shipping. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager | Lead safety programs and environmental compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance Mechanic / Millwright | Maintain machinery, rolls, and drives. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Account Manager – Packaging | Manage customer accounts, pricing, and growth. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service Representative | Handle orders, deliveries, and claims. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Mill Manager | Deliver safe, efficient mill operations. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Engineer | Optimize pulping and papermaking processes. |
-| 13 | [Executive](#13-executive) | VP Manufacturing / President | Set strategy and performance across mills. |
-| 14 | [Forester/Fiber Procurement (industry-specific)](#14-foresterfiber-procurement-industry-specific) | Fiber Procurement Manager / Forester | Source wood fiber and manage certification. |
-| 15 | [Paper Machine Superintendent (industry-specific)](#15-paper-machine-superintendent-industry-specific) | Paper Machine Superintendent | Lead machine performance, efficiency, and grade runs. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Mill Controller |
+| 2 | [HR](#2-hr) | HR Business Partner – Mill |
+| 3 | [Frontline Worker](#3-frontline-worker) | Machine Tender / Back Tender |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Shift Supervisor / Tour Boss |
+| 5 | [Quality](#5-quality) | Quality Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Supply Chain Planner |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance Mechanic / Millwright |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Account Manager – Packaging |
+| 10 | [Customer Service](#10-customer-service) | Customer Service Representative |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Mill Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Engineer |
+| 13 | [Executive](#13-executive) | VP Manufacturing / President |
+| 14 | [Forester/Fiber Procurement (industry-specific)](#14-foresterfiber-procurement-industry-specific) | Fiber Procurement Manager / Forester |
+| 15 | [Paper Machine Superintendent (industry-specific)](#15-paper-machine-superintendent-industry-specific) | Paper Machine Superintendent |
 
 ## Personas and example asks
 

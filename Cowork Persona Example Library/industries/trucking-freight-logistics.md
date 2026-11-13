@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Customer Service Representative (Load Planner), recurring:** every morning, in-transit exceptions matched to customers with ETA updates drafted for approval. → [jump](#10-customer-service)
 2. **Director of Safety, hand-off:** an accident review pack built from the police report, video telematics events and the driver's history. → [jump](#7-safetyehs)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Brokerage carrier sales reps and cross-dock supervisors run distinct, high-volume workflows (capacity sourcing and LTL freight handling) found in most trucking and logistics companies.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Freight Billing & Settlement Analyst | Audit freight bills, reconcile accessorials, process carrier and driver settlements. |
-| 2 | [HR](#2-hr) | Driver Recruiting & Retention Manager | Recruit CDL drivers, manage onboarding, reduce turnover across terminals. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Over-the-Road Truck Driver | Safely transport freight, complete pre-trips, meet delivery appointments. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Fleet Manager / Dispatcher | Assign loads, manage driver hours, resolve exceptions, maintain service levels. |
-| 5 | [Quality](#5-quality) | Quality & Compliance Manager (DOT) | Maintain DQ files, audit HOS logs, ensure FMCSA compliance. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Procurement & Fuel Manager | Manage fuel programs, tires, parts and carrier purchasing contracts. |
-| 7 | [Safety/EHS](#7-safetyehs) | Director of Safety | Lead driver safety programs, accident review, and loss prevention. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Diesel Technician / Shop Lead | Perform PMs, diagnose tractor and trailer repairs, maintain DVIR compliance. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Account Executive / Freight Sales | Grow shipper accounts, quote lanes, and win bid freight. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service Representative (Load Planner) | Track shipments, update customers, resolve delivery exceptions. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Terminal Manager | Run terminal operations, yard, drivers, and facility performance. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Transportation Technology / Network Engineering Manager | Manage TMS, telematics integrations, routing optimization and data. |
-| 13 | [Executive](#13-executive) | President / COO | Lead carrier strategy, profitability, safety and customer growth. |
-| 14 | [Brokerage / Carrier Sales](#14-brokerage--carrier-sales) | Carrier Sales Representative (Brokerage) | Source capacity, negotiate carrier rates, vet carriers for brokered loads. |
-| 15 | [Warehouse / Cross-Dock](#15-warehouse--cross-dock) | Cross-Dock Supervisor | Manage dock loading, freight transfers, and LTL shipment accuracy. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Freight Billing & Settlement Analyst |
+| 2 | [HR](#2-hr) | Driver Recruiting & Retention Manager |
+| 3 | [Frontline Worker](#3-frontline-worker) | Over-the-Road Truck Driver |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Fleet Manager / Dispatcher |
+| 5 | [Quality](#5-quality) | Quality & Compliance Manager (DOT) |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Procurement & Fuel Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | Director of Safety |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Diesel Technician / Shop Lead |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Account Executive / Freight Sales |
+| 10 | [Customer Service](#10-customer-service) | Customer Service Representative (Load Planner) |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Terminal Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Transportation Technology / Network Engineering Manager |
+| 13 | [Executive](#13-executive) | President / COO |
+| 14 | [Brokerage / Carrier Sales](#14-brokerage--carrier-sales) | Carrier Sales Representative (Brokerage) |
+| 15 | [Warehouse / Cross-Dock](#15-warehouse--cross-dock) | Cross-Dock Supervisor |
 
 ## Personas and example asks
 

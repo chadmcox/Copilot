@@ -1,6 +1,10 @@
 # Daily Summary
 
-Separate Cowork prompts, each scheduled to run **daily** and email the result to me. Run them a few minutes apart (e.g. 6:00, 6:05, 6:10 AM) so the emails arrive in a predictable order.
+Five Cowork prompts I schedule to run every day. Each one emails me its result.
+
+1. Copy a prompt below into Copilot Cowork.
+2. Schedule it to run daily.
+3. Space them a few minutes apart (6:00, 6:05, 6:10 AM) so the emails arrive in the same order every morning.
 
 ---
 

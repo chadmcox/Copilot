@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Materials Manager / Purchasing Buyer, recurring:** every morning, customer EDI release changes compared with inventory and sub-tier deliveries, with shortages flagged. → [jump](#6-supply-chainprocurement)
 2. **Supplier Quality / Customer Quality Engineer, hand-off:** PPM, open 8Ds and IATF findings for one OEM pulled into the customer quality review. → [jump](#5-quality)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Program Management and Aftermarket Channel are added because APQP launches and distributor channels drive supplier revenue.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Plant Controller | Manage plant costing, quoting support, and customer price-downs. |
-| 2 | [HR](#2-hr) | HR Manager, Plant | Support plant hiring, retention, and skills training. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Machine Operator (Stamping, Molding, or Machining) | Run production equipment and perform in-process quality checks. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Supervisor | Lead shift output, OEE, scrap, and safety in assigned cells. |
-| 5 | [Quality](#5-quality) | Supplier Quality / Customer Quality Engineer | Manage PPAP, customer complaints, 8Ds, and IATF 16949 compliance. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Materials Manager / Purchasing Buyer | Manage EDI releases, resin/steel buys, and sub-tier suppliers. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Coordinator | Manage plant safety, machine guarding, and environmental compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Aftermarket Field Technical Specialist | Support installers and repair shops with product technical issues. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Account Manager (OEM) / Aftermarket Category Manager | Win business, manage RFQs, and grow aftermarket channel sales. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service Representative (Aftermarket) | Handle distributor orders, returns, and product inquiries. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Maintenance Manager | Maintain presses, molding machines, and tooling for uptime. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Product Engineer / Manufacturing Engineer | Design parts and processes to meet customer specifications. |
-| 13 | [Executive](#13-executive) | General Manager / President | Lead business unit growth, profitability, and customer relationships. |
-| 14 | [Program Management (industry-specific)](#14-program-management-industry-specific) | APQP Program Manager | Manage new part launches through APQP and PPAP. |
-| 15 | [Aftermarket Channel (industry-specific)](#15-aftermarket-channel-industry-specific) | Distribution Channel Manager | Manage distributor relationships and catalog coverage. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Plant Controller |
+| 2 | [HR](#2-hr) | HR Manager, Plant |
+| 3 | [Frontline Worker](#3-frontline-worker) | Machine Operator (Stamping, Molding, or Machining) |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Supervisor |
+| 5 | [Quality](#5-quality) | Supplier Quality / Customer Quality Engineer |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Materials Manager / Purchasing Buyer |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Coordinator |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Aftermarket Field Technical Specialist |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Account Manager (OEM) / Aftermarket Category Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Service Representative (Aftermarket) |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Maintenance Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Product Engineer / Manufacturing Engineer |
+| 13 | [Executive](#13-executive) | General Manager / President |
+| 14 | [Program Management (industry-specific)](#14-program-management-industry-specific) | APQP Program Manager |
+| 15 | [Aftermarket Channel (industry-specific)](#15-aftermarket-channel-industry-specific) | Distribution Channel Manager |
 
 ## Personas and example asks
 

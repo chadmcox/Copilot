@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Customer Operations Specialist, recurring:** every Monday, orders at risk of OTIF fines this week, with the root cause and a draft notice for each retailer. → [jump](#10-customer-service)
 2. **Revenue Growth Manager, hand-off:** promotions below ROI threshold found from TPM and POS data, with pricing guidance drafted for sales. → [jump](#14-revenue-growth-manager-industry-specific)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Revenue Growth Manager: trade spend is among the largest CPG costs. Category Manager: retailer category captaincy drives shelf space and growth.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Brand Finance Manager | Own brand P&L, trade spend accruals, and forecasting. |
-| 2 | [HR](#2-hr) | HR Business Partner – Supply Chain | Support plant and DC workforce, talent, and engagement. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Packaging Line Operator | Run packaging lines, changeovers, and in-process quality checks. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Team Leader | Lead shift team to hit safety, quality, and output. |
-| 5 | [Quality](#5-quality) | Quality Assurance Manager | Manage GMP compliance, holds, complaints, CAPAs, and audits. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Category Buyer – Raw & Pack Materials | Source materials, manage suppliers, and control costs. |
-| 7 | [Safety/EHS](#7-safetyehs) | Site EHS Manager | Lead safety programs, permits, and sustainability reporting. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance Technician | Maintain and repair packaging and process equipment. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Brand Manager | Drive brand growth, innovation launches, and marketing plans. |
-| 10 | [Customer Service](#10-customer-service) | Customer Operations Specialist | Manage retailer orders, OTIF compliance, and deductions. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Manager | Run plant safety, quality, cost, and output. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Packaging Development Engineer | Develop packaging, run line trials, support sustainability goals. |
-| 13 | [Executive](#13-executive) | Chief Supply Chain Officer | Lead end-to-end supply chain, service, and cost. |
-| 14 | [Revenue Growth Manager (industry-specific)](#14-revenue-growth-manager-industry-specific) | Revenue Growth Manager | Optimize pricing, promotions, mix, and trade investment. |
-| 15 | [Category Manager (industry-specific)](#15-category-manager-industry-specific) | Category Manager / Shopper Insights | Lead category strategy and retailer planogram recommendations. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Brand Finance Manager |
+| 2 | [HR](#2-hr) | HR Business Partner – Supply Chain |
+| 3 | [Frontline Worker](#3-frontline-worker) | Packaging Line Operator |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Team Leader |
+| 5 | [Quality](#5-quality) | Quality Assurance Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Category Buyer – Raw & Pack Materials |
+| 7 | [Safety/EHS](#7-safetyehs) | Site EHS Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Maintenance Technician |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Brand Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Operations Specialist |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Plant Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Packaging Development Engineer |
+| 13 | [Executive](#13-executive) | Chief Supply Chain Officer |
+| 14 | [Revenue Growth Manager (industry-specific)](#14-revenue-growth-manager-industry-specific) | Revenue Growth Manager |
+| 15 | [Category Manager (industry-specific)](#15-category-manager-industry-specific) | Category Manager / Shopper Insights |
 
 ## Personas and example asks
 

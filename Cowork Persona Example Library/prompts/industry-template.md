@@ -32,6 +32,6 @@ OTHER SECTIONS
 - Confirm with each customer: things that vary by company.
 
 OUTPUT
-Markdown in this order: title; "Back to index" link; Top 3 demos; How to read this page (the three ask types, the standard Microsoft 365 sources stated once, systems marked (confirm), anything that sends/posts/schedules is a draft for approval); Why the two industry personas; Personas at a glance table (#, Persona, Title, Duty); one ### section per persona (Title, Duty, Systems, three bulleted asks, and "Related example skill:" link where one fits); Top 5 custom skills; Top 5 connectors; Business areas; Confirm with each customer.
+Markdown in this order: title; "Back to index" link; Top 3 demos (one line, "Start a workshop with these.", then the list); How to read this page (one sentence naming the three ask types, systems marked (confirm), anything that sends/posts/schedules is a draft, then a link to ../README.md#how-to-use); Why the two industry personas; Personas at a glance table (#, Persona, Title); one ### section per persona (Title, Duty, Systems, three bulleted asks, and "Related example skill:" link where one fits); Top 5 custom skills; Top 5 connectors; Business areas; Confirm with each customer.
 Exactly 15 personas. No web research required. Final reply: one line, no tool names.
 ```

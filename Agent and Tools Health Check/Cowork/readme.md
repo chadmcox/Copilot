@@ -8,6 +8,13 @@ Use GitHub Copilot in VS Code instead? The same skill works there, with a much s
 
 > Microsoft changes Cowork, plugins, Agent 365 and the Enterprise MCP server often, and parts are in preview. Test this in your own tenant first.
 
+## Short version
+
+1. Pick a way. **A:** an admin sets up the plugin once and Cowork runs the whole check live. **B:** skill only, about 2 minutes per person; Cowork explains the CSVs from `Get-AgentToolsHealth.ps1`.
+2. Set it up: [Way A](#way-a-admin-setup-once-per-tenant) (admin, once per tenant) or [Way B](#way-b-skill-only).
+3. Attach `Packages.csv` and `DefenderAgents.csv` (see [Get Packages.csv and DefenderAgents.csv](#get-packagescsv-and-defenderagentscsv)) and paste [the prompt](#the-prompt) into Cowork.
+4. Open the HTML report. Start with the lowest-scoring area; every finding has a fix.
+
 ## What you need to know first
 
 The Enterprise MCP server **can't read the Agent 365 catalog**: no MCP scope covers it, so a request to `/copilot/admin/catalog/packages` returns 403. So you give Cowork the agents and tools as a file, **Packages.csv**, and Defender's agent inventory as **DefenderAgents.csv**, and Cowork reads everything else live. Tested against a live tenant on Oct 31, 2026:

@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Component Commodity Manager, recurring:** every Monday, distributor shortage, allocation and end-of-life notices turned into a risk list with alternates needed. → [jump](#6-supply-chainprocurement)
 2. **Supplier Quality / Quality Engineer, hand-off:** a SCAR for a connector failure built from NCRs, the defect Pareto and field returns. → [jump](#5-quality)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** NPI Program Manager chosen because short product lifecycles make NPI execution a key driver; Product Compliance Engineer chosen because FCC/CE/UL and RoHS/REACH compliance gate market entry.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Plant Controller | Lead costing, inventory valuation, and month-end close for [plant]. |
-| 2 | [HR](#2-hr) | HR Business Partner, Manufacturing | Support staffing, labor relations, and development for production teams. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Electronics Assembler / SMT Operator | Operate SMT lines and assemble boards per work instructions. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Line Supervisor | Lead SMT and box-build teams to meet output and quality. |
-| 5 | [Quality](#5-quality) | Supplier Quality / Quality Engineer | Manage NCRs, CAPAs, first article inspection, and audits. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Component Commodity Manager | Source electronic components; manage allocation, lead times, and costs. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Specialist | Manage workplace safety, ESD, chemical, and environmental compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Technician / Depot Repair Technician | Install, repair, and maintain products at customer sites. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Channel / Key Account Manager | Grow revenue with OEMs, distributors, and channel partners. |
-| 10 | [Customer Service](#10-customer-service) | Customer Support / Order Management Specialist | Handle orders, RMAs, and product support inquiries. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Manufacturing Operations Manager | Run plant capacity, layout, maintenance, and facilities. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Hardware / Manufacturing Engineer | Design products and processes; support NPI and DFM. |
-| 13 | [Executive](#13-executive) | VP Operations / General Manager | Lead manufacturing output, cost, quality, and growth. |
-| 14 | [Industry-Specific: NPI](#14-industry-specific-npi) | NPI Program Manager | Lead new product introductions from prototype to volume. |
-| 15 | [Industry-Specific: Compliance](#15-industry-specific-compliance) | Product Compliance Engineer | Manage regulatory certifications (FCC, CE, UL) and material compliance. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Plant Controller |
+| 2 | [HR](#2-hr) | HR Business Partner, Manufacturing |
+| 3 | [Frontline Worker](#3-frontline-worker) | Electronics Assembler / SMT Operator |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Production Line Supervisor |
+| 5 | [Quality](#5-quality) | Supplier Quality / Quality Engineer |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Component Commodity Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Specialist |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Field Service Technician / Depot Repair Technician |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Channel / Key Account Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Support / Order Management Specialist |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Manufacturing Operations Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Hardware / Manufacturing Engineer |
+| 13 | [Executive](#13-executive) | VP Operations / General Manager |
+| 14 | [Industry-Specific: NPI](#14-industry-specific-npi) | NPI Program Manager |
+| 15 | [Industry-Specific: Compliance](#15-industry-specific-compliance) | Product Compliance Engineer |
 
 ## Personas and example asks
 

@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Yield / Quality Engineer, hand-off:** an 8D update for a customer excursion built from lot dispositions, SPC data and yield by layer. → [jump](#5-quality)
 2. **Materials & Commodity Buyer, recurring:** every Monday, days of supply for photoresist, gases and critical consumables against forecasted wafer starts. → [jump](#6-supply-chainprocurement)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Lithography Equipment Engineer chosen because patterning is the fab's typical bottleneck and costliest tool set; Test & Product Engineer chosen because sort/final test yield links fab output to customer quality and revenue.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Fab Cost Accountant | Manage wafer standard costs, variances, and month-end close. |
-| 2 | [HR](#2-hr) | Fab Talent Acquisition Partner | Recruit and onboard technicians and engineers for cleanroom operations. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Manufacturing Technician (Wafer Fab) | Operate and monitor fab tools per specs in cleanroom. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Fab Area Shift Supervisor | Lead shift technicians to hit moves, cycle time, and safety. |
-| 5 | [Quality](#5-quality) | Yield / Quality Engineer | Drive yield improvement, excursion response, and 8D corrective actions. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Materials & Commodity Buyer | Source wafers, chemicals, gases, and spares; manage supplier risk. |
-| 7 | [Safety/EHS](#7-safetyehs) | EHS Engineer (Fab) | Manage chemical, gas, and cleanroom safety and environmental compliance. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Customer Field Applications / Equipment Service Engineer | Support customer and fab tools; resolve failures, install, qualify. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Account Manager (Design Win) | Win sockets and grow revenue across assigned OEM accounts. |
-| 10 | [Customer Service](#10-customer-service) | Customer Order Fulfillment Specialist | Manage orders, allocations, lead times, and customer delivery commitments. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Fab Facilities Manager | Run cleanroom, UPW, gases, power, and HVAC for uptime. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Integration Engineer | Develop and integrate process flows for new technology nodes. |
-| 13 | [Executive](#13-executive) | VP / General Manager, Fab Operations | Lead fab output, yield, cost, and capacity strategy. |
-| 14 | [Industry-Specific: Lithography](#14-industry-specific-lithography) | Lithography Equipment Engineer | Maintain scanners, overlay, and CD performance for patterning. |
-| 15 | [Industry-Specific: Product/Test](#15-industry-specific-producttest) | Test & Product Engineer | Own wafer sort and final test programs, bins, and yields. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Fab Cost Accountant |
+| 2 | [HR](#2-hr) | Fab Talent Acquisition Partner |
+| 3 | [Frontline Worker](#3-frontline-worker) | Manufacturing Technician (Wafer Fab) |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Fab Area Shift Supervisor |
+| 5 | [Quality](#5-quality) | Yield / Quality Engineer |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Materials & Commodity Buyer |
+| 7 | [Safety/EHS](#7-safetyehs) | EHS Engineer (Fab) |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Customer Field Applications / Equipment Service Engineer |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Account Manager (Design Win) |
+| 10 | [Customer Service](#10-customer-service) | Customer Order Fulfillment Specialist |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Fab Facilities Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Integration Engineer |
+| 13 | [Executive](#13-executive) | VP / General Manager, Fab Operations |
+| 14 | [Industry-Specific: Lithography](#14-industry-specific-lithography) | Lithography Equipment Engineer |
+| 15 | [Industry-Specific: Product/Test](#15-industry-specific-producttest) | Test & Product Engineer |
 
 ## Personas and example asks
 

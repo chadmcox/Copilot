@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Port Operations Manager, recurring:** every evening, tomorrow's port call with berth or tender status, agent emails and weather, and what's still open. → [jump](#15-industry-specific-port--itinerary-operations)
 2. **Guest Services Manager, hand-off:** a service-recovery pack for an upset guest built from the folio, case notes and the guest's emails. → [jump](#10-customer-service)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Shore Excursions and Port & Itinerary Operations are unique, high-impact cruise functions driving revenue and voyage continuity.
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Shipboard Finance Manager | Oversee onboard revenue, payroll, cash and voyage P&L reporting. |
-| 2 | [HR](#2-hr) | Crew HR & Manning Manager | Manage crew manning, contracts, sign-on/sign-off and welfare. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Stateroom Attendant | Clean and service assigned staterooms to brand standards daily. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Housekeeping Supervisor (Deck Supervisor) | Lead stateroom attendants, inspections and turnaround on assigned decks. |
-| 5 | [Quality](#5-quality) | Guest Experience & Quality Manager | Monitor service standards, audits, guest feedback and corrective actions. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Fleet Provisioning & Procurement Manager | Plan provisioning, purchasing and port loading for fleet operations. |
-| 7 | [Safety/EHS](#7-safetyehs) | Environmental & Safety Officer | Ensure SOLAS, MARPOL compliance, drills and incident reporting. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Marine Engineer (Staff Chief Engineer) | Maintain propulsion, power and hotel technical systems onboard. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Trade Sales & Revenue Marketing Manager | Drive cruise bookings through travel partners and campaigns. |
-| 10 | [Customer Service](#10-customer-service) | Guest Services Manager | Lead guest services desk, onboard requests and service recovery. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Hotel Director | Run onboard hotel operations across housekeeping, F&B and guest services. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Shipboard IT Officer | Support onboard networks, guest connectivity and systems. |
-| 13 | [Executive](#13-executive) | VP Fleet Hotel Operations | Lead fleet hotel strategy, guest experience and profitability. |
-| 14 | [Industry-Specific: Shore Excursions](#14-industry-specific-shore-excursions) | Shore Excursions Manager | Plan, sell and coordinate port tours with local operators. |
-| 15 | [Industry-Specific: Port & Itinerary Operations](#15-industry-specific-port--itinerary-operations) | Port Operations Manager | Coordinate port calls, agents, berths and turnaround logistics. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Shipboard Finance Manager |
+| 2 | [HR](#2-hr) | Crew HR & Manning Manager |
+| 3 | [Frontline Worker](#3-frontline-worker) | Stateroom Attendant |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Housekeeping Supervisor (Deck Supervisor) |
+| 5 | [Quality](#5-quality) | Guest Experience & Quality Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Fleet Provisioning & Procurement Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | Environmental & Safety Officer |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Marine Engineer (Staff Chief Engineer) |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Trade Sales & Revenue Marketing Manager |
+| 10 | [Customer Service](#10-customer-service) | Guest Services Manager |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Hotel Director |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Shipboard IT Officer |
+| 13 | [Executive](#13-executive) | VP Fleet Hotel Operations |
+| 14 | [Industry-Specific: Shore Excursions](#14-industry-specific-shore-excursions) | Shore Excursions Manager |
+| 15 | [Industry-Specific: Port & Itinerary Operations](#15-industry-specific-port--itinerary-operations) | Port Operations Manager |
 
 ## Personas and example asks
 

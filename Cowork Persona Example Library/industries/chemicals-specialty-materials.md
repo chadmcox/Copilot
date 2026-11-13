@@ -4,7 +4,7 @@
 
 ## Top 3 demos
 
-Start a workshop with these. Each shows something different Cowork does well.
+Start a workshop with these.
 
 1. **Shift Superintendent, recurring:** at every shift change, a turnover brief built from logs, open permits and lab results. → [jump](#4-frontline-supervisor)
 2. **Product Stewardship & Regulatory Manager, hand-off:** a customer regulatory inquiry answered from the SDS system, registration status and past statements, with a draft reply. → [jump](#14-regulatoryproduct-stewardship-industry-specific)
@@ -12,35 +12,29 @@ Start a workshop with these. Each shows something different Cowork does well.
 
 ## How to read this page
 
-Each persona has three asks:
-
-- **Quick win:** a small, everyday job that pays off right away.
-- **Hand-off:** a multi-step job across several sources that would otherwise take an hour or more.
-- **Recurring:** something scheduled or ongoing that keeps working without the person.
-
-Every persona can use the standard Microsoft 365 sources (Outlook, Teams, meeting transcripts, SharePoint/OneDrive, calendar). **Systems** lists only the industry-specific systems that persona uses beyond those, marked *(confirm)* because they vary by company. Anything that sends, posts or schedules is a draft for the person's approval.
+Each persona has a **quick win**, a **hand-off** and a **recurring** ask. Systems marked *(confirm)* vary by company. Anything that sends, posts or schedules is a draft. Details: [How to use](../README.md#how-to-use).
 
 **Why the two industry personas:** Product Stewardship & Regulatory Manager (SDS/REACH/TSCA obligations) and Production Scheduler (campaign scheduling drives process-plant economics).
 
 ## Personas at a glance
 
-| # | Persona | Title | Duty |
-|---|---|---|---|
-| 1 | [Finance](#1-finance) | Site Controller | Manages site cost, inventory valuation, and month-end close. |
-| 2 | [HR](#2-hr) | Site HR Manager | Supports workforce planning, operator training, and labor relations. |
-| 3 | [Frontline Worker](#3-frontline-worker) | Process Operator | Operates reactors and units safely within operating limits. |
-| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Shift Superintendent | Directs unit operations, permits, and crew during shift. |
-| 5 | [Quality](#5-quality) | Quality Assurance Manager | Owns product specs, CoAs, and customer quality complaints. |
-| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Feedstock Procurement Manager | Sources feedstocks, catalysts, and logistics at competitive cost. |
-| 7 | [Safety/EHS](#7-safetyehs) | Process Safety Manager | Leads PSM, environmental permits, and incident investigations. |
-| 8 | [Field Service/Repair](#8-field-servicerepair) | Reliability & Maintenance Technician | Maintains pumps, compressors, and instrumentation for reliability. |
-| 9 | [Sales/Marketing](#9-salesmarketing) | Technical Sales Manager | Grows specialty product sales with industrial customers. |
-| 10 | [Customer Service](#10-customer-service) | Customer Service Specialist | Manages orders, CoA requests, and delivery coordination. |
-| 11 | [Operations/Facilities](#11-operationsfacilities) | Site Operations Manager | Leads safe, reliable, and profitable site operations. |
-| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Engineer | Optimizes unit performance, yields, and process changes. |
-| 13 | [Executive](#13-executive) | Business Unit President | Owns BU strategy, portfolio, and financial performance. |
-| 14 | [Regulatory/Product Stewardship (industry-specific)](#14-regulatoryproduct-stewardship-industry-specific) | Product Stewardship & Regulatory Manager | Manages SDS, REACH/TSCA compliance, and customer regulatory inquiries. |
-| 15 | [Production Planning (industry-specific)](#15-production-planning-industry-specific) | Production Scheduler | Schedules campaigns and batches to balance demand and capacity. |
+| # | Persona | Title |
+|---|---|---|
+| 1 | [Finance](#1-finance) | Site Controller |
+| 2 | [HR](#2-hr) | Site HR Manager |
+| 3 | [Frontline Worker](#3-frontline-worker) | Process Operator |
+| 4 | [Frontline Supervisor](#4-frontline-supervisor) | Shift Superintendent |
+| 5 | [Quality](#5-quality) | Quality Assurance Manager |
+| 6 | [Supply Chain/Procurement](#6-supply-chainprocurement) | Feedstock Procurement Manager |
+| 7 | [Safety/EHS](#7-safetyehs) | Process Safety Manager |
+| 8 | [Field Service/Repair](#8-field-servicerepair) | Reliability & Maintenance Technician |
+| 9 | [Sales/Marketing](#9-salesmarketing) | Technical Sales Manager |
+| 10 | [Customer Service](#10-customer-service) | Customer Service Specialist |
+| 11 | [Operations/Facilities](#11-operationsfacilities) | Site Operations Manager |
+| 12 | [Engineering/R&D/Technology](#12-engineeringrdtechnology) | Process Engineer |
+| 13 | [Executive](#13-executive) | Business Unit President |
+| 14 | [Regulatory/Product Stewardship (industry-specific)](#14-regulatoryproduct-stewardship-industry-specific) | Product Stewardship & Regulatory Manager |
+| 15 | [Production Planning (industry-specific)](#15-production-planning-industry-specific) | Production Scheduler |
 
 ## Personas and example asks
 
