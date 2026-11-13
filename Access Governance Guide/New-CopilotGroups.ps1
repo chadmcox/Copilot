@@ -55,6 +55,11 @@ url: Manage Microsoft Copilot settings in the M365 admin center - https://learn.
     Scopes: Group.ReadWrite.All, plus RoleManagement.ReadWrite.Directory unless -SkipAdminGroups
     (Microsoft Learn: needed to set isAssignableToRole and to change role-assignable groups).
 
+.PARAMETER BusinessUnits
+    Also checks a set of tier groups for each line of business or cost center, named
+    "Copilot Spend <business unit> <tier>" (for example Copilot Spend Finance Gold).
+    Use names with only letters, digits and spaces, so the spending policy names work in Graph.
+
 .PARAMETER IncludeCodeGroups
     Also checks the three Copilot Code groups. Use it once Code is in your spending policy wizard (MC1519871).
 
@@ -72,11 +77,13 @@ url: Manage Microsoft Copilot settings in the M365 admin center - https://learn.
     .\New-CopilotGroups.ps1 -WhatIf
     .\New-CopilotGroups.ps1
     .\New-CopilotGroups.ps1 -IncludeCodeGroups
+    .\New-CopilotGroups.ps1 -BusinessUnits "Finance", "Revenue", "Operations" -WhatIf
     .\New-CopilotGroups.ps1 -SkipAdminGroups
     .\New-CopilotGroups.ps1 -RemoveRetiredGroups -WhatIf
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
+    [ValidatePattern('^[A-Za-z0-9 ]+$')][string[]]$BusinessUnits,
     [switch]$IncludeCodeGroups,
     [switch]$SkipAdminGroups,
     [switch]$RemoveRetiredGroups,
@@ -93,6 +100,7 @@ param(
 #   Desc           = description; the script keeps the tenant in step with it
 #   RoleAssignable = admin group (role-assignable, under PIM). Can't be changed after creation.
 #   Code           = only with -IncludeCodeGroups
+#   Tier           = spend tier; -BusinessUnits makes a copy of each tier row per business unit
 #   OldNames       = earlier names; a group found under one of them is renamed
 # ---------------------------------------------------------------------------
 $groups = @(
@@ -106,10 +114,14 @@ $groups = @(
     @{ Name = "Copilot Pilot Ring";                          Desc = "Early-validation users; scope of the Copilot New Services Pilot spending policy (auto-applies new credit-billed services, e.g. Copilot Code)." }
 
     # ---------- Spend (spending policies in Copilot > Cost Management) ----------
-    # Cowork access is granted by these spending policies, so there is no separate Cowork access group.
-    @{ Name = "Copilot + Cowork Spend Limit";                Desc = "Scope of the Cowork Limited spending policy. Per-user limit on (minimum 2,000 credits/month). Mutually exclusive with Unlimited." }
-    @{ Name = "Copilot + Cowork Spend Unlimited";            Desc = "Scope of the Cowork Unlimited spending policy. No per-user limit. Mutually exclusive with Limit." }
-    @{ Name = "Copilot + Cowork Spend Unlimited Temp";       Desc = "Scope of the Cowork Temporary Unlimited spending policy. Granted for 30 days by the Temporary Unlimited access package; only Spend Limit members can request it. Only one policy applies to a person at a time, and spending already used still counts." }
+    # Cowork and Work IQ API spending uses four tiers. A person is in one tier at a time.
+    # The old Limit, Unlimited and Temp groups are renamed into Silver, Platinum and Platinum Temp,
+    # so their members and spending policy links carry over. -BusinessUnits adds a set per business unit.
+    @{ Name = "Copilot Spend Bronze";                        Tier = "Bronze";        Desc = "Scope of the Copilot Bronze spending policy: Work IQ API only, 2,000 credits/month per user. No Cowork. One tier per person." }
+    @{ Name = "Copilot Spend Silver";                        Tier = "Silver";        OldNames = @("Copilot + Cowork Spend Limit"); Desc = "Scope of the Copilot Silver spending policy: Cowork and Work IQ API, 5,000 credits/month per user. One tier per person." }
+    @{ Name = "Copilot Spend Gold";                          Tier = "Gold";          Desc = "Scope of the Copilot Gold spending policy: Cowork and Work IQ API, 10,000 credits/month per user. One tier per person." }
+    @{ Name = "Copilot Spend Platinum";                      Tier = "Platinum";      OldNames = @("Copilot + Cowork Spend Unlimited"); Desc = "Scope of the Copilot Platinum spending policy: Cowork and Work IQ API, no per-user limit. Set a policy limit and an alert. One tier per person." }
+    @{ Name = "Copilot Spend Platinum Temp";                 Tier = "Platinum Temp"; OldNames = @("Copilot + Cowork Spend Unlimited Temp"); Desc = "Scope of the Copilot Platinum Temporary spending policy. Granted for 30 days by the Temporary Platinum access package; only Silver and Gold members can request it. Spending already used this month still counts." }
     @{ Name = "Copilot SharePoint OneDrive Advanced Access"; Desc = "Scope of the SharePoint OneDrive Advanced Work spending policy (Advanced work in SharePoint and OneDrive)." }
     @{ Name = "Copilot Work IQ API Access";                  Desc = "Scope of the Work IQ API spending policy: users of custom agents and apps that call the Work IQ API. Admin controls for Business Applications in Work IQ reach preview by Nov 17, 2026 (MC1518036)." }
     @{ Name = "Copilot Managed Runtime Access";              Desc = "Scope of the Managed Runtime spending policy: people who run apps built in Cowork, Copilot Studio or the CLI. No Copilot license needed." }
@@ -154,9 +166,19 @@ $groups = @(
     @{ Name = "Copilot Entra ID Operations Reader"; RoleAssignable = $true; Desc = "People who run the Entra ID Operations Report and Entra ID Security Review (read-only). Holds Global Reader through PIM. Scope of their Cowork plugins." }
 )
 
+# One set of tier groups per business unit (-BusinessUnits). Made from the Tier rows above.
+$businessUnitGroups = @(
+    foreach ($bu in $BusinessUnits) {
+        $groups | Where-Object Tier | ForEach-Object {
+            @{ Name = "Copilot Spend $bu $($_.Tier)"; Tier = $_.Tier; BusinessUnit = $bu
+               Desc = "$bu business unit. " + ($_.Desc -replace 'Copilot (Bronze|Silver|Gold|Platinum)', "Copilot $bu `$1") }
+        }
+    }
+)
+
 # Groups this design no longer uses. Reported every run; deleted only with -RemoveRetiredGroups.
 $retiredGroups = [ordered]@{
-    "Copilot + Cowork Access"       = "Cowork access now comes only from the Cowork spend groups."
+    "Copilot + Cowork Access"       = "Cowork access now comes only from the Silver, Gold and Platinum spend tier groups."
     "Copilot + Code Access"         = "Code access comes from the Code spend groups, like Cowork."
     "Copilot Preview Models Access" = "Replaced by Copilot Independent Processor Models Access."
 }
@@ -308,7 +330,7 @@ $scopes = @("Group.ReadWrite.All"; if (-not $SkipAdminGroups) { "RoleManagement.
 $graph = "$(Connect-Cloud -Environment $Environment -Scopes $scopes)/beta"
 
 $results = @(
-    $groups |
+    @($groups; $businessUnitGroups) |
         Where-Object { $IncludeCodeGroups -or -not $_.Code } |
         Where-Object { -not ($SkipAdminGroups -and $_.RoleAssignable) } |
         Set-CopilotGroup

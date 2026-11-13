@@ -36,7 +36,8 @@ url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-
 
     For each policy in the table below the script:
       1. Skips it if a policy with that name already exists (match on displayName). With
-         -UpdateExisting it instead brings that policy in line: limits, services and group.
+         -UpdateExisting it instead brings that policy in line: name (if found under an old
+         name), limits, services, group and, with -AlertThresholdPercent, the alert.
       2. Creates it as a selectedGroupsSpendingPolicy with its period limit, per-user limit
          and services. A new policy is created DISABLED.
       3. Links its Entra group, which is what lets the service enable the policy.
@@ -45,7 +46,7 @@ url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-
     What this script CANNOT do, because the API does not expose it (set these by hand in
     Copilot > Cost management > Configuration):
       - "Allow new Agents and services as they become available" (Auto-apply new services).
-      - Model profiles.
+      - Model templates (model profiles).
 
     Rules the API enforces (so the script does too):
       - A policy name is 10-64 characters, letters, digits and spaces only. That is why the
@@ -69,6 +70,14 @@ url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-
       - The Billing Administrator or Global Administrator role at runtime.
       - Run New-CopilotGroups.ps1 first, so the groups exist.
 
+.PARAMETER BusinessUnits
+    Also creates a set of tier policies for each business unit: "Copilot <business unit> <tier>",
+    scoped to "Copilot Spend <business unit> <tier>". Run New-CopilotGroups.ps1 -BusinessUnits first.
+
+.PARAMETER TierPeriodLimit
+    Monthly policy limit for the Silver, Gold and Platinum tiers. Default 500,000 credits.
+    Bronze uses -PeriodLimit. Size both to the number of people in each group.
+
 .PARAMETER ServiceIdMap
     Overrides the service IDs. Keys: Cowork, SharePointAdvanced, OneDriveAdvanced, WorkIqApi,
     ManagedRuntime, TeamsPhoneAgent, Code.
@@ -78,12 +87,13 @@ url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-
     you use -AlertThresholdPercent.
 
 .PARAMETER UpdateExisting
-    For policies that already exist: set the period and per-user limits to the values the
-    script would create, turn on any missing service, and link the group if it's missing.
+    For policies that already exist: rename a policy found under an old name, set the period
+    and per-user limits to the values the script would create, turn on any missing service,
+    link the group if it's missing, and turn on the alert if -AlertThresholdPercent is set.
     It never turns a service off or removes a group; it only reports extras.
 
 .PARAMETER TempPeriodLimit
-    Monthly cap for the Cowork Temporary Unlimited policy. Its users have no per-user cap, so
+    Monthly cap for the Copilot Platinum Temporary policy. Its users have no per-user cap, so
     this is the safety net. Defaults to -PeriodLimit.
 
 .PARAMETER Environment
@@ -95,12 +105,15 @@ url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-
     .\New-CopilotSpendingPolicies.ps1 -WhatIf
     .\New-CopilotSpendingPolicies.ps1 -UpdateExisting -TempPeriodLimit 20000 -WhatIf
     .\New-CopilotSpendingPolicies.ps1 -IncludeCodePolicies -AlertThresholdPercent 80 -AlertRecipientUpn "<copilot program owner UPN>"
+    .\New-CopilotSpendingPolicies.ps1 -BusinessUnits "Finance", "Revenue" -AlertThresholdPercent 80 -AlertRecipientUpn "<budget owner UPN>" -WhatIf
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [switch]$ShowServiceIds,
     [switch]$IncludeCodePolicies,
     [switch]$UpdateExisting,
+    [ValidatePattern('^[A-Za-z0-9 ]+$')][string[]]$BusinessUnits,
+    [int]$TierPeriodLimit = 500000,
     [hashtable]$ServiceIdMap = @{},
     [int]$PerUserLimit    = 2000,
     [int]$PeriodLimit     = 100000,
@@ -155,10 +168,23 @@ $documentedIds = @("cowork", "workIQ")
 # Policies. Names: letters, digits and spaces only, 10-64 characters.
 # Unlimited = no per-user cap (unlimitedCostManagementQuantity).
 # ---------------------------------------------------------------------------
+# Spend tiers (Cowork and Work IQ API). PerUserValue overrides -PerUserLimit. OldNames are the
+# policies from the earlier Limited/Unlimited design; -UpdateExisting renames them.
+$tierPolicies = @(
+    @{ Name = "Copilot Bronze";             Tier = "Bronze";        Services = @($svc.WorkIqApi);              PerUser = "limited";   PerUserValue = 2000 }
+    @{ Name = "Copilot Silver";             Tier = "Silver";        Services = @($svc.Cowork, $svc.WorkIqApi); PerUser = "limited";   PerUserValue = 5000;  Period = $TierPeriodLimit; OldNames = @("Cowork Limited") }
+    @{ Name = "Copilot Gold";               Tier = "Gold";          Services = @($svc.Cowork, $svc.WorkIqApi); PerUser = "limited";   PerUserValue = 10000; Period = $TierPeriodLimit }
+    @{ Name = "Copilot Platinum";           Tier = "Platinum";      Services = @($svc.Cowork, $svc.WorkIqApi); PerUser = "unlimited"; Period = $TierPeriodLimit; OldNames = @("Cowork Unlimited") }
+    @{ Name = "Copilot Platinum Temporary"; Tier = "Platinum Temp"; Services = @($svc.Cowork, $svc.WorkIqApi); PerUser = "unlimited"; Period = $TempPeriodLimit; OldNames = @("Cowork Temporary Unlimited") }
+)
 $policies = @(
-    @{ Name = "Cowork Limited";                   Group = "Copilot + Cowork Spend Limit";                Services = @($svc.Cowork); PerUser = "limited" }
-    @{ Name = "Cowork Unlimited";                 Group = "Copilot + Cowork Spend Unlimited";            Services = @($svc.Cowork); PerUser = "unlimited" }
-    @{ Name = "Cowork Temporary Unlimited";       Group = "Copilot + Cowork Spend Unlimited Temp";       Services = @($svc.Cowork); PerUser = "unlimited"; Period = $TempPeriodLimit }
+    $tierPolicies | ForEach-Object { $_.Group = "Copilot Spend $($_.Tier)"; $_ }
+    foreach ($bu in $BusinessUnits) {
+        $tierPolicies | ForEach-Object {
+            @{ Name = "Copilot $bu $($_.Tier -replace ' Temp$', ' Temporary')"; Group = "Copilot Spend $bu $($_.Tier)"
+               Services = $_.Services; PerUser = $_.PerUser; PerUserValue = $_.PerUserValue; Period = $_.Period }
+        }
+    }
     @{ Name = "SharePoint OneDrive Advanced Work"; Group = "Copilot SharePoint OneDrive Advanced Access"; Services = @($svc.SharePointAdvanced, $svc.OneDriveAdvanced); PerUser = "limited" }
     @{ Name = "Work IQ API";                      Group = "Copilot Work IQ API Access";                  Services = @($svc.WorkIqApi); PerUser = "limited" }
     @{ Name = "Managed Runtime";                  Group = "Copilot Managed Runtime Access";              Services = @($svc.ManagedRuntime); PerUser = "limited" }
@@ -293,7 +319,32 @@ function Sync-Policy([string]$Id, $Want, [string]$GroupId, [hashtable]$Desired) 
     $others = @($groups | Where-Object { $_.id -ne $GroupId })
     if ($others) { $notes += "EXTRA groups (left alone): $(($others | ForEach-Object displayName) -join ', ')" }
 
+    if ($AlertThresholdPercent -gt 0) {
+        $alert = Invoke-Graph GET "$cm/spendingPolicies/$Id/emailThresholdSettings" $null $null
+        if (-not $alert.isEnabled -and $PSCmdlet.ShouldProcess($Want.Name, "Turn on alert at $AlertThresholdPercent%")) {
+            Set-PolicyAlert $Id
+            $notes += "alert on at $AlertThresholdPercent%"
+        }
+    }
+
     if (-not $notes) { "already matches" } else { $notes -join "; " }
+}
+
+# Microsoft's order: set the alert disabled, add the recipients, then enable it.
+function Set-PolicyAlert([string]$Id) {
+    Invoke-Graph PATCH "$cm/spendingPolicies/$Id/emailThresholdSettings" `
+        @{ isEnabled = $false; thresholds = @(@{ "@odata.type" = "#microsoft.graph.percentageCostManagementAlertThreshold"; value = $AlertThresholdPercent }) } `
+        @{ "If-Match" = (Get-PolicyEtag $Id) } | Out-Null
+    foreach ($upn in $AlertRecipientUpn) {
+        $uid = Get-UserId $upn
+        try {
+            Invoke-Graph POST "$cm/spendingPolicies/$Id/emailThresholdSettings/recipients/`$ref" `
+                @{ "@odata.id" = "$beta/users/$uid" } @{ "If-Match" = (Get-PolicyEtag $Id) } | Out-Null
+        }
+        catch { Write-Verbose "Recipient $upn not added (it may already be there): $($_.Exception.Message)" }
+    }
+    Invoke-Graph PATCH "$cm/spendingPolicies/$Id/emailThresholdSettings" `
+        @{ isEnabled = $true } @{ "If-Match" = (Get-PolicyEtag $Id) } | Out-Null
 }
 
 # ---------------------------------------------------------------------------
@@ -344,18 +395,27 @@ foreach ($p in $policies) {
     $period = if ($p.Period) { $p.Period } else { $PeriodLimit }
     $desired = @{
         periodLimit    = (New-Quantity "limited" $period)
-        perUserLimit   = (New-Quantity $p.PerUser $PerUserLimit)
+        perUserLimit   = (New-Quantity $p.PerUser $(if ($p.PerUserValue) { $p.PerUserValue } else { $PerUserLimit }))
         billingMethods = $BillingMethods
     }
 
     $already = $existingPolicies | Where-Object { $_.displayName -eq $p.Name } | Select-Object -First 1
+    $oldName = $null
+    if (-not $already) {
+        $already = $existingPolicies | Where-Object { $_.displayName -in @($p.OldNames) } | Select-Object -First 1
+        if ($already) { $oldName = $already.displayName }
+    }
     if ($already) {
         if (-not $UpdateExisting) {
-            $results += [pscustomobject]@{ Policy = $p.Name; Status = "Exists"; Detail = "status $($already.status); id $($already.id). Use -UpdateExisting to sync it" }
+            $results += [pscustomobject]@{ Policy = $p.Name; Status = "Exists"; Detail = "status $($already.status); id $($already.id)$(if ($oldName) { "; found under old name '$oldName'" }). Use -UpdateExisting to sync it" }
             continue
         }
         try {
+            if ($oldName -and $PSCmdlet.ShouldProcess($oldName, "Rename policy to '$($p.Name)'")) {
+                Invoke-Graph PATCH "$cm/spendingPolicies/$($already.id)" @{ displayName = $p.Name } @{ "If-Match" = (Get-PolicyEtag $already.id) } | Out-Null
+            }
             $note = Sync-Policy $already.id $p (Get-GroupId $p.Group) $desired
+            if ($oldName) { $note = "renamed from '$oldName'; $note" }
             $results += [pscustomobject]@{ Policy = $p.Name; Status = "Checked"; Detail = "status $($already.status); $note" }
         }
         catch {
@@ -403,20 +463,7 @@ foreach ($p in $policies) {
 
     if ($AlertThresholdPercent -gt 0) {
         try {
-            # Microsoft's order: create the alert disabled, add the recipients, then enable it.
-            Invoke-Graph PATCH "$cm/spendingPolicies/$($created.id)/emailThresholdSettings" `
-                @{ isEnabled = $false; thresholds = @(@{ "@odata.type" = "#microsoft.graph.percentageCostManagementAlertThreshold"; value = $AlertThresholdPercent }) } `
-                @{ "If-Match" = (Get-PolicyEtag $created.id) } | Out-Null
-
-            foreach ($upn in $AlertRecipientUpn) {
-                $uid = Get-UserId $upn
-                Invoke-Graph POST "$cm/spendingPolicies/$($created.id)/emailThresholdSettings/recipients/`$ref" `
-                    @{ "@odata.id" = "$beta/users/$uid" } @{ "If-Match" = (Get-PolicyEtag $created.id) } | Out-Null
-            }
-
-            Invoke-Graph PATCH "$cm/spendingPolicies/$($created.id)/emailThresholdSettings" `
-                @{ isEnabled = $true } @{ "If-Match" = (Get-PolicyEtag $created.id) } | Out-Null
-
+            Set-PolicyAlert $created.id
             $detail += "; alert at $AlertThresholdPercent%"
         }
         catch {
@@ -434,5 +481,5 @@ Write-Host ""
 Write-Host "Still to do by hand in Copilot > Cost management > Configuration:"
 Write-Host "  1. Turn OFF 'Allow new Agents and services as they become available' on every policy above."
 Write-Host "  2. Create the Copilot New Services Pilot policy and leave that switch ON for Copilot Pilot Ring only."
-Write-Host "  3. Pick a model profile on each Cowork policy."
+Write-Host "  3. Pick a model template on each policy that includes Cowork."
 Write-Host "  4. Check each policy turned itself on (status enabled)."
