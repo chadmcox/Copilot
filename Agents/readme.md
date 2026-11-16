@@ -1,6 +1,6 @@
 # Copilot Agent Delegation Guide
 
-Updated Nov 9, 2026 · @Chad Cox
+Updated Nov 16, 2026 · @Chad Cox
 
 > **Do the [Access Governance Guide](../Access%20Governance%20Guide/readme.md) first.** This guide is step 2 and uses the groups and admin roles its scripts create.
 
@@ -37,14 +37,15 @@ Docs call the blueprint switch **Users can create agent blueprints**. It's the s
 | M365 admin center → **Agents → Settings → Agent feedback sharing** | Pick **No agents** (default), **All agents** or **Selected agents**. **Save** | Decides whether agent owners see users' ratings and comments (MC1520901) |
 | M365 admin center → **Agents → All agents → [agent] → Connected agents** | Check this tab before you approve an agent | Agents can now call Agent 365 agents over Agent2Agent. Only admins can install those (MC1478975) |
 
-### Dated: Nov 14 to early Dec 2026
+### Dated: Nov 14, 2026 to January 2027
 
 | By | Where | What to do | Why |
 | --- | --- | --- | --- |
-| **Nov 14** | Teams admin center → **Meetings → Meeting settings → Transcript API access** | Turn **WorkIQ access** **On** only if an agent or app reads live meeting transcripts through Work IQ | Off by default from Nov 14. Apps that use it stop working until you turn it on |
+| **Nov 14 (passed)** | Teams admin center → **Meetings → Meeting settings → Transcript API access** | Turn **WorkIQ access** **On** only if an agent or app reads live meeting transcripts through Work IQ | Off by default since Nov 14. Apps that use it stopped working until you turn it on |
 | **Mid-Nov** | M365 admin center → **Agents → Tools → Connectors** | Block the Power Platform connectors your data policies would block. **Save** | Cowork can now use them, and Power Platform DLP doesn't apply to Cowork. Blocks also stop existing connections and Cowork Automations (MC1542062) |
 | **Nov 18** | Microsoft 365 Organizational Data Service (MODS) | Only if you send custom data to the Workforce Insights endpoint: switch to the **Microsoft 365 profile** endpoint. For non-public data, join the private preview first | That endpoint is retiring and your old selection doesn't carry over (MC1542066) |
 | **Early Dec** | M365 admin center → **Agents → Tools → Registry → Work IQ MCP → Policies** | Turn the memory read policy off if agents shouldn't read a person's memory | On by default (MC1539004) |
+| **Before end of Jan 2027** | M365 admin center → **Copilot → Settings → All settings → Access requests to usage-based billing experiences** | **Specific users and groups** → add **Copilot Access**. **Save**. From mid-December, add a link to your own guidance | From the end of January, Cowork, Code and Autopilot show for every Copilot user. This decides who can ask for them. See step 6 in the Access Governance Guide (MC1546354) |
 
 ### Tell people
 
@@ -53,6 +54,9 @@ Docs call the blueprint switch **Users can create agent blueprints**. It's the s
 | Mid-Nov 2026 | SharePoint site owners | New SharePoint agents use Agent Builder, and `.agent` files stop working in April 2027. See [SharePoint agents are changing](#sharepoint-agents-are-changing) (MC1511052) |
 | Mid-Nov 2026 | Agent Builder makers | Scheduled prompts are on by default and run for the person who made them, on published agents only. There's no admin switch yet (MC1302906) |
 | Mid-Nov to late Dec 2026 | Everyone | The standalone Word, Excel and PowerPoint agents are leaving. Ask Chat instead. Old chats stay readable but can't continue (MC1536062) |
+| Nov 30 to Dec 31, 2026 | People who use scheduled prompts in Copilot Chat | Schedules move to **Tasks → Scheduled** in the Copilot app. Check your schedules there. Make again any that didn't move before Dec 31, when the old Power Platform scheduled prompts stop. Limit: 10 active and 50 total per person (MC1550533) |
+| December 2026 (Frontier) | Workspaces users | Workspaces (was Notebooks) no longer let you pick Researcher, Analyst or Designer. Just ask in the chat. The agents are still in the Copilot app (MC1550540) |
+| By Dec 31, 2026 | Copilot Studio makers with a custom web chat | People can now connect third-party services inside the chat. Custom web UIs on the Standard harness need a code change (MC1548034) |
 
 ## 1. Who can build agents
 
@@ -121,7 +125,7 @@ Rules of thumb:
 - **Pin sparingly.** Pin only agents that are deployed. Pins can take up to 6 hours to show up.
 - **Need a group just for one agent?** Name it `Copilot <Agent name> Agent Access`, like the other groups in this repo. Give it through an access package so it gets reviewed.
 
-**Cowork plugins are assigned elsewhere:** go to **Agents → Tools → [plugin] → Installed for**. Pick the Cowork spend groups (Limited, Unlimited and Temp), because those are the people who can use Cowork. No single tenant setting turns off plugin sharing. New Microsoft plugins are assigned the same way: Planner (MC1540339) and Engage (GA Nov 16, off by default, MC1530609).
+**Cowork plugins are assigned elsewhere:** go to **Agents → Tools → [plugin] → Installed for**. Pick the Cowork spend groups (Limited, Unlimited and Temp), because those are the people who can use Cowork. No single tenant setting turns off plugin sharing. New Microsoft plugins are assigned the same way: Planner (MC1540339), Engage (GA Nov 16, off by default, MC1530609) and Workforce Intelligence (Frontier, from Nov 16, MC1552389). Give Workforce Intelligence only to **Copilot Workforce Insights Agent Access**, not to every Cowork user.
 
 **Plugins replace the Agents button.** From late October to late November 2026, users see a **Plugins** button instead of **Agents**, **Agents & Skills** or **Customize** (MC1484008). You still manage agents in the same admin pages.
 
@@ -138,7 +142,7 @@ Here's how Microsoft's own agents should look in **Agents → All agents → [ag
 
 | Agent | Who should get it | Available to | Installed for | Pinned | Why |
 | --- | --- | --- | --- | --- | --- |
-| **Researcher** and **Analyst** | Everyone with a Copilot license | Can't be changed | Everyone (Microsoft installs them) | By Microsoft | You can't limit these to a group. Your only choice is to leave them on or block them for everyone |
+| **Researcher** and **Analyst** | Everyone with a Copilot license | Can't be changed | Everyone (Microsoft installs them) | No longer pinned by default. Pin them yourself under **Manage pinned agents** if you want (MC1479277) | You can't limit these to a group. Your only choice is to leave them on or block them for everyone |
 | **Workforce Insights** (Frontier) | Leaders, managers and their delegates | **Copilot Workforce Insights Agent Access** | Same group | Same group | It shows people data about a leader's organization. Microsoft says to pilot it with specific groups. Members also need Copilot Frontier Access |
 | **Sales** | Sellers who use Dynamics 365 Sales or Salesforce | **Copilot Sales Agent Access** | Same group | Optional | It only works for people connected to a CRM. Also add a Teams app setup policy for the same group |
 | **Employee Self-Service** (HR and IT) | Everyone, after a pilot | Pilot group first (about 5 to 10% of staff), then **Entire organization** | Same as Available to | Everyone, once it's live | Your team builds it from Microsoft's template in Copilot Studio, so it arrives as a publish request. Microsoft suggests a pilot of 5 to 10% |
@@ -251,6 +255,8 @@ All of these groups use PIM, so people turn the role on only when they need it. 
 - Message Center: MC1472007 (advanced package uploads), MC1506733 (agent blueprints), MC1506728 (agents that make their own identities, Nov 4), MC1484008 (plugin registry), MC1511052 (SharePoint agents), MC1469329 (app building), MC1509799 (legal plugins)
 - [Manage transcript API access for Teams meetings](https://learn.microsoft.com/microsoftteams/meeting-transcript-api-access)
 - [Manage Copilot Studio costs in the Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-manage-copilot-studio-costs)
+- [Access requests to usage-based billing experiences](https://learn.microsoft.com/copilot/implement/request-access-usage-based-billing-experiences)
+- Message Center, new Nov 16, 2026: MC1546354 (usage-based experiences shown to everyone from end of January), MC1550533 (scheduled prompts move to Tasks), MC1550540 (Workspaces agent picker removed), MC1548034 (Copilot Studio connections in chat), MC1552389 (Workforce Intelligence plugin), MC1479277 (Researcher and Analyst no longer pinned), MC1478975 (connected agents, rollout ends late December)
 - Message Center, new Nov 9, 2026: MC1542062 (Power Platform connectors in Cowork), MC1542066 (Workforce Insights custom data), MC1539004 (Work IQ MCP memory policy), MC1538999 (connectors in Work IQ APIs), MC1536062 (standalone Office agents replaced), MC1540339 (Planner plugin)
 - Message Center, new Nov 2, 2026: MC1302906 (scheduled prompts in Agent Builder), MC1478975 (connected agents), MC1532073 (Evaluation Viewer role), MC1530609 (Engage plugin), MC1530368 (Copilot Studio spending in Cost management)
 - Message Center, Oct 26, 2026: MC1454973 (Agent and plugin access decides connector access from Oct 30), MC1520901 (Agent feedback sharing), MC1515931 (Teams app enablement flow), MC1518233 (Copilot Studio support for Copilot Chat agents), MC1518036 (admin controls for Business Applications in Work IQ, preview by Nov 17)

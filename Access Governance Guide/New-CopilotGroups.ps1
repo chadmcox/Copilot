@@ -112,7 +112,7 @@ $groups = @(
     @{ Name = "Copilot + Cowork Spend Unlimited Temp";       Desc = "Scope of the Cowork Temporary Unlimited spending policy. Granted for 30 days by the Temporary Unlimited access package; only Spend Limit members can request it. Only one policy applies to a person at a time, and spending already used still counts." }
     @{ Name = "Copilot SharePoint OneDrive Advanced Access"; Desc = "Scope of the SharePoint OneDrive Advanced Work spending policy (Advanced work in SharePoint and OneDrive)." }
     @{ Name = "Copilot Work IQ API Access";                  Desc = "Scope of the Work IQ API spending policy: users of custom agents and apps that call the Work IQ API. Admin controls for Business Applications in Work IQ reach preview by Nov 17, 2026 (MC1518036)." }
-    @{ Name = "Copilot Managed Runtime Access";              Desc = "Scope of the Managed Runtime spending policy: people who run apps built in Cowork, Copilot Studio or the CLI. No Copilot license needed." }
+    @{ Name = "Copilot Managed Runtime Access";              Desc = "Scope of the Managed Runtime spending policy for heavy app users (higher per-user limit). Running a shared app needs this or an all-users Managed Runtime policy, or Power Apps Premium. No Copilot license needed." }
     @{ Name = "Copilot Intelligent Call Delegation Access";  Desc = "Scope of the Intelligent Call Delegation spending policy (Teams AI call screening, public preview, MC1537490)." }
     @{ Name = "Copilot Teams Phone Agent Accounts";          Desc = "Teams Phone Agent resource accounts only (no people). Scope of the Teams Phone Agent spending policy. One group and one policy per budget (MC1482800). Not managed by access packages." }
 

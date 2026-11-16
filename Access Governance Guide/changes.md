@@ -23,6 +23,22 @@ I checked each step against the admin centers. These are the differences from th
 
 Every Copilot post that changes this guide. The newest ones are at the top. Rows above the line were checked on Oct 26, 2026; the rest come from earlier versions of this guide.
 
+**New on Nov 16, 2026:**
+
+| Change | Post | What it means for you |
+| --- | --- | --- |
+| New setting **Access requests to usage-based billing experiences** is ready mid-November. A custom "Learn more" link comes mid-December. From the end of January 2027, Cowork, Code and Autopilot show for every Copilot user and the old discovery setting retires | MC1546354 | See Do these first, step 6. Set it to **Copilot Access** now |
+| Microsoft now suggests one all-users Managed Runtime policy with a small limit (100 credits), so shared apps open for everyone | Microsoft docs (Managed Runtime licensing) | See Do these first, step 18. Optional. Copilot Managed Runtime Access stays for heavy users |
+| Scheduled prompts in Copilot move to **Tasks → Scheduled**. The old Power Platform scheduled prompts retire Dec 31, 2026 | MC1550533 | Tell users to check their schedules. See the Agent Delegation Guide |
+| Workforce Intelligence plugin for Cowork (Frontier, from Nov 16) | MC1552389 | Make it available to leaders and managers only. See Cowork plugins |
+| New Copilot Pages and Notebooks are saved in OneDrive, late November. The Pages and Notebooks Cloud Policy will retire later | MC1449182 (updated Nov 13) | OneDrive DLP and retention now apply. Keep Copilot Cloud Policy Exceptions for now |
+| Researcher and Analyst are no longer pinned by default. Admins can pin them | MC1479277 (updated Nov 9) | See the Agent Delegation Guide |
+| Workspaces (was Notebooks) drop the Researcher, Analyst and Designer picker, Frontier from December | MC1550540 | Update training. No group change |
+| Agent 365 connected agents: rollout now ends late December | MC1478975 (updated Nov 9) | No change. Keep checking the **Connected agents** tab |
+| Copilot desktop app's built-in browser can read open tabs, mid to late November | MC1552386 | Only when the built-in browser is on. No group change |
+| Copilot Studio: people set up third-party connections inside the chat, by Dec 31 | MC1548034 | Your connector rules still apply. Custom web UIs need a code change |
+| Power BI standalone Copilot (preview) retires Dec 8 | MC1546429 | Tell Power BI users. No group change |
+
 **New on Nov 9, 2026:**
 
 | Change | Post | What it means for you |

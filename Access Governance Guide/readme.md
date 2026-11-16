@@ -1,6 +1,6 @@
 # Copilot Access Governance Guide
 
-Updated Nov 10, 2026 · @Chad Cox
+Updated Nov 16, 2026 · @Chad Cox
 
 This guide shows where to use each Copilot group. The scripts in this folder create the groups. You add each group to its admin center setting one time. After that, you add or remove people with access packages, not in the admin centers.
 
@@ -103,7 +103,7 @@ The access package script puts every package in a catalog named **Copilot Access
 | Copilot + Cowork Spend Unlimited Temp | Cowork Temporary Unlimited spending policy | Copilot + Cowork Access (Temporary Unlimited, 30 days) (Temporary). Only Spend Limit members can ask |
 | Copilot SharePoint OneDrive Advanced Access | SharePoint OneDrive Advanced Work spending policy | Copilot SharePoint OneDrive Advanced Access (Standard) · Copilot Access |
 | Copilot Work IQ API Access | Work IQ API spending policy | Copilot Work IQ API Access (Elevated) |
-| Copilot Managed Runtime Access | Managed Runtime spending policy | Copilot Managed Runtime Access (Standard). No Copilot license needed, so it doesn't add Copilot Access |
+| Copilot Managed Runtime Access | Managed Runtime spending policy (heavy app users). See Do these first, step 18, for an optional all-users policy | Copilot Managed Runtime Access (Standard). No Copilot license needed, so it doesn't add Copilot Access |
 | Copilot Teams Phone Agent Accounts | Teams Phone Agent spending policy | None. Members are resource accounts, not people |
 
 **New on Nov 9, 2026: Copilot Intelligent Call Delegation Access.** Assign it to the **Intelligent Call Delegation** spending policy. Its access package is Standard tier and also adds Copilot Access. See Do these first, step 16.
@@ -145,13 +145,14 @@ Copilot Platform Admin is made by `New-CopilotGroups.ps1`, gets its roles from `
 
 ## Do these first
 
-**At a glance, as of Nov 13, 2026:**
+**At a glance, as of Nov 16, 2026:**
 
-- **Overdue:** [1. Agent and plugin access](#1-check-agent-and-plugin-access-date-passed-do-it-now), [2. Advanced package uploads](#2-limit-who-can-upload-advanced-agent-and-plugin-packages), [3. Agent blueprints](#3-stop-every-user-from-creating-agent-blueprints-in-entra), [8. SharePoint](#8-sharepoint), [9. Agents that create their own identities](#9-find-agents-that-create-their-own-entra-agent-identities-date-passed-do-it-now)
-- **This week:** [11. Frontier members](#11-check-who-is-in-frontier-do-it-this-week), [12. Work IQ transcript access (Nov 14)](#12-turn-on-work-iq-transcript-access-if-apps-need-it-by-nov-14-2026), [16. Intelligent call delegation (Nov 17)](#16-keep-intelligent-call-delegation-working-as-early-as-nov-17-2026), [17. Power Platform connectors for Cowork (mid-Nov)](#17-review-power-platform-connectors-for-cowork-by-mid-november), [15. Opal spending policy (since Nov 9)](#15-give-opal-users-a-spending-policy-from-nov-9-2026)
-- **This month:** [10. App Builder (Nov 30)](#10-tell-makers-to-move-apps-off-app-builder-by-nov-30-2026), [14. Copilot Studio spending (from Nov 20)](#14-decide-if-copilot-studio-spending-moves-to-cost-management-from-nov-20-2026)
-- **No date, do once:** [4. Auto-apply new services](#4-turn-off-automatic-new-services-in-your-spending-policies), [5. Spending minimums](#5-check-your-spending-limits-meet-microsofts-new-minimums), [6. Usage-based billing requests](#6-choose-who-can-ask-for-usage-based-billing-experiences), [7. Copilot Code controls](#7-set-the-copilot-code-controls-frontier)
-- **December:** [13. Teams AI meeting policies](#13-get-ready-for-the-new-teams-ai-meeting-policies-december)
+- **Overdue:** [1. Agent and plugin access](#1-check-agent-and-plugin-access-date-passed-do-it-now), [2. Advanced package uploads](#2-limit-who-can-upload-advanced-agent-and-plugin-packages), [3. Agent blueprints](#3-stop-every-user-from-creating-agent-blueprints-in-entra), [8. SharePoint](#8-sharepoint), [9. Agents that create their own identities](#9-find-agents-that-create-their-own-entra-agent-identities-date-passed-do-it-now), [12. Work IQ transcript access (Nov 14, only if apps need it)](#12-turn-on-work-iq-transcript-access-if-apps-need-it-date-passed)
+- **This week:** [6. Who can ask for Cowork, Code and Autopilot (new setting, mid-Nov)](#6-choose-who-can-ask-for-usage-based-billing-experiences-new-setting-mid-november), [16. Intelligent call delegation (Nov 17)](#16-keep-intelligent-call-delegation-working-as-early-as-nov-17-2026), [17. Power Platform connectors for Cowork (mid-Nov)](#17-review-power-platform-connectors-for-cowork-by-mid-november), [11. Frontier members](#11-check-who-is-in-frontier-do-it-this-week), [15. Opal spending policy (since Nov 9)](#15-give-opal-users-a-spending-policy-from-nov-9-2026)
+- **This month:** [10. App Builder (Nov 30)](#10-tell-makers-to-move-apps-off-app-builder-by-nov-30-2026), [14. Copilot Studio spending (from Nov 20)](#14-decide-if-copilot-studio-spending-moves-to-cost-management-from-nov-20-2026), [18. Let shared apps run (Managed Runtime)](#18-decide-who-can-run-shared-apps-managed-runtime)
+- **No date, do once:** [4. Auto-apply new services](#4-turn-off-automatic-new-services-in-your-spending-policies), [5. Spending minimums](#5-check-your-spending-limits-meet-microsofts-new-minimums), [7. Copilot Code controls](#7-set-the-copilot-code-controls-frontier)
+- **December:** [13. Teams AI meeting policies](#13-get-ready-for-the-new-teams-ai-meeting-policies-december), [6. Custom "Learn more" link (mid-Dec)](#6-choose-who-can-ask-for-usage-based-billing-experiences-new-setting-mid-november), scheduled prompts move to **Tasks → Scheduled**, old ones retire Dec 31 (MC1550533, see the [Agent Delegation Guide](../Agents/readme.md))
+- **End of January 2027:** Cowork, Code and Autopilot show for every Copilot user, and the old discovery setting retires. Step 6 must be done by then (MC1546354)
 
 ### 1. Check Agent and plugin access (date passed, do it now)
 
@@ -222,17 +223,26 @@ A policy below the minimum won't save. If your limit meets the minimum but is st
 
 This changes the **Cowork Limited** tier: a "small" limit now starts at 2,000 credits a month per person.
 
-### 6. Choose who can ask for usage-based billing experiences
+### 6. Choose who can ask for usage-based billing experiences (new setting, mid-November)
 
 *Checked in the admin center on Nov 10, 2026.* This setting decides what people see when they try Cowork (or another paid service) without a spending policy.
 
-*From Microsoft docs ([Access requests to usage-based billing experiences](https://learn.microsoft.com/microsoft-365/copilot/request-access-usage-based-billing-experiences)):*
+**Dates (MC1546354, Nov 9, 2026):**
+
+- **Mid-November 2026:** the new setting is ready to use. Set it now.
+- **Mid-December 2026:** you can add a link to your own guidance. People who can't ask for access see it under **Learn more**. The link only shows if you pick **Specific users and groups** or **No users**.
+- **End of January 2027:** **Cowork**, **Code** and **Autopilot** show for every person with a Copilot license, even without a spending policy. The old setting, **Allow users to discover and use AI experiences enabled by usage-based billing**, retires. Deferred release tenants get this at the end of February 2027.
+
+Showing the entry points doesn't turn on billing. People still need a spending policy and credits to use them.
+
+*From Microsoft docs ([Access requests to usage-based billing experiences](https://learn.microsoft.com/copilot/implement/request-access-usage-based-billing-experiences)):*
 
 1. Go to M365 admin center → **Copilot** → **Settings** → **All settings**.
-2. Select **Access requests to usage-based billing experiences**.
+2. Select **Access requests to usage-based billing experiences**. Microsoft docs now call it **Access to usage-based billing experiences**. It's the same setting.
 3. Under **Choose who can request a spending policy**, select **Specific users and groups**. The default is **All users**. The other option is **No users**.
 4. Add **Copilot Access**.
 5. Select **Save**. You need Global Administrator. It can take up to 24 hours.
+6. **From mid-December:** open the setting again. Paste the link to your Copilot request page (for example, the My Access link for **Copilot + Cowork Access (Limited)**). Select **Save**.
 
 **Why I couldn't find it on Oct 23, 2026.** Microsoft docs now say the old setting, **AI experiences enabled by usage-based billing**, is **deprecated**. It is being replaced by **Access requests to usage-based billing experiences**, the setting above. The old page has one checkbox and no group picker; the new page has the group picker. On Nov 10, 2026 both settings were still in the list, and the old one was still on. Leave the old one alone; the new one decides who can ask. See [Discovery setting for AI experiences enabled by usage-based billing](https://learn.microsoft.com/microsoft-365/copilot/discovery-setting-ai-experiences).
 
@@ -285,9 +295,9 @@ From November 2026, people in Frontier also get public previews in Teams, new Ou
 
 In November the admin center also adds one page for Frontier, Standard release and Deferred release. *From Microsoft docs ([Plan for the retirement of Targeted release](https://learn.microsoft.com/microsoft-365/admin/manage/targeted-release-retirement)).*
 
-### 12. Turn on Work IQ transcript access if apps need it (by Nov 14, 2026)
+### 12. Turn on Work IQ transcript access if apps need it (date passed)
 
-*From Microsoft docs ([Manage transcript API access for Teams meetings](https://learn.microsoft.com/microsoftteams/meeting-transcript-api-access)):* a new setting decides if agents and apps can get live meeting transcripts through Work IQ. It's off by default and takes effect on Nov 14, 2026. If an app uses this today, it stops working unless you turn the setting on. If no app uses it, leave it off.
+*From Microsoft docs ([Manage transcript API access for Teams meetings](https://learn.microsoft.com/microsoftteams/meeting-transcript-api-access)):* a new setting decides if agents and apps can get live meeting transcripts through Work IQ. It's off by default and took effect on Nov 14, 2026. If an app owner reports that live transcripts stopped working, do the steps below. If an app uses this today, it stops working unless you turn the setting on. If no app uses it, leave it off.
 
 1. Ask the owners of your Work IQ apps if they read live meeting transcripts.
 2. Go to Teams admin center → **Meetings** → **Meeting settings**.
@@ -353,6 +363,23 @@ Cowork can now use Power Platform connectors published as plugins (MC1542062). Y
 4. Check again later. Microsoft keeps adding connectors, and they show up in Cowork as they're added.
 
 Blocking also stops connections people already made, and Cowork Automations. *From Microsoft docs ([federated connectors](https://learn.microsoft.com/microsoft-365/copilot/connectors/federated-connectors-overview)):* **Installed for** and agent sharing settings don't apply to federated connectors.
+
+### 18. Decide who can run shared apps (Managed Runtime)
+
+*From Microsoft docs ([Manage licensing and Copilot Credits for apps on Copilot Managed Runtime](https://learn.microsoft.com/microsoft-365/admin/manage/apps/licensing-credits)):* every person who **runs** an app built in Cowork, Code or Copilot Studio needs a Power Apps Premium license or a spending policy that includes **Copilot Managed Runtime**. Sharing an app doesn't pay for running it. A Copilot license, E3 or E5 doesn't cover it either.
+
+This guide scopes the **Managed Runtime** policy to **Copilot Managed Runtime Access**. That blocks anyone a maker shares an app with who isn't in the group. Pick one:
+
+- **Keep it small (this guide's default).** Leave the policy on the group. Tell makers that only group members can open their apps. People ask for access with the access package.
+- **Let shared apps just work (Microsoft's suggestion).** Add a second policy for everyone with a small limit:
+  1. Go to **Copilot** → **Cost management** → **Configuration** → **Add spending policy**.
+  2. Name it **Managed Runtime All Users**. Leave the scope on **All users**.
+  3. Turn off **Allow new Agents and services as they become available**. Check only **Copilot Managed Runtime**.
+  4. Set the per-user limit to **100 credits** a month (about US$1). Microsoft says that covers several hundred app launches. If the wizard asks for more, use the lowest number it accepts.
+  5. Set a policy limit and an alert. Finish the wizard.
+  6. Keep **Copilot Managed Runtime Access** for heavy users. Give its policy a higher per-user limit (Microsoft's example is 1,000 credits), so it wins for them.
+
+People with Power Apps Premium don't use credits for normal app use, so you don't need to leave them out.
 
 ## Feature access groups
 
@@ -494,7 +521,8 @@ The **Cost management** page has three tabs: **Overview**, **Configuration** and
 | Cowork Temporary Unlimited | Cowork | Copilot + Cowork Spend Unlimited Temp | Off. Set a policy limit and an alert | Copilot program owner |
 | SharePoint OneDrive Advanced Work | Advanced work in SharePoint, Advanced work in OneDrive | Copilot SharePoint OneDrive Advanced Access | On | Copilot program owner |
 | Work IQ API | Work IQ API for custom apps and agents | Copilot Work IQ API Access | On | App platform / Power Platform team |
-| Managed Runtime | Copilot Managed Runtime | Copilot Managed Runtime Access | On | App platform / Power Platform team |
+| Managed Runtime | Copilot Managed Runtime | Copilot Managed Runtime Access | On, higher than the all-users policy (for example 1,000 credits) | App platform / Power Platform team |
+| Managed Runtime All Users (optional, by hand) | Copilot Managed Runtime | All users | On, 100 credits (see Do these first, step 18) | App platform / Power Platform team |
 | Teams Phone Agent | Teams Phone Agent | Copilot Teams Phone Agent Accounts (resource accounts only) | Optional | Teams voice admins |
 | Copilot New Services Pilot | As few as the wizard allows. New-services setting **on** | Copilot Pilot Ring | On | Copilot program owner |
 | Code Limited | Code | Copilot + Code Spend Limit | On, at least 2,000 credits | Copilot program owner |
@@ -735,6 +763,8 @@ The page says this affects agents built with Agent Builder, and people who can't
 
 **New: Engage plugin (Nov 16, 2026).** It's off by default. To offer it, use the steps above (MC1530609). It only does what each person can already do in Engage.
 
+**New: Workforce Intelligence plugin (Frontier, from Nov 16, 2026).** It answers questions about org structure and skills for leaders and managers (MC1552389). It needs Frontier and a configured Workforce Insights agent. Make it available only to your leaders and managers group, not to all Cowork users. It doesn't give anyone more access to people data.
+
 ### Copilot Teams Policy Exceptions
 
 *Checked in the admin center on Oct 23, 2026.*
@@ -750,6 +780,8 @@ The page says this affects agents built with Agent Builder, and people who can't
 ### Copilot Cloud Policy Exceptions
 
 *Not checked.* Microsoft 365 Apps admin center (config.office.com) → **Customization** → **Policy Management** → \[new policy\] → **Scope**. Scope the policy to this group. Give it a lower priority number than the all-users policy, so it wins.
+
+From late November 2026, new Copilot Pages and new Notebooks are saved in each person's OneDrive, so your OneDrive DLP and retention rules apply to them (MC1449182). The **Create and view Copilot Pages and Copilot Notebooks** policy still works, but Microsoft plans to retire it later.
 
 Related: *Checked in the admin center on Oct 23, 2026:* **Web search for Microsoft Copilot** in **Copilot** → **Settings** → **View all** says to manage it in the Microsoft 365 Apps admin center.
 
@@ -869,7 +901,7 @@ Members also need a Microsoft 365 Copilot license and Cowork access to run the r
 
 | Group | Why | What to do for now |
 | --- | --- | --- |
-| Copilot + Autopilot Access | *Not checked:* Autopilot is the new name for Microsoft Scout (MC1479277). It uses a spending policy, but its admin settings aren't out yet. *Checked Oct 23, 2026:* Autopilot wasn't in the spending policy wizard. *Checked Nov 2, 2026:* Microsoft docs still have no Autopilot admin page or API service name | Keep the group. Its access package also adds Copilot Access and Copilot Frontier Access. When Autopilot appears in the wizard, create a policy for this group |
+| Copilot + Autopilot Access | *Not checked:* Autopilot is the new name for Microsoft Scout (MC1479277). It uses a spending policy, but its admin settings aren't out yet. *Checked Oct 23, 2026:* Autopilot wasn't in the spending policy wizard. *Checked Nov 16, 2026:* Microsoft docs still have no Autopilot admin page or API service name. From the end of January 2027, Autopilot shows for every Copilot user, and people without a policy see **Request access** or **Learn more** (MC1546354) | Keep the group. Its access package also adds Copilot Access and Copilot Frontier Access. When Autopilot appears in the wizard, create a policy for this group |
 | Copilot Cost Reader | No role can view spending without also seeing other things | Give it AI Reader, or delete it and use Copilot AI Reader |
 | Copilot Plugin Approvers | Plugin requests are under **Agents** → **Tools** → **Requests (preview)** (checked Oct 23, 2026). I didn't see an approver setting | Use it as a mailing or ticket queue, or give it AI Administrator |
 
@@ -885,7 +917,16 @@ What changed in the admin centers on Oct 23, 2026, and every Message Center post
 
 ## Sources
 
-Microsoft docs I read for this version (Nov 9, 2026):
+Microsoft docs I read for this version (Nov 16, 2026):
+
+- [Access requests to usage-based billing experiences (new address)](https://learn.microsoft.com/copilot/implement/request-access-usage-based-billing-experiences)
+- [Manage licensing and Copilot Credits for apps on Copilot Managed Runtime](https://learn.microsoft.com/microsoft-365/admin/manage/apps/licensing-credits)
+- [Managing AI experiences enabled by usage-based billing (new address)](https://learn.microsoft.com/copilot/implement/usage-based-billing-manage-copilot-credits)
+- Message Center: MC1546354, MC1552389, MC1449182, MC1550533, MC1550540, MC1479277 (updated Nov 9)
+
+Microsoft moved many Copilot admin pages from `learn.microsoft.com/microsoft-365/copilot/...` to `learn.microsoft.com/copilot/...`. The old links still redirect.
+
+Microsoft docs I read for the Nov 9, 2026 version:
 
 - [How access to Copilot Cowork is determined](https://learn.microsoft.com/copilot/cowork/cowork-access)
 - [Federated connectors overview](https://learn.microsoft.com/microsoft-365/copilot/connectors/federated-connectors-overview)
