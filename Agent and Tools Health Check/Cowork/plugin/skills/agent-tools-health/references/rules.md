@@ -152,7 +152,7 @@ Older Copilot Studio agents run as ordinary service principals. Find them by the
 
 ## Scoring
 
-Every item starts at 100: High −25, Medium −10, Low −3 (Info 0), never below 0. An area's score is the average of its items' scores; an area with no items scores 100. Rating: Green 80+, Amber 50–79, Red under 50. Copilot adoption is its own area, with one item ("Copilot agent adoption", only when the Copilot usage report was read) kept separate from Tenant so it never averages with "Conditional Access" and can't pad or dilute either area's score. Discovered agents and Agents without Agent ID only appear when there is data for them.
+Every item starts at 100: High −25, Medium −10, Low −3 (Info 0), never below 0. An area's score is the average of its items' scores, capped at one finding of its worst severity: no higher than 75 with any High, 90 with any Medium, 97 with any Low (Info doesn't cap). An area with no items scores 100. Rating: Green 80+, Amber 50–79, Red under 50. Copilot adoption is its own area, with one item ("Copilot agent adoption", only when the Copilot usage report was read) kept separate from Tenant so it never averages with "Conditional Access" and can't pad or dilute either area's score. Discovered agents and Agents without Agent ID only appear when there is data for them.
 
 ## Well-governed funnel (agent identities)
 
