@@ -693,8 +693,15 @@ function Get-DefenderAgent($Columns) {
         SkillCount          = "Skills", "array_length(Skills)"
         ToolCount           = "DeclaredTools", "array_length(DeclaredTools)"
     }
-    $nameColumn = if ("AgentName" -in $Columns) { "AgentName" } elseif ("Name" -in $Columns) { "Name" } else { "AgentId" }
-    $project = @("AgentId", "AgentName = tostring($nameColumn)") + @($fields.Keys | Where-Object { $fields[$_][0] -in $Columns } | ForEach-Object { "$_ = $($fields[$_][1])" })
+    # KQL column names are case-sensitive, but -in isn't: one tenant has EntraAgentID and EntraBlueprintID
+    # where the docs say EntraAgentId and EntraBlueprintId. Use the tenant's own spelling in the query.
+    $actual = @{}
+    $Columns | ForEach-Object { $actual[$_] = $_ }
+    $nameColumn = if ("AgentName" -in $Columns) { $actual["AgentName"] } elseif ("Name" -in $Columns) { $actual["Name"] } else { "AgentId" }
+    $project = @("AgentId", "AgentName = tostring($nameColumn)") + @($fields.Keys | Where-Object { $fields[$_][0] -in $Columns } | ForEach-Object {
+        $source = $fields[$_][0]
+        "$_ = $($fields[$_][1] -creplace "\b$([regex]::Escape($source))\b", $actual[$source])"
+    })
     $kql = @(
         "AgentsInfo"
         "| summarize arg_max(Timestamp, *) by AgentId"
@@ -824,23 +831,32 @@ function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry, $Column
         Write-Warning "None of Defender's $($cloud.Count) agents match an Agent 365 package by ID, so the 'not in the registry' checks are skipped."
         $matchRegistry = $false
     }
+    # Defender leaves Owners blank for agents it has no owner data for (most agents on platform Other).
+    # Blank means unknown, not none, so the owner checks run only where Defender reports a count.
+    $unknownOwners = @($cloud | Where-Object { "$($_.OwnerCount)" -eq "" }).Count
+    if ($has["OwnerCount"] -and $unknownOwners -and -not $HaveRegistry) {
+        New-Finding "Discovered agents" "Defender inventory" "Info" "Defender has no owner data for $unknownOwners agents, so their owners weren't checked" "Run without -SkipPackages to check owners from the Agent 365 registry"
+    }
     $cloud | ForEach-Object {
         $name = if ($_.AgentName) { "$($_.AgentName) ($($_.Platform))" } else { "$($_.AgentId) ($($_.Platform))" }
+        $noOwner = $has["OwnerCount"] -and "$($_.OwnerCount)" -ne "" -and $_.OwnerCount -eq 0
+        # Vendor agents from the Microsoft 365 agent store show as platform Other with no owners and no source
+        # agent ID. They run inside Copilot and are governed in the catalog, so they don't get an Agent ID.
+        $vendorStore = $_.Platform -eq "Other" -and -not ($_.OwnerCount -gt 0) -and -not $_.SourceAgentId
         $inRegistry = [bool](@($_.AgentId, $_.SourceAgentId, $_.EntraAgentId) | Where-Object { $_ -and $RegistryKeys["$_"] })
         if ($matchRegistry -and -not $inRegistry) {
             New-Finding "Discovered agents" $name "Medium" "Found by Defender, but not in the Agent 365 registry" "Add it to the registry (registry sync) with an owner, or remove it"
             if ("$($_.Availability)" -match "all") { New-Finding "Discovered agents" $name "High" "Not in the registry, and available to all users" "Limit it to a group, then register it" }
-            if ($has["OwnerCount"] -and -not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "Not in the registry, and no owner" "Find who built it and make them the owner, or remove it" }
+            if ($noOwner) { New-Finding "Discovered agents" $name "Medium" "Not in the registry, and no owner" "Find who built it and make them the owner, or remove it" }
         }
         if (-not $HaveRegistry) {
             # No Agent 365 catalog: use Defender's inventory as the agent list.
             if ("$($_.Availability)" -match "all") { New-Finding "Discovered agents" $name "High" "Available to all users" "Make it available to specific groups" }
-            if ($has["OwnerCount"] -and -not ($_.OwnerCount -gt 0)) { New-Finding "Discovered agents" $name "Medium" "No owner" "Find who built it and make them the owner, or remove it" }
-            if ($has["AgentName"] -and (Test-UnclearName $_.AgentName)) { New-Finding "Discovered agents" $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
+            if ($noOwner) { New-Finding "Discovered agents" $name "Medium" "No owner" "Find who built it and make them the owner, or remove it" }
+            # Store agents carry the vendor's brand name (Box, Wix), so only the wording rule applies to them.
+            $unclear = if ($vendorStore) { $_.AgentName -match $UnclearNamePattern } else { Test-UnclearName $_.AgentName }
+            if ($has["AgentName"] -and $unclear) { New-Finding "Discovered agents" $name "Medium" "Unclear name" "Rename it so people can tell what it does and who owns it" }
         }
-        # Vendor agents from the Microsoft 365 agent store show as platform Other with no owners and no source
-        # agent ID. They run inside Copilot and are governed in the catalog, so they don't get an Agent ID.
-        $vendorStore = $_.Platform -eq "Other" -and $has["OwnerCount"] -and -not ($_.OwnerCount -gt 0) -and -not $_.SourceAgentId
         if ($has["EntraAgentId"] -and -not $_.EntraAgentId -and -not $vendorStore) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls" }
         $known = @($_.AgentId, $_.SourceAgentId, $_.EntraAgentId) | Where-Object { $_ -and $RegistryKeys["$_"] } | ForEach-Object { $RegistryKeys["$_"] }
         Test-AgentTools "Discovered agents" $name $_.McpServerUrls (@($known) -join ";")
@@ -973,7 +989,7 @@ if (-not $SkipConnectors) {
     catch { Write-Warning "Couldn't read Copilot connectors. It needs ExternalConnection.Read.All and the AI Administrator role. Run with -SkipConnectors to skip it. $($_.Exception.Message)" }
 }
 if ($PackagesOnly) {
-    $saved = @("Packages.csv", "DefenderAgents.csv", "Connectors.csv") | Where-Object { Test-Path (Join-Path $OutputFolder $_) }
+    $saved = @(if (-not $SkipPackages) { "Packages.csv" }; if ($haveDefender) { "DefenderAgents.csv" }; if ($haveConnectors) { "Connectors.csv" })
     Write-Host "Saved $($saved -join ', ') to $OutputFolder. Attach them in Copilot Cowork with the prompt in the Cowork folder of this repo."
     return
 }
@@ -1188,4 +1204,5 @@ if ($template) { New-HtmlReport $template (Join-Path ((Resolve-Path $OutputFolde
 
 $scorecard | Format-Table -AutoSize
 Write-Host "$governedPercent% of agent identities are well governed."
-Write-Host "Saved Findings.csv, Scorecard.csv, Packages.csv, DefenderAgents.csv and Report.html to $OutputFolder. Keep these files private."
+$saved = @("Findings.csv", "Scorecard.csv"; if (-not $SkipPackages) { "Packages.csv" }; if ($haveDefender) { "DefenderAgents.csv" }; if ($haveConnectors) { "Connectors.csv" }; if ($template) { "Report.html" })
+Write-Host "Saved $($saved -join ', ') to $OutputFolder. Keep these files private."
