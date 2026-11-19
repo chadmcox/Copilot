@@ -44,4 +44,7 @@
 ## Governance
 | Symptom | Root cause | Fix | Source/verified link | Contributor | Date |
 |---|---|---|---|---|---|
+| App-only script can't read spending policies or the Copilot web search setting | Those Graph endpoints support delegated permissions only [Author repo-reported; verify on Graph reference] | Run read-only checks signed in as an admin | https://github.com/chadmcox/maester-ai-governance-pack (docs/how-checks-work.md, MP.AIGOV.1013, 1042) | Skill author | 2026-11-19 |
+| Resource-based spending policies missing from Graph reads | Graph beta `spendingPolicy` documents only all-users and selected-groups types [Author repo-reported] | Review resource policies in the admin center by hand | https://github.com/chadmcox/maester-ai-governance-pack (README, Manual checks) | Skill author | 2026-11-19 |
+| A user ends up with a higher Cowork limit than their tier | Overlapping policies: the higher per-user limit wins and limits don't combine | Keep each person in one tier policy | https://learn.microsoft.com/copilot/cowork/cowork-access | Skill author | 2026-11-19 |
 | Reader can't see all agents | Needs AI Reader role | Assign AI Reader | https://learn.microsoft.com/entra/agent-id/agent-registry-convergence | Skill author | 2026-11-19 |

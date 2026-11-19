@@ -32,4 +32,5 @@ Source: https://learn.microsoft.com/copilot/implement/copilot-controls-managemen
 | How is it logged and stopped? | Audit, Defender, removal from scope/activation |
 
 ## Author tools [Author repo – community, not official Microsoft guidance]
+- Agent, tool, MCP, skill, agent identity and blueprint health rules and Maester tests: health-checks.md
 - Agent and Tools Health Check, Agent and Tools Cleanup, Agents delegation guide, Access Governance Guide: https://github.com/chadmcox/Copilot

@@ -70,6 +70,7 @@ $pluginFiles = @(
     "skills/copilot-ai-sme/references/finops.md",
     "skills/copilot-ai-sme/references/gotchas.md",
     "skills/copilot-ai-sme/references/governance.md",
+    "skills/copilot-ai-sme/references/health-checks.md",
     "skills/copilot-ai-sme/references/licensing.md",
     "skills/copilot-ai-sme/references/security-frameworks.md",
     "skills/copilot-ai-sme/references/sources.md",

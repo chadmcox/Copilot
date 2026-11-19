@@ -68,6 +68,7 @@ Guides are PDFs that change. Always name the version or date you read.
 See security-frameworks.md.
 
 ## 4. Author repos [Author repo – community, not official Microsoft guidance]
+- Maester AI governance pack (`MP.AIGOV.*` tests, how each check works, framework coverage matrix): https://github.com/chadmcox/maester-ai-governance-pack (summary in health-checks.md)
 - Copilot repo (Billing Health Check, Agent and Tools Health Check, Agent and Tools Cleanup, Access Governance Guide, Agents delegation guide): https://github.com/chadmcox/Copilot
 - Entra ID SME skill (identity questions): https://github.com/chadmcox/Copilot/tree/main/Entra%20ID%20SME%20Skill
 

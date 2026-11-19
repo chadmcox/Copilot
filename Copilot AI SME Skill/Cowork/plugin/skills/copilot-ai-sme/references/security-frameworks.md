@@ -9,6 +9,7 @@ Rules (from SKILL.md): lead with the Microsoft control, then cite the framework 
 | Source | Status | Use for | Link |
 |---|---|---|---|
 | **Careful Adoption of Agentic AI Services** (CISA, NSA, ASD ACSC, CCCS, NCSC-NZ, NCSC-UK) | Published May 2026 (checked: official PDF) | Agentic AI risk categories — **privilege, design and configuration, behaviour, structural, accountability** — best practices across the lifecycle, and **cyber security prerequisites before implementing AI agents** | https://www.cyber.gov.au/sites/default/files/2026-05/careful_adoption_of_agentic_ai_services.pdf (CISA hosts a copy; search cisa.gov) |
+| CISA SCuBA draft "SI / SI Agents" baseline (MS.SI.1.1–13.6) | **Draft** on ScubaGear `main` at Nov 18, 2026 review [Author repo-reported]; rationale TBD | Agent and Copilot data controls; mapped by the Maester pack (health-checks.md) | https://github.com/cisagov/ScubaGear |
 | CISA SCuBA baselines (M365, Entra, Power Platform, Teams, SharePoint, Exchange, Defender) | Versioned; check the current release | Tenant hardening that agents depend on; BOD 25-01 requirements | https://github.com/cisagov/ScubaGear |
 | CISA/NSA joint AI guidance (e.g. deploying AI systems securely, AI data security) | Verify titles and dates at runtime | Secure deployment, data protection for AI | https://www.cisa.gov/ai |
 | NIST AI RMF 1.0 (AI 100-1) and Generative AI Profile (AI 600-1) | Final (verify) | AI risk governance: Govern, Map, Measure, Manage | https://www.nist.gov/itl/ai-risk-management-framework |
@@ -27,7 +28,8 @@ Rules (from SKILL.md): lead with the Microsoft control, then cite the framework 
 | OWASP Top 10 for LLM Applications 2025 (LLM01–LLM10) | Verify | Model and prompt risks under the agent | https://genai.owasp.org/llm-top-10/ |
 | MITRE ATLAS | Living knowledge base | Adversary techniques against AI | https://atlas.mitre.org |
 | CIS Microsoft 365 Foundations Benchmark | Versioned (licensed; cite IDs only) | Tenant hardening checks | https://www.cisecurity.org/benchmark/microsoft_365 |
-| CIS Controls v8.1 | Verify version | Program safeguards | https://www.cisecurity.org/controls |
+| CIS Controls v8.1 (+ AI companion guides for LLM, agents and MCP, Apr 2026 [Author repo-reported]) | Verify version | Program safeguards; the Agent and Tools Health Check maps its rules to v8.1 safeguards | https://www.cisecurity.org/controls |
+| Microsoft cloud security benchmark v2 (AI controls) | Verify | Azure AI resource controls (Maester 1045–1048) | https://learn.microsoft.com/security/benchmark/azure/ |
 | ISO/IEC 42001 (AI management system) | Final (licensed; cite clauses only) | AI governance and certification language | https://www.iso.org/standard/42001 |
 | ISO/IEC 27001, 27701, 23894 | Final (licensed) | ISMS, privacy, AI risk | iso.org |
 | Cloud Security Alliance AI Controls Matrix | Verify version | Cross-industry AI control set | https://cloudsecurityalliance.org/artifacts/ai-controls-matrix |

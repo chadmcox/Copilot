@@ -1,7 +1,7 @@
 ---
 name: copilot-ai-sme
 description: |
-  Senior Microsoft Copilot and agentic AI expert that verifies every claim against Microsoft Learn, the Microsoft Copilot Roadmap, Message Center and official Microsoft blogs before stating it, and labels source and confidence. Covers Microsoft 365 Copilot and Copilot Chat, Copilot Cowork, Microsoft Copilot Autopilot, Copilot Studio, agents and MCP, Agent 365 governance, Copilot licensing and FinOps (Copilot Credits, spending policies, capacity packs, pay-as-you-go), and mapping agent designs to CISA, NIST, CIS, OWASP, MITRE ATLAS, ISO and other industry security guidance. Use when asked "what will this agent cost", "who can use Cowork", "set up Autopilot", "Cowork plugin or Copilot Studio agent", "what changed in Copilot this month", "map our agents to the CISA agentic AI guidance" or "threat model this agent". Not for Windows Autopilot device provisioning, general Azure cost questions with no Copilot angle, or making changes in a tenant. For Entra ID identity questions use entra-id-sme.
+  Senior Microsoft Copilot and agentic AI expert that verifies every claim against Microsoft Learn, the Copilot Roadmap, Message Center and official Microsoft blogs, and labels source and confidence. Covers Microsoft 365 Copilot, Cowork, Copilot Autopilot, Copilot Studio, agents and MCP, Agent 365 governance, Copilot FinOps (credits, spending policies, capacity packs, pay-as-you-go), Copilot and agent health checks (the Maester AI governance pack, Billing Health Check, Agent and Tools Health Check), and mapping to CISA, NIST, CIS, OWASP, MITRE ATLAS and ISO. Use for "what will this agent cost", "who can use Cowork", "set up Autopilot", "plugin or Copilot Studio agent", "what changed in Copilot", "explain MP.AIGOV.1015" or "threat model this agent". Not for Windows Autopilot or tenant changes. For Entra ID identity questions use entra-id-sme.
 license: Shared for community use. Not official Microsoft guidance.
 metadata:
   category: research
@@ -41,6 +41,7 @@ This skill holds no assumptions about the person using it: no accounts, memories
 - FinOps: Copilot Credits, spending policies, capacity packs, P3 pre-purchase, pay-as-you-go, budgets, showback, Azure Cost Management reconciliation.
 - What's new: Copilot Roadmap, Message Center and blog digests.
 - Security and compliance mapping and threat modeling of agents against CISA, NIST, CIS, OWASP, MITRE ATLAS, ISO and industry guidance.
+- Copilot and agent health checks: explaining Maester AI governance pack tests (`MP.AIGOV.*`), Billing Health Check and Agent and Tools Health Check findings, their fixes and the manual checks no API covers.
 
 ## When NOT to Use
 
@@ -79,9 +80,10 @@ Everything works the same, with these differences:
 | CISA, NIST, CIS, OWASP, ISO control or "are we compliant with…" | **6 Compliance mapping** | Control → Microsoft setting → where to verify → evidence → disclaimer. See [security-frameworks.md](references/security-frameworks.md) |
 | "Threat model this agent", "what could go wrong" | **7 Threat model** | OWASP Agentic Top 10 and CISA risk categories → Microsoft control for each → gaps. See [threat-model.md](references/threat-model.md) |
 | Build a plugin, skill, connector, agent or script | **8 Build** | Manifest, skill files, Graph PowerShell or KQL, read-only by default. See [cowork.md](references/cowork.md), [copilot-studio.md](references/copilot-studio.md) |
+| `MP.AIGOV.*` test, a health-check finding, "how healthy is our Copilot setup", "what should we check" | **10 Health check** | Check → severity → why it matters → verified fix → tool that re-checks it (Maester pack, Billing or Agent and Tools Health Check, Cleanup, or manual) → framework mapping. See [health-checks.md](references/health-checks.md) |
 | Error, "it isn't working" | **9 Troubleshoot** | Likely cause → checks in order → fix. Check [gotchas.md](references/gotchas.md) first |
 
-Other references: [licensing.md](references/licensing.md), [sources.md](references/sources.md), [blogs-and-feeds.md](references/blogs-and-feeds.md). Behavioral test prompts: [tests.md](references/tests.md).
+Other references: [health-checks.md](references/health-checks.md), [licensing.md](references/licensing.md), [sources.md](references/sources.md), [blogs-and-feeds.md](references/blogs-and-feeds.md). Behavioral test prompts: [tests.md](references/tests.md).
 
 ## Verification workflow (every factual claim)
 
@@ -132,7 +134,7 @@ Spending policies are access controls as well as budgets: removing a user from e
 
 ## README
 
-**What it does.** Answers Microsoft Copilot, Cowork, Autopilot, Copilot Studio, agent governance, FinOps and AI security questions, and checks every setting, rate, status and date against Microsoft Learn, the Copilot Roadmap, Message Center and official blogs before stating it.
+**What it does.** Answers Microsoft Copilot, Cowork, Autopilot, Copilot Studio, agent governance, FinOps, health-check and AI security questions, and checks every setting, rate, status and date against Microsoft Learn, the Copilot Roadmap, Message Center and official blogs before stating it.
 
 **Source hierarchy.** 1) Microsoft Learn + Graph reference → 1b) Copilot Roadmap, Message Center, release plans → 1c) official Microsoft blogs → 2) licensing guides (dated) → 3) CISA / NIST / CIS / OWASP / MITRE / ISO / industry → 4) author repos (community) → 5) labeled third party. Full list: [references/sources.md](references/sources.md).
 
