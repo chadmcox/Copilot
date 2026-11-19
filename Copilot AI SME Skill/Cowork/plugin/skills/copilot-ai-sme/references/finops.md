@@ -50,4 +50,5 @@ Reasoning models are billed per token (feature rate + premium tokens). One messa
 Then use the Copilot Credit Estimator (https://aka.ms/CopilotCreditPlanningModel) and the billing-rates page. State that estimates aren't quotes.
 
 ## Author tools [Author repo – community, not official Microsoft guidance]
+- Spending policy health rules and Maester tests 1013–1015, 1025–1027, 1032: health-checks.md
 - Billing Health Check (read-only check of spending policies, groups, members): https://github.com/chadmcox/Copilot/tree/main/Billing%20Health%20Check

@@ -74,6 +74,7 @@ $files = @(
     @{ Source = "Cowork/plugin/skills/copilot-ai-sme/references/finops.md"; Target = "copilot-ai-sme/references/finops.md" },
     @{ Source = "Cowork/plugin/skills/copilot-ai-sme/references/gotchas.md"; Target = "copilot-ai-sme/references/gotchas.md" },
     @{ Source = "Cowork/plugin/skills/copilot-ai-sme/references/governance.md"; Target = "copilot-ai-sme/references/governance.md" },
+    @{ Source = "Cowork/plugin/skills/copilot-ai-sme/references/health-checks.md"; Target = "copilot-ai-sme/references/health-checks.md" },
     @{ Source = "Cowork/plugin/skills/copilot-ai-sme/references/licensing.md"; Target = "copilot-ai-sme/references/licensing.md" },
     @{ Source = "Cowork/plugin/skills/copilot-ai-sme/references/security-frameworks.md"; Target = "copilot-ai-sme/references/security-frameworks.md" },
     @{ Source = "Cowork/plugin/skills/copilot-ai-sme/references/sources.md"; Target = "copilot-ai-sme/references/sources.md" },

@@ -27,6 +27,7 @@ Works in **Copilot Cowork** and **GitHub Copilot** (VS Code and the Copilot CLI)
 | What's new | Roadmap, Message Center and blog digests with IDs, dates and status |
 | Security and compliance | Mapping to CISA (incl. *Careful Adoption of Agentic AI Services*), NIST, CIS, OWASP, MITRE ATLAS, ISO, and OT/automotive/defense guidance |
 | Threat modeling | Agents walked through the OWASP Top 10 for Agentic Applications and CISA's agentic risk categories |
+| Health checks | Explains [Maester AI governance pack](https://github.com/chadmcox/maester-ai-governance-pack) tests (`MP.AIGOV.*`) and [Billing Health Check](../Billing%20Health%20Check/README.md) and [Agent and Tools Health Check](../Agent%20and%20Tools%20Health%20Check/README.md) findings: why each matters, the fix, how to re-check, and the manual checks no API covers |
 
 "Autopilot" means Microsoft Copilot Autopilot, not Windows Autopilot.
 
@@ -42,6 +43,7 @@ Works in **Copilot Cowork** and **GitHub Copilot** (VS Code and the Copilot CLI)
 | A framework control | Compliance mapping | Control → Microsoft setting → where to verify → evidence, with a disclaimer |
 | "Threat model this agent" | Threat model | ASI01–ASI10 walk, gaps, fixes |
 | Build a plugin, skill or script | Build | Manifest, skill files, Graph PowerShell or KQL, read-only by default |
+| A Maester test ID or health-check finding | Health check | Severity, why it matters, verified fix, which tool re-checks it, framework mapping |
 | An error | Troubleshoot | Likely cause, ordered checks, fix |
 
 ## Sources it uses, in order

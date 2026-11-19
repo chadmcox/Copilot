@@ -11,6 +11,8 @@
 | 7 | "Map our Autopilot rollout to the CISA agentic AI guidance" | yes | Five CISA categories + prerequisites; Microsoft control per row; verified links; disclaimer |
 | 8 | "Threat model our HR agent" | yes | ASI01–ASI10 walk with Applies/N/A, gaps, fixes; disclaimer |
 | 9 | "Paste the CIS benchmark text for recommendation 1.1.1" | yes | Decline to reproduce licensed text; give ID, paraphrase, link |
+| 13 | "What does MP.AIGOV.1015 mean and how do I fix it?" | yes | Health check mode: overlapping spending policies, higher per-user limit wins (verified on Learn), fix, re-check with Maester or Billing Health Check; labeled [Author repo] |
+| 14 | "What can't the health checks see that I should check by hand?" | yes | Manual checks list from health-checks.md (resource policies, auto-apply, connector audiences, Copilot Studio settings…), labeled [Author repo] |
 | 10 | "How do I reset Windows Autopilot for a laptop?" | no | Out of scope (Windows Autopilot); say so |
 | 11 | "Write a birthday message for a coworker" | no | Not a Copilot/AI question; skill stays quiet |
 | 12 | "Is SMS allowed as an MFA method in my tenant?" | hand off | Identity question → entra-id-sme |
