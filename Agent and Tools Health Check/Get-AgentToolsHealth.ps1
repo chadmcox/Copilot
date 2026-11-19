@@ -64,7 +64,9 @@ url: Best practices for Microsoft Entra Agent ID - https://learn.microsoft.com/e
         Defender's AgentsInfo inventory that aren't in the Agent 365 registry, cloud agents with no
         Entra agent identity (except vendor agents from the Microsoft 365 agent store: platform Other,
         no owners and no source agent ID), MCP servers reached without TLS or on a host outside this script's list
-        of Microsoft domains, and local AI agents found on devices. Without the Agent 365 catalog, AgentsInfo becomes the agent list
+        of Microsoft domains, published agents whose MCP servers run tools without asking, Defender risk
+        indicators at High or Medium, and local AI agents found on devices, including ones that
+        auto-approve or run in an untrusted process. Without the Agent 365 catalog, AgentsInfo becomes the agent list
         (availability, owner and name checks). Agent 365 activity in CloudAppEvents (last 30 days)
         counts as use in the stale checks.
       - Agents without Agent ID: older Copilot Studio agents that run as classic
@@ -233,6 +235,7 @@ function Get-Category([string]$Check) {
         'verified publisher'                               { "Inventory"; break }
         'sponsor|owner'                                    { "Ownership"; break }
         'Agent ID|classic service principal'               { "Identity"; break }
+        'Defender risk|without asking|untrusted process'   { "Security"; break }
         'Defender|registry|Local AI agent'                 { "Inventory"; break }
         'MCP server|MCP tool'                              { "Tools"; break }
         'permission|secret|credential|agent user'          { "Permissions"; break }
@@ -247,6 +250,8 @@ function Get-Category([string]$Check) {
 function Get-Reference([string]$Check) {
     switch -Regex ($Check) {
         'not in the Agent 365 registry|Not in the registry'      { "CIS 1.1, 2.1, 2.3 | CISA: accountability"; break }
+        'Defender risk'                                          { "CIS 5.3, 7.1 | CISA: behavioral"; break }
+        'without asking|untrusted process'                       { "CIS 2.5, 4.1 | CISA: behavioral, design and configuration"; break }
         'Local AI agent'                                         { "CIS 2.1, 2.3, 2.5 | CISA: design and configuration"; break }
         'MCP server without TLS'                                 { "CIS 3.10 | CISA: design and configuration"; break }
         'external MCP server'                                    { "CIS 2.5, 15.1 | CISA: design and configuration"; break }
@@ -667,7 +672,7 @@ function Get-DefenderColumn {
 # Latest record of every agent Defender knows about. One row per agent. This is DefenderAgents.csv.
 # A column the tenant doesn't have is left out of the query, so it comes back blank for every agent.
 function Get-DefenderAgent($Columns) {
-    if (-not $Columns) { $Columns = @("AgentName", "Platform", "SourceAgentId", "EntraAgentId", "EntraBlueprintId", "Availability", "PublishedStatus", "LifecycleStatus", "CreatedDateTime", "LastUpdatedDateTime", "Owners", "McpServers", "Skills", "DeclaredTools") }
+    if (-not $Columns) { $Columns = @("AgentName", "Platform", "SourceAgentId", "EntraAgentId", "EntraBlueprintId", "Availability", "PublishedStatus", "LifecycleStatus", "CreatedDateTime", "LastUpdatedDateTime", "Owners", "McpServers", "Skills", "DeclaredTools", "RiskIndicators", "RawAgentInfo") }
     # Output field = source column and KQL expression.
     $fields = [ordered]@{
         Platform            = "Platform", "tostring(Platform)"
@@ -681,6 +686,10 @@ function Get-DefenderAgent($Columns) {
         LastUpdatedDateTime = "LastUpdatedDateTime", "LastUpdatedDateTime"
         OwnerCount          = "Owners", "array_length(Owners)"
         McpServerUrls       = "McpServers", 'strcat_array(extract_all(@''(https?://[^\s"\],}]+)'', tostring(McpServers)), ";")'
+        McpServersRaw       = "McpServers", "tostring(McpServers)"
+        RiskRaw             = "RiskIndicators", "tostring(RiskIndicators)"
+        AutoApprove         = "RawAgentInfo", "tostring(todynamic(RawAgentInfo).localAgentMetadata.autoApprove)"
+        TrustedProcess      = "RawAgentInfo", "tostring(todynamic(RawAgentInfo).localAgentMetadata.trustedProcess)"
         SkillCount          = "Skills", "array_length(Skills)"
         ToolCount           = "DeclaredTools", "array_length(DeclaredTools)"
     }
@@ -698,10 +707,33 @@ function Get-DefenderAgent($Columns) {
         $hit = @($_.EntraAgentId, $_.SourceAgentId, $_.AgentId) | Where-Object { $_ -and $activity["$_"] } | ForEach-Object { $activity["$_"] } | Select-Object -First 1
         $_ | Select-Object AgentId, AgentName, Platform, SourceAgentId, EntraAgentId, EntraBlueprintId, Availability,
             PublishedStatus, LifecycleStatus, CreatedDateTime, LastUpdatedDateTime, OwnerCount, McpServerUrls, SkillCount, ToolCount,
+            @{ n = "RiskIndicators"; e = { ConvertTo-RiskSummary $_.RiskRaw } },
+            @{ n = "McpAlwaysAllow"; e = { Get-AlwaysAllowMcp $_.McpServersRaw } },
+            AutoApprove, TrustedProcess,
             @{ n = "LastActivity";   e = { $hit.LastActivity } },
             @{ n = "Invocations30d"; e = { $hit.Invocations } },
             @{ n = "ToolCalls30d";   e = { $hit.ToolCalls } }
     }
+}
+
+# Defender's active exposure risk indicators for an agent, as "title (severity)" joined by "; ".
+# RiskIndicators is a property bag keyed by indicator ID; each value has title, severity, isActive and
+# isExposure. Blast-radius indicators (such as "Connection count") have no severity and are left out.
+function ConvertTo-RiskSummary([string]$Json) {
+    if (-not $Json -or $Json -in "null", "{}") { return "" }
+    $bag = try { $Json | ConvertFrom-Json } catch { $null }
+    if (-not $bag) { return "" }
+    @($bag.psobject.Properties | Where-Object { $_.Name -notlike "@*" -and $_.Value.isActive -eq $true -and $_.Value.isExposure -eq $true -and $_.Value.severity } |
+        ForEach-Object { "$($_.Value.title) ($($_.Value.severity))" }) -join "; "
+}
+
+# Names of an agent's MCP servers that run their tools without asking the user (approvalModeKind
+# always_allow, seen on Copilot Studio agents). McpServers holds JSON strings, one per server.
+function Get-AlwaysAllowMcp([string]$Json) {
+    if (-not $Json -or $Json -in "null", "[]") { return "" }
+    $list = try { @($Json | ConvertFrom-Json) } catch { @() }
+    @($list | ForEach-Object { if ($_ -is [string]) { try { $_ | ConvertFrom-Json } catch { $null } } else { $_ } } |
+        Where-Object { $_ -and $_.approvalModeKind -eq "always_allow" } | ForEach-Object { $_.name }) -join "; "
 }
 
 # Runs a KQL query through Graph advanced hunting and returns the rows.
@@ -770,6 +802,12 @@ function Test-DefenderField($Agents, [string]$Field) {
     [bool](@($Agents) | Where-Object { "$($_.$Field)" -ne "" } | Select-Object -First 1)
 }
 
+# One finding for an agent's High and Medium Defender risk indicators. Low ones are left out.
+function Test-DefenderRisk([string]$Name, [string]$Risk) {
+    $serious = @($Risk -split "; " | Where-Object { $_ -match '\((High|Medium)\)$' })
+    if ($serious) { New-Finding "Discovered agents" $Name "Medium" "Defender risk indicator: $($serious -join '; ')" "Open the agent in Defender (Assets > AI agents), fix the cause, such as patching the device or retiring a dormant agent, or block it" }
+}
+
 function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry, $Columns) {
     $has = @{}
     "AgentName", "OwnerCount", "EntraAgentId", "SourceAgentId", "Availability" | ForEach-Object { $has[$_] = Test-DefenderField $Agents $_ }
@@ -806,11 +844,19 @@ function Test-DefenderAgent($Agents, $RegistryKeys, [bool]$HaveRegistry, $Column
         if ($has["EntraAgentId"] -and -not $_.EntraAgentId -and -not $vendorStore) { New-Finding "Discovered agents" $name "Medium" "No Entra agent identity (Agent ID)" "Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls" }
         $known = @($_.AgentId, $_.SourceAgentId, $_.EntraAgentId) | Where-Object { $_ -and $RegistryKeys["$_"] } | ForEach-Object { $RegistryKeys["$_"] }
         Test-AgentTools "Discovered agents" $name $_.McpServerUrls (@($known) -join ";")
+        if ($_.PublishedStatus -eq "Published" -and $_.McpAlwaysAllow) { New-Finding "Discovered agents" $name "Medium" "Published, and an MCP server runs its tools without asking the user: $($_.McpAlwaysAllow)" "In Copilot Studio, open the agent's Tools, require confirmation before the server's tools run, then republish" }
+        if (-not $vendorStore) { Test-DefenderRisk $name $_.RiskIndicators }
     }
     # Local AI agents (coding assistants and the like) seen on devices: one finding per agent name.
     # Each AgentsInfo row for a local agent is one installation (one agent, device and account).
     $Agents | Where-Object { $_.Platform -eq "LocalAgents" -and $_.LifecycleStatus -ne "Uninstalled" } | Group-Object AgentName | ForEach-Object {
-        New-Finding "Discovered agents" "$($_.Name) (local)" "Low" "Local AI agent found in $($_.Count) installation$(if ($_.Count -ne 1) { 's' }) on devices" "Check it's an approved tool; govern it with Defender for Endpoint and Intune"
+        $name = "$($_.Name) (local)"
+        New-Finding "Discovered agents" $name "Low" "Local AI agent found in $($_.Count) installation$(if ($_.Count -ne 1) { 's' }) on devices" "Check it's an approved tool; govern it with Defender for Endpoint and Intune"
+        $auto = @($_.Group | Where-Object AutoApprove -eq "true").Count
+        $untrusted = @($_.Group | Where-Object TrustedProcess -eq "false").Count
+        if ($auto) { New-Finding "Discovered agents" $name "Medium" "Acts without asking the user (auto-approve) in $auto installation$(if ($auto -ne 1) { 's' })" "Turn off auto-approve in the agent's settings on those devices, or block the agent" }
+        if ($untrusted) { New-Finding "Discovered agents" $name "Medium" "Runs in an untrusted process in $untrusted installation$(if ($untrusted -ne 1) { 's' })" "Investigate the host process on those devices, and block the agent if you can't explain it" }
+        Test-DefenderRisk $name (@($_.Group.RiskIndicators | Where-Object { $_ } | ForEach-Object { $_ -split "; " } | Sort-Object -Unique) -join "; ")
     }
 }
 
