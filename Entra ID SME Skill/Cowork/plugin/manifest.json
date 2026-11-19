@@ -1,0 +1,46 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.29",
+  "version": "1.0.0",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "developer": {
+    "name": "Entra ID SME Skill",
+    "websiteUrl": "https://github.com/chadmcox/Copilot/tree/main/Entra%20ID%20SME%20Skill",
+    "privacyUrl": "https://github.com/chadmcox/Copilot/blob/main/Entra%20ID%20SME%20Skill/Cowork/readme.md#privacy",
+    "termsOfUseUrl": "https://github.com/chadmcox/Copilot/blob/main/Entra%20ID%20SME%20Skill/Cowork/readme.md#terms"
+  },
+  "name": {
+    "short": "Entra ID SME",
+    "full": "Entra ID SME for Copilot Cowork"
+  },
+  "description": {
+    "short": "Entra ID answers checked against Microsoft Learn and Graph",
+    "full": "Answers Microsoft Entra ID questions and checks every setting, property, license, status and date against Microsoft Learn and the Microsoft Graph API reference before stating it, with a source tag and confidence line. Covers Conditional Access, ID Protection, authentication methods, PIM, hybrid identity, Defender for Identity, cross-tenant and guest access, Zero Trust, attack and defense, and mapping to CISA SCuBA, NIST and CMMC. Can read the tenant through the Microsoft MCP Server for Enterprise. Read-only: any change script is handed to you to run."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#0078D4",
+  "agentSkills": [
+    {
+      "folder": "./skills/entra-id-sme"
+    }
+  ],
+  "agentConnectors": [
+    {
+      "id": "enterprise-mcp",
+      "displayName": "Microsoft MCP Server for Enterprise",
+      "description": "Read-only Microsoft Graph calls for Microsoft Entra, as the signed-in admin: Conditional Access, authentication methods, roles and PIM, apps and service principals, guests and cross-tenant settings, risky users, and sign-in and audit logs.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "https://mcp.svc.cloud.microsoft/enterprise",
+          "authorization": {
+            "type": "OAuthPluginVault",
+            "referenceId": "REPLACE-WITH-OAUTH-CLIENT-REGISTRATION-ID"
+          }
+        }
+      }
+    }
+  ]
+}
