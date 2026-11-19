@@ -28,6 +28,7 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | 6.2 | Establish an Access Revoking Process | Unused agents and tools get blocked or disabled |
 | 6.7 | Centralize Access Control | Conditional Access covers agent identities |
 | 6.8 | Define and Maintain Role-Based Access Control | Access by group; inheritable permissions limited to what agents need |
+| 7.1 | Establish and Maintain a Vulnerability Management Process | Agents running on vulnerable devices inherit the device's risk |
 | 15.1 | Establish and Maintain an Inventory of Service Providers | External MCP servers, and outside apps that write into Copilot connectors, are third-party services Copilot depends on |
 
 ## Checks mapped to the guidance
@@ -52,6 +53,8 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 | Pending request older than 14 days; blocked but still has a pending request | 6.1 | None |
 | Found by Defender but not in the registry | 1.1, 2.1, 2.3 | Accountability |
 | Local AI agent on devices | 2.1, 2.3, 2.5 | Design and configuration |
+| Local AI agent that acts without asking (auto-approve) or runs in an untrusted process; published agent whose MCP server runs tools without asking | 2.5, 4.1 | Behavioral, design and configuration |
+| Defender risk indicator at High or Medium (vulnerable device, dormant agent) | 5.3, 7.1 | Behavioral |
 | MCP server reached over http (no TLS) | 3.10 | Design and configuration |
 | MCP server outside Microsoft | 2.5, 15.1 | Design and configuration (third-party components) |
 | MCP server with no authentication, or a static secret instead of OAuth | 4.1, 6.7 | Design and configuration |
@@ -63,5 +66,5 @@ Every finding names the guidance it comes from, in brackets after the fix: the *
 ## Not checked here, but in the guidance
 
 - **Logging and monitoring** (CISA's accountability category; CIS 8.2 Collect Audit Logs): confirm Purview audit is on and Defender monitors agent activity. Microsoft Graph's AI interaction change notifications (`copilot/interactionHistory/getAllEnterpriseInteractions` subscriptions, `AiEnterpriseInteraction.Read.All`) could feed a compliance capture of agent conversations, but that permission is application-only and `GET /subscriptions` only returns subscriptions owned by the calling app; this script's delegated Microsoft Graph PowerShell sign-in can't reliably check it, so it isn't a script check here.
-- **Human oversight of high-impact actions** (CIS agent guide: governed autonomy): check in each agent's design (Copilot Studio, Foundry), not through Graph.
+- **Human oversight of high-impact actions** (CIS agent guide: governed autonomy): the script flags local agents that auto-approve and published agents whose MCP servers run tools without asking, from Defender's AgentsInfo. Check other approval steps in each agent's design (Copilot Studio, Foundry).
 - **Approved tools** (CIS MCP guide: secure tool access): this check flags MCP servers over http, on hosts outside this repo's Microsoft domain list, or with weak authentication, from the Agent 365 catalog and Defender's AgentsInfo. Use **Agents > Tools** to allow only approved MCP servers, and the Agent and Tools Cleanup scripts to block unused ones.

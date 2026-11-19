@@ -6,3 +6,10 @@ MP.AIGOV.1040  # sensitivity labels are a Purview prerequisite, not an agent or 
 MP.AIGOV.1043  # needs Security & Compliance PowerShell (Get-DlpComplianceRule); this health check uses Graph only
 MP.AIGOV.1044  # needs Security & Compliance PowerShell (Get-UnifiedAuditLogRetentionPolicy); this health check uses Graph only
 MP.AIGOV.1045  # Azure resources (Resource Graph and Defender for Cloud pricing); this health check covers Microsoft 365 and Entra only
+MP.AIGOV.1046  # Azure resources (model deployments and content filters); this health check covers Microsoft 365 and Entra only
+MP.AIGOV.1047  # Azure resources (diagnostic settings on AI accounts); this health check covers Microsoft 365 and Entra only
+MP.AIGOV.1048  # Azure resources (model deployments), and it needs an approved-model list kept in the Maester config
+MP.AIGOV.1049  # SharePoint tenant setting read with PnP.PowerShell (Get-PnPTenant); Graph doesn't expose it and this health check uses Graph only
+MP.AIGOV.1050  # SharePoint tenant settings read with PnP.PowerShell (Get-PnPTenant); Graph doesn't expose them and this health check uses Graph only
+MP.AIGOV.1051  # SharePoint tenant setting read with PnP.PowerShell (Get-PnPTenant); Graph doesn't expose it and this health check uses Graph only
+MP.AIGOV.1054  # Microsoft Entra diagnostic settings are read through Azure Resource Manager (microsoft.aadiam), not Graph
