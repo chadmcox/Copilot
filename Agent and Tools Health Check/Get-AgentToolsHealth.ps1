@@ -693,8 +693,15 @@ function Get-DefenderAgent($Columns) {
         SkillCount          = "Skills", "array_length(Skills)"
         ToolCount           = "DeclaredTools", "array_length(DeclaredTools)"
     }
-    $nameColumn = if ("AgentName" -in $Columns) { "AgentName" } elseif ("Name" -in $Columns) { "Name" } else { "AgentId" }
-    $project = @("AgentId", "AgentName = tostring($nameColumn)") + @($fields.Keys | Where-Object { $fields[$_][0] -in $Columns } | ForEach-Object { "$_ = $($fields[$_][1])" })
+    # KQL column names are case-sensitive, but -in isn't: one tenant has EntraAgentID and EntraBlueprintID
+    # where the docs say EntraAgentId and EntraBlueprintId. Use the tenant's own spelling in the query.
+    $actual = @{}
+    $Columns | ForEach-Object { $actual[$_] = $_ }
+    $nameColumn = if ("AgentName" -in $Columns) { $actual["AgentName"] } elseif ("Name" -in $Columns) { $actual["Name"] } else { "AgentId" }
+    $project = @("AgentId", "AgentName = tostring($nameColumn)") + @($fields.Keys | Where-Object { $fields[$_][0] -in $Columns } | ForEach-Object {
+        $source = $fields[$_][0]
+        "$_ = $($fields[$_][1] -creplace "\b$([regex]::Escape($source))\b", $actual[$source])"
+    })
     $kql = @(
         "AgentsInfo"
         "| summarize arg_max(Timestamp, *) by AgentId"
