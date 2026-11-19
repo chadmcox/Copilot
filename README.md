@@ -39,6 +39,7 @@ Do these in order.
 | --- | --- | --- |
 | [Personalization](Personalization/readme.md) | How to set Copilot custom instructions, with examples for different roles (Copilot admin, identity admin, students, HOA board member) | Better answers without repeating your role and preferences in every prompt |
 | [Entra ID SME Skill](Entra%20ID%20SME%20Skill/README.md) | A skill that answers Entra ID questions and checks every setting, property and date against Microsoft Learn and the Graph reference first. Cowork or GitHub Copilot | Entra ID answers with sources and a confidence line, plus read-only KQL and Graph PowerShell |
+| [Copilot AI SME Skill](Copilot%20AI%20SME%20Skill/README.md) | A skill that answers Copilot, Cowork, Autopilot, Copilot Studio, agent governance and Copilot FinOps questions, checked against Microsoft Learn, the Copilot Roadmap and official blogs, and maps agents to CISA, NIST, CIS and OWASP guidance. Cowork or GitHub Copilot | Copilot answers with sources, status and a confidence line, plus credit estimates, threat models and framework mappings |
 
 ## About this repo
 
