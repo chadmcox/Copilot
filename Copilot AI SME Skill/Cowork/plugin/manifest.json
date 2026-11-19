@@ -1,0 +1,46 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.29",
+  "version": "1.0.0",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "developer": {
+    "name": "Copilot AI SME Skill",
+    "websiteUrl": "https://github.com/chadmcox/Copilot/tree/main/Copilot%20AI%20SME%20Skill",
+    "privacyUrl": "https://github.com/chadmcox/Copilot/blob/main/Copilot%20AI%20SME%20Skill/Cowork/readme.md#privacy",
+    "termsOfUseUrl": "https://github.com/chadmcox/Copilot/blob/main/Copilot%20AI%20SME%20Skill/Cowork/readme.md#terms"
+  },
+  "name": {
+    "short": "Copilot AI SME",
+    "full": "Copilot AI SME for Copilot Cowork"
+  },
+  "description": {
+    "short": "Copilot, agent, FinOps and AI security answers with sources",
+    "full": "Answers Microsoft 365 Copilot, Copilot Cowork, Microsoft Copilot Autopilot, Copilot Studio, agent governance and Copilot FinOps questions, and checks every setting, credit rate, status and date against Microsoft Learn, the Microsoft Copilot Roadmap, Message Center and official Microsoft blogs before stating it. Maps agent designs to CISA, NIST, CIS, OWASP, MITRE ATLAS, ISO and industry guidance, and threat models agents against the OWASP Agentic Top 10. Every answer carries source tags and a confidence line. Can read the tenant read-only through the Microsoft MCP Server for Enterprise; any change is handed to you."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#0078D4",
+  "agentSkills": [
+    {
+      "folder": "./skills/copilot-ai-sme"
+    }
+  ],
+  "agentConnectors": [
+    {
+      "id": "enterprise-mcp",
+      "displayName": "Microsoft MCP Server for Enterprise",
+      "description": "Read-only Microsoft Graph calls as the signed-in admin: Message Center posts, subscribed licenses, agents and service principals, Conditional Access and audit logs.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "https://mcp.svc.cloud.microsoft/enterprise",
+          "authorization": {
+            "type": "OAuthPluginVault",
+            "referenceId": "REPLACE-WITH-OAUTH-CLIENT-REGISTRATION-ID"
+          }
+        }
+      }
+    }
+  ]
+}
