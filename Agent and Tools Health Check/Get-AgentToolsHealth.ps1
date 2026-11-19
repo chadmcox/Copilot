@@ -286,7 +286,9 @@ function Get-Reference([string]$Check) {
 function Test-UnclearName([string]$Name) { -not $Name -or $Name.Trim().Length -lt 4 -or $Name -match $UnclearNamePattern }
 function Test-PoorDescription([string]$Text, [string]$Name) { -not $Text -or $Text.Trim().Length -lt 20 -or $Text.Trim() -eq $Name.Trim() }
 
-# Score each area: the average of its items' scores. Items with no findings score 100.
+# Score each area: the average of its items' scores. Items with no findings score 100. An area never
+# scores above one finding of its worst severity (High 75, Medium 90, Low 97), so a few findings among
+# hundreds of clean items (Defender's inventory) don't round away to 100.
 function Get-AreaScore {
     param([Parameter(ValueFromPipeline)]$Area, $Findings)
     begin { $weights = @{ High = 25; Medium = 10; Low = 3; Info = 0 } }
@@ -294,9 +296,10 @@ function Get-AreaScore {
         $areaFindings = @($Findings | Where-Object Area -eq $Area.Name)
         $byItem = $areaFindings | Group-Object Item -AsHashTable -AsString
         if (-not $byItem) { $byItem = @{} }
+        $cap = 100 - [int]($areaFindings | ForEach-Object { $weights[$_.Severity] } | Measure-Object -Maximum).Maximum
         $itemScores = @($Area.Items | ForEach-Object { [math]::Max(0, 100 - (@($byItem["$_"]) | Where-Object { $_ } | ForEach-Object { $weights[$_.Severity] } | Measure-Object -Sum).Sum) })
         $Area | Select-Object @{ n = "Area"; e = { $_.Name } },
-            @{ n = "Score";  e = { if ($itemScores) { [int][math]::Round(($itemScores | Measure-Object -Average).Average) } else { 100 } } },
+            @{ n = "Score";  e = { if ($itemScores) { [math]::Min($cap, [int][math]::Round(($itemScores | Measure-Object -Average).Average)) } else { $cap } } },
             @{ n = "Items";  e = { $itemScores.Count } },
             @{ n = "High";   e = { @($areaFindings | Where-Object Severity -eq "High").Count } },
             @{ n = "Medium"; e = { @($areaFindings | Where-Object Severity -eq "Medium").Count } },
@@ -1043,7 +1046,7 @@ if (-not $children) { $children = @{} }
 $findings = @(
     $activityByKey = Get-ActivityByKey $defenderAgents
     $packages | ForEach-Object { Test-Package $_ $activityByKey }
-    $identities | ForEach-Object { Write-Host "  $($_.displayName)"; Test-Identity $_ $signIns $roleNames }
+    $identities | ForEach-Object { Test-Identity $_ $signIns $roleNames }
     Test-RiskyAgent $riskyAgents $identities
     $agentUsers | ForEach-Object {
         $parent = $identities | Where-Object id -eq $_.identityParentId | Select-Object -First 1

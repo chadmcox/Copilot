@@ -51,7 +51,7 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 
 **Guidance**: every finding names the CIS Controls v8.1 safeguards and the CISA risk category behind it, in the Reference column of Findings.csv and in brackets after the fix in the report. See [CISA and CIS guidance](#cisa-and-cis-guidance).
 
-**Scores**: every item starts at 100 (High −25, Medium −10, Low −3); an area's score is the average of its items, and an area with no items scores 100. Green 80+, Amber 50–79, Red under 50. **Copilot adoption** is its own area, separate from Tenant, so a missing or unread usage report never pads the Tenant score, and the Tenant score is never diluted by averaging it with Conditional Access.
+**Scores**: every item starts at 100 (High −25, Medium −10, Low −3); an area's score is the average of its items, but never above one finding of its worst severity (High 75, Medium 90, Low 97), so a few findings among hundreds of clean items still show; an area with no items scores 100. Green 80+, Amber 50–79, Red under 50. **Copilot adoption** is its own area, separate from Tenant, so a missing or unread usage report never pads the Tenant score, and the Tenant score is never diluted by averaging it with Conditional Access.
 
 Agents and tools from Microsoft or a third-party publisher, and blueprints from other publishers, aren't checked for names, descriptions or Agent ID, because they aren't yours to fix. Third-party packages are still checked for access, MCP servers, skills and use. Packages people can't reach (blocked, or available to no one) aren't checked for use or skills.
 
