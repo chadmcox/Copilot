@@ -1,3 +1,8 @@
 # Maester AI governance pack tests the health checks deliberately don't cover.
 # One ID per line, with the reason after a #. Example:
 # MP.AIGOV.1099  # needs Dataverse, which the health checks don't read
+MP.AIGOV.1038  # needs an approved baseline of MCP tool fingerprints kept between runs; the health check is a point-in-time read
+MP.AIGOV.1040  # sensitivity labels are a Purview prerequisite, not an agent or tool setting
+MP.AIGOV.1043  # needs Security & Compliance PowerShell (Get-DlpComplianceRule); this health check uses Graph only
+MP.AIGOV.1044  # needs Security & Compliance PowerShell (Get-UnifiedAuditLogRetentionPolicy); this health check uses Graph only
+MP.AIGOV.1045  # Azure resources (Resource Graph and Defender for Cloud pricing); this health check covers Microsoft 365 and Entra only

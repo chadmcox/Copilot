@@ -1,6 +1,6 @@
 # Agent and Tools Health Check
 
-Updated Nov 5, 2026
+Updated Nov 18, 2026
 
 A read-only check of how well your Copilot agents and tools, Entra agent identities and agent identity blueprints are set up, with a score per area and a fix for every finding. It works like the [Copilot Billing Health Check](../Billing%20Health%20Check/README.md): run it in **Copilot Cowork**, or from PowerShell.
 
@@ -23,6 +23,8 @@ A read-only check of how well your Copilot agents and tools, Entra agent identit
 .\Get-AgentToolsHealth.ps1 -SkipCopilotUsage  # no Reports Reader, or no Microsoft 365 Copilot licenses
 .\Get-AgentToolsHealth.ps1 -SkipConnectors  # don't read synced Copilot connectors
 .\Get-AgentToolsHealth.ps1 -SkipRiskyAgents # no Identity Protection for agents (or no Security Reader)
+.\Get-AgentToolsHealth.ps1 -SkipAiAdminRoles # don't read the AI administration role assignments
+.\Get-AgentToolsHealth.ps1 -SkipCopilotSettings # don't read the Copilot web search setting
 .\Get-AgentToolsHealth.ps1 -Environment USGov  # GCC High, without the cloud question
 ```
 
@@ -36,12 +38,12 @@ Based on Microsoft's [Entra Agent ID best practices](https://learn.microsoft.com
 
 | Area | Checks |
 | --- | --- |
-| **Agents and tools** | Available to or installed for everyone instead of groups (High). Assigned to people directly; groups with fewer than two owners or no description. Unclear name, missing description. Old pending requests. Not used in 90 days. **MCP servers** in the catalog: over plain http (High), no authentication (High), a static secret instead of OAuth (Medium), a host outside this script's Microsoft domains (Low), and tools that change data or reach outside sources in a package available to everyone (High). **Agent skills**: a missing or too-short description (Medium), and skills exposed to Copilot in a package available to everyone (Medium). Access and MCP checks skip packages users can't reach (blocked, or available to no one) |
+| **Agents and tools** | Available to or installed for everyone instead of groups (High). Assigned to people directly; groups with fewer than two owners or no description. Unclear name, missing description. Old pending requests. Not used in 90 days. **MCP servers** in the catalog: over plain http (High), no authentication (High), a static secret instead of OAuth (Medium), a host outside this script's Microsoft domains (Low), and tools that change data or reach outside sources in a package available to everyone (High). **MCP tools** whose description has text aimed at the model, such as "ignore previous instructions" (Medium), or with no behavior annotations (Low). **Agent skills**: a missing or too-short description (Medium), and skills exposed to Copilot in a package available to everyone (Medium). Access and MCP checks skip packages users can't reach (blocked, or available to no one) |
 | **Agent identities** | No sponsor, or a sponsor or owner disabled or gone (High). High-privilege Graph permissions such as Mail.Send or Directory.ReadWrite.All (High). At risk in Identity Protection and not yet handled (High). Delegated permissions people consented to themselves (Medium, High for a high-privilege scope). One sponsor and no owner. Unclear name. No sign-in for 90 days, or never. Agent user accounts |
-| **Blueprints** | Inheritable permissions set to All allowed (High). No sponsor (High). Client secrets instead of certificates or federated credentials, expiring credentials. Unclear name, no description. Nothing active under it |
-| **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents |
+| **Blueprints** | Inheritable permissions set to All allowed (High). No sponsor (High). Client secrets instead of certificates or federated credentials, expiring credentials. Unclear name, no description. Nothing active under it. Blueprints from another organization with no verified publisher (Medium) |
+| **Tenant** | No Conditional Access policy for agent identities (High). Agent policies only report-only. No policy blocking high-risk agents. AI Administrator, Agent ID Administrator or Agent Registry Administrator held permanently instead of through PIM, or by a guest or a non-human principal (High), or by more than 3 holders (Medium). Copilot web search on for everyone (Low) |
 | **Copilot adoption** | Agents exist in the catalog, but almost no licensed Microsoft 365 Copilot user used one in the last 90 days (Copilot usage report). Its own area so it doesn't average into the Tenant score, and it only appears when the usage report was read |
-| **Discovered agents** (Microsoft Defender, KQL) | Agents Defender found (`AgentsInfo`: Copilot Studio, Foundry, third-party) that aren't in the Agent 365 registry, especially ones available to everyone (High) or with no owner. Cloud agents with no Entra Agent ID. **MCP servers** the agents use: over plain http (High), or on a host outside this script's list of Microsoft domains (Low; check it against your approved tools). Local AI agents found on devices (needs Defender for Endpoint Plan 2). Without the Agent 365 catalog, Defender's list becomes the agent list |
+| **Discovered agents** (Microsoft Defender, KQL) | Agents Defender found (`AgentsInfo`: Copilot Studio, Foundry, third-party) that aren't in the Agent 365 registry, especially ones available to everyone (High) or with no owner. Cloud agents with no Entra Agent ID (vendor agents from the Microsoft 365 agent store aren't counted: they run inside Copilot and are governed in the catalog). **MCP servers** the agents use: over plain http (High), or on a host outside this script's list of Microsoft domains (Low; check it against your approved tools). Local AI agents found on devices (needs Defender for Endpoint Plan 2). Without the Agent 365 catalog, Defender's list becomes the agent list |
 | **Connectors** (synced Copilot connectors) | Connectors users can search (ready, or index full). An app that can write content into the connector isn't in this tenant, or belongs to another organization (Medium): whatever it writes, users get back from Copilot. Index full, so answers come from part of the source (Low). No description (Low). Skip with `-SkipConnectors` |
 | **Agents without Agent ID** | Older Copilot Studio agents still running as classic service principals (found by their `AgentCreatedBy:CopilotStudio`, `AgenticApp` and similar tags), which miss Agent ID controls such as agent Conditional Access and lifecycle policies. There's no in-place migration. Microsoft's guidance: retire unused ones, recreate lightly used ones with Agent ID, and leave busy production agents until Microsoft ships an automated migration path |
 
@@ -120,7 +122,7 @@ Put the people who run the health checks in one group: **Copilot Health Check Us
 
 ## Permissions (PowerShell)
 
-Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentity.Read.All, AgentIdentityBlueprint.Read.All, AgentIdentityBlueprintPrincipal.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All, Reports.Read.All, ExternalConnection.Read.All, IdentityRiskyAgent.Read.All (skip with `-SkipRiskyAgents`). Roles: activate **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader) in PIM for the run; see above. The catalog also needs a Microsoft Agent 365 license or Microsoft 365 E7. Copilot agent adoption needs at least one Microsoft 365 Copilot license in the tenant; skip it with `-SkipCopilotUsage`.
+Delegated: CopilotPackages.Read.All, Application.Read.All, AgentIdentity.Read.All, AgentIdentityBlueprint.Read.All, AgentIdentityBlueprintPrincipal.Read.All, AuditLog.Read.All, User.Read.All, Group.Read.All, Policy.Read.All, ThreatHunting.Read.All, Reports.Read.All, ExternalConnection.Read.All, IdentityRiskyAgent.Read.All (skip with `-SkipRiskyAgents`), RoleAssignmentSchedule.Read.Directory (skip with `-SkipAiAdminRoles`), CopilotPolicySettings.Read (skip with `-SkipCopilotSettings`). Roles: activate **Copilot Health Check Users** (AI Reader, Security Reader, Reports Reader) in PIM for the run; see above. The catalog also needs a Microsoft Agent 365 license or Microsoft 365 E7. Copilot agent adoption needs at least one Microsoft 365 Copilot license in the tenant; skip it with `-SkipCopilotUsage`.
 
 Only `Connect-MgGraph` and `Invoke-MgGraphRequest` (module Microsoft.Graph.Authentication), Graph beta, Windows PowerShell 5.1 and PowerShell 7.
 
