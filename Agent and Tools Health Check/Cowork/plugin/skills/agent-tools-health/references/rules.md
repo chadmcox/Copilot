@@ -30,6 +30,8 @@ Agents and tools published by Microsoft (`type` microsoft or firstParty) or by a
 | Reachable, custom or external, an `mcpAuth` type is `Unspecified` (no authorization block). Microsoft's own connectors have none and are authenticated by the platform, so skip Microsoft packages | Medium | Tools | Confirm how it authenticates, and require OAuth if it doesn't | MP.AIGOV.1016 |
 | Reachable, an `mcpAuth` type is `ApiKeyPluginVault`, `AzureKeyVault` or `ConnectionVault` (a static secret). `OAuthPluginVault` and `DynamicClientRegistration` pass | Medium | Tools | Move it to OAuth so access follows the user, and rotate the secret until then | MP.AIGOV.1016 |
 | Reachable, available or installed for all users, and `mcpRiskyTools` isn't empty | High | Tools | Limit the package to a group that needs these tools, or remove the tools | MP.AIGOV.1011 |
+| Reachable, and `mcpSteeringTools` isn't empty: a tool's description or input schema has text aimed at the model, such as "ignore previous instructions", "always call this tool", "do not tell the user" or a request to send credentials (the same patterns as the Maester pack's `AIGOV.McpSteeringPatterns`) | Medium | Tools | Review the tool with its publisher, and block the package until its description only describes the tool | MP.AIGOV.1039 |
+| Reachable, and `mcpUnannotatedTools` isn't empty: a tool sets none of `readOnlyHint`, `destructiveHint`, `idempotentHint` or `openWorldHint` | Low | Tools | Ask the publisher to set the annotations so you can tell what each tool does | MP.AIGOV.1039 |
 | Reachable, custom or external, available or installed for all users, and `skillsExposed` isn't empty (agent skills with `expose_skill_to_copilot` on) | Medium | Access | Limit the package to a group, or turn off expose to Copilot until the skill is reviewed | MP.AIGOV.1012 |
 | Reachable, custom or external, `skillsWeakDescription` isn't empty (an agent skill's `SKILL.md` description is empty or under 40 characters; Copilot reads it to decide when to use the skill) | Medium | Naming | Describe when Copilot should use the skill and what it does | MP.AIGOV.1012 |
 | `directUsers` more than 0 | Medium | Access | Assign it to a group instead | MP.AIGOV.1003 |
@@ -48,7 +50,7 @@ Agents and tools published by Microsoft (`type` microsoft or firstParty) or by a
 | Check | Severity | Category | Fix | Maester |
 | --- | --- | --- | --- | --- |
 | No sponsor | High | Ownership | Add a sponsor: the person accountable for what it does | — |
-| A sponsor or owner no longer exists, or is disabled | High | Ownership | Replace them with an active person | — |
+| A sponsor or owner no longer exists, or is disabled | High | Ownership | Replace them with an active person | MP.AIGOV.1036 |
 | High-privilege Microsoft Graph permissions (app roles or admin-consented delegated grants) | High | Permissions | Replace them with narrower permissions (least privilege), or remove them | MP.AIGOV.1022 |
 | Tenant-wide write permissions | Medium | Permissions | Check each one is needed; prefer Selected or narrower scopes | MP.AIGOV.1022 |
 | Delegated grants a person consented to themselves (`consentType` is `Principal`), on any API. High if a scope is on the high-privilege list | Medium | Permissions | Revoke the user consents, grant only what it needs through admin consent, and turn off user consent for apps if it's on | MP.AIGOV.1019 |
@@ -68,11 +70,19 @@ Agents and tools published by Microsoft (`type` microsoft or firstParty) or by a
 | An inheritable permission has `inheritableScopes.kind` or `inheritableRoles.kind` = `allAllowed` | High | Permissions | List only the scopes its agents need (enumerated scopes) | — |
 | The blueprint principal has high-privilege Graph permissions | High | Permissions | Replace them with narrower permissions, or remove them | MP.AIGOV.1022 |
 | One sponsor and no owner | Medium | Ownership | Add an owner or a second sponsor | MP.AIGOV.1004 |
-| Has a client secret (`passwordCredentials`) | Medium | Permissions | Use a certificate or a federated credential (managed identity) instead | — |
+| Has a client secret (`passwordCredentials`) | Medium | Permissions | Use a certificate or a federated credential (managed identity) instead | MP.AIGOV.1035 |
 | A credential expired, or expires within 30 days | Medium | Permissions | Remove it, or roll it before then | MP.AIGOV.1009 |
 | Unclear name | Medium | Naming | Rename it so people can tell which agents it's for | MP.AIGOV.1023 |
 | Poor description | Medium | Naming | Describe its purpose, scope and owning team | MP.AIGOV.1023 |
 | No enabled agent identity signed in or created within 90 days, the blueprint hasn't signed in for 90 days, and it's older than 90 days | Low | Usage | Check it's still needed, or run Agent and Tools Cleanup | — |
+
+## Blueprints from other publishers
+
+A blueprint principal whose `appOwnerOrganizationId` isn't this tenant or a Microsoft tenant. Item name: "displayName (other publisher)". Skip this check when no blueprint principal returns `verifiedPublisher.verifiedPublisherId`, because then the field isn't populated in the tenant.
+
+| Check | Severity | Category | Fix | Maester |
+| --- | --- | --- | --- | --- |
+| From another organization, and `verifiedPublisher.verifiedPublisherId` is empty | Medium | Inventory | Confirm who publishes it and that you approved it; remove its consent if you didn't | MP.AIGOV.1041 |
 
 ## Tenant
 
@@ -81,6 +91,10 @@ Agents and tools published by Microsoft (`type` microsoft or firstParty) or by a
 | No Conditional Access policy targets agent identities (`conditions.clientApplications.includeAgentIdServicePrincipals` or `agentIdServicePrincipalFilter`, `conditions.agents`, or `conditions.agentIdRiskLevels`) | High | Security | Create agent policies (start in report-only): block high-risk agents, and limit what non-production agents reach | MP.AIGOV.1017 |
 | Agent policies exist, but none is `enabled` | Medium | Security | Review the report-only results, then turn them on | MP.AIGOV.1017 |
 | No enabled policy with `agentIdRiskLevels` including high and a `block` grant | Medium | Security | Add a policy that blocks agent identities at high risk | — |
+| AI Administrator, Agent ID Administrator or Agent Registry Administrator (`roleManagement/directory/roleAssignmentScheduleInstances`) has an active assignment with `assignmentType` `Assigned` and no `endDateTime`: permanent, not through PIM. One finding per role; item is the role name | High | Permissions | Make the assignments eligible in PIM, with approval or MFA and a short activation window | MP.AIGOV.1034 |
+| One of those roles is held by a guest (`userType` Guest) or a non-human principal (service principal or agent identity; a role-assignable group isn't counted) | High | Permissions | Remove it, or give the role to an eligible internal admin instead | MP.AIGOV.1034 |
+| One of those roles has more than 3 holders (active, unique principals) | Medium | Permissions | Keep it to the few people who manage Copilot and agents | MP.AIGOV.1034 |
+| Copilot web search (`copilot/admin/policySettings/microsoft.copilot.allowwebsearch`) isn't `1` (off) or `2` (off in Work mode only). Empty means no tenant policy, so the default applies: on | Low | Security | Turn it off, limit it to Web mode, or make sure a Copilot DLP rule blocks web search for prompts with sensitive information | MP.AIGOV.1042 |
 
 ## Copilot adoption
 
@@ -99,7 +113,7 @@ Not every tenant's `AgentsInfo` has every documented column yet. A field that's 
 | Cloud agent (Platform isn't `LocalAgents`) not in the registry | Medium | Inventory | Add it to the registry (registry sync) with an owner, or remove it | — |
 | Not in the registry, and `Availability` is all users | High | Inventory | Limit it to a group, then register it | — |
 | Not in the registry, and `OwnerCount` is 0 | Medium | Ownership | Find who built it and make them the owner, or remove it | — |
-| Cloud agent with no `EntraAgentId` | Medium | Identity | Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls | — |
+| Cloud agent with no `EntraAgentId`. Skip vendor agents from the Microsoft 365 agent store: `Platform` is `Other`, `OwnerCount` is 0 and `SourceAgentId` is blank. They run inside Copilot and are governed in the catalog, and in one test tenant all 421 agents this check used to flag were of this kind | Medium | Identity | Find who owns it and whether its platform supports Agent ID; an agent identity adds a sponsor, Conditional Access and lifecycle controls | MP.AIGOV.1037 |
 | An `McpServerUrls` entry starts with `http://` (no TLS). Skip a scheme and host that a matching Packages.csv row already lists in `mcpServers` | High | Tools | Use HTTPS only, or remove the server | — |
 | An `McpServerUrls` host isn't on this repo's list of Microsoft domains (not a Microsoft-published list: not under microsoft.com, cloud.microsoft, office.com, sharepoint.com, azure.com, azure-api.net, windows.net, dynamics.com, powerplatform.com, azurewebsites.net) | Low | Tools | Check it's on your approved tools list (Agents > Tools), and who runs it | — |
 | **No Packages.csv** (no Agent 365 catalog): Defender's agents become the agent list. Cloud agent `Availability` is all users | High | Access | Make it available to specific groups | — |

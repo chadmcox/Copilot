@@ -55,7 +55,9 @@ the call returns 403). Get it from a file the user attaches:
   availableTo, deployedTo, requestStatus, requestType, groupIds, groups, directUsers,
   lastModifiedDateTime, lastUsedDateTime, activeUsers30d, sessions30d, mcpServers (scheme://host,
   semicolon-separated), mcpAuth (scheme://host=authorization type; Unspecified when there's none),
-  mcpRiskyTools (tools whose annotations set destructiveHint or openWorldHint), skills (agent skill
+  mcpRiskyTools (tools whose annotations set destructiveHint or openWorldHint), mcpSteeringTools (tools
+  whose description or input schema has text aimed at the model), mcpUnannotatedTools (tools with no
+  behavior annotations), skills (agent skill
   names), skillsWeakDescription (skills whose description is under 40 characters), skillsExposed
   (skills with expose_skill_to_copilot on). All three skill columns are semicolon-separated.
 
@@ -111,12 +113,14 @@ fails, stop and tell the user the connector can't read the tenant, with the erro
 | Blueprints registered here | `GET /beta/applications/microsoft.graph.agentIdentityBlueprint?$select=id,appId,displayName,description,createdDateTime,passwordCredentials,keyCredentials&$expand=sponsors($select=id)` |
 | Owners of a blueprint | `GET /beta/applications/{id}/owners?$select=id` |
 | Inheritable permissions | `GET /beta/applications/{id}/microsoft.graph.agentIdentityBlueprint/inheritablePermissions` |
-| Blueprint principals | `GET /beta/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal?$select=id,appId,displayName` |
+| Blueprint principals | `GET /beta/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal?$select=id,appId,displayName,appOwnerOrganizationId,verifiedPublisher`. Compare `appOwnerOrganizationId` with the tenant ID and Microsoft's tenants for the other-publisher check |
 | Agent user accounts | `GET /beta/users/microsoft.graph.agentUser?$select=id,displayName,identityParentId` |
 | Sponsors and owners (are they active?) | `GET /beta/users/{id}?$select=id,displayName,accountEnabled`. A 404 means the person is gone |
 | Authorized apps from Connectors.csv | `GET /beta/servicePrincipals?$filter=appId eq '{appId}'&$select=id,appId,displayName,appOwnerOrganizationId`. None means the app isn't in this tenant. Compare `appOwnerOrganizationId` with the tenant ID (`GET /beta/organization?$select=id`) and Microsoft's tenants (f8cdef31-a31e-4b4a-93e4-5f571e91255a, 72f988bf-86f1-41af-91ab-2d7cd011db47) |
 | Groups from Packages.csv `groupIds` | `GET /beta/groups/{id}?$select=id,displayName,description` and `GET /beta/groups/{id}/owners?$select=id` |
 | Conditional Access | `GET /beta/identity/conditionalAccess/policies?$select=displayName,state,conditions,grantControls` |
+| AI administration roles | `GET /beta/roleManagement/directory/roleAssignmentScheduleInstances?$filter=roleDefinitionId eq '{id}'&$expand=principal` for AI Administrator (d2562ede-74db-457e-a7b6-544e236ebb61), Agent ID Administrator (db506228-d27e-4b7d-95e5-295956d6615f) and Agent Registry Administrator (6b942400-691f-4bf0-9d12-d8a254a2baf5). RoleAssignmentSchedule.Read.Directory, Security Reader. If it returns 403, say the role check was skipped |
+| Copilot web search | `GET /beta/copilot/admin/policySettings/microsoft.copilot.allowwebsearch` (CopilotPolicySettings.Read, delegated only). If it returns 403 or isn't readable through the Enterprise MCP, put it on the manual checklist |
 | Copilot agent adoption (last 90 days) | `GET /beta/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D90')`. Find the agent activity date column by name (it varies by tenant/version) rather than assuming one; count users active on an agent in the last 90 days against the total rows |
 | Agents without Agent ID | `GET /beta/servicePrincipals?$filter=tags/any(t:t eq 'AgentCreatedBy:CopilotStudio')&$select=id,appId,displayName,accountEnabled,tags,createdDateTime`, then the same for `AgenticApp`, `AIAgentBuilder` and `AgenticInstance`, and `tags/any(t:startswith(t,'power-virtual-agents-'))`. Leave out IDs that are agent identities or blueprint principals. Then owners and last sign-in as above |
 
