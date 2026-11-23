@@ -1,6 +1,6 @@
 # Copilot Agent Delegation Guide
 
-Updated Nov 16, 2026 · @Chad Cox
+Updated Nov 23, 2026 · @Chad Cox
 
 > **Do the [Access Governance Guide](../Access%20Governance%20Guide/readme.md) first.** This guide is step 2 and uses the groups and admin roles its scripts create.
 
@@ -36,15 +36,19 @@ Docs call the blueprint switch **Users can create agent blueprints**. It's the s
 | M365 admin center → **Agents → Settings → Sharing** | **Specific users** → add **Copilot Agent Sharing Access**. **Save** | Stops everyone from sharing Agent Builder agents with the whole organization |
 | M365 admin center → **Agents → Settings → Agent feedback sharing** | Pick **No agents** (default), **All agents** or **Selected agents**. **Save** | Decides whether agent owners see users' ratings and comments (MC1520901) |
 | M365 admin center → **Agents → All agents → [agent] → Connected agents** | Check this tab before you approve an agent | Agents can now call Agent 365 agents over Agent2Agent. Only admins can install those (MC1478975) |
+| M365 admin center → **Agents → Settings → Activity classification** and **AI value** (Frontier) | Leave on, or turn off if your privacy rules say so. To stop Cowork classification for some people, use a Feature access management policy | New and on by default for Frontier tenants from mid-November. It sorts agent sessions and Cowork work into use cases for reports. Users can opt out in their profile (MC1557759) |
 
 ### Dated: Nov 14, 2026 to January 2027
 
 | By | Where | What to do | Why |
 | --- | --- | --- | --- |
+| **Now (Frontier, from Nov 17)** | M365 admin center → **Agents → All agents → Autopilot (Frontier) → Activate** | Only if you want Autopilot: **Select users** → **Copilot + Autopilot Access**, and pick the **Autopilot Frontier** spending policy. Never **All users** | Autopilot is an always-on agent with its own Entra identity. Off by default. Memory is always on, and its chats aren't covered by eDiscovery or legal hold yet. Full steps: step 19 in the Access Governance Guide (MC1557730) |
+| **Before mid-Dec** | M365 admin center → **Copilot → Settings → View all → Build apps in Copilot** | **Specific users and groups** → add **Copilot App Builder Access**. **Save** | Managed Runtime is GA. App building in Cowork is on for all users and no longer needs Frontier (MC1558033) |
 | **Nov 14 (passed)** | Teams admin center → **Meetings → Meeting settings → Transcript API access** | Turn **WorkIQ access** **On** only if an agent or app reads live meeting transcripts through Work IQ | Off by default since Nov 14. Apps that use it stopped working until you turn it on |
 | **Mid-Nov** | M365 admin center → **Agents → Tools → Connectors** | Block the Power Platform connectors your data policies would block. **Save** | Cowork can now use them, and Power Platform DLP doesn't apply to Cowork. Blocks also stop existing connections and Cowork Automations (MC1542062) |
 | **Nov 18** | Microsoft 365 Organizational Data Service (MODS) | Only if you send custom data to the Workforce Insights endpoint: switch to the **Microsoft 365 profile** endpoint. For non-public data, join the private preview first | That endpoint is retiring and your old selection doesn't carry over (MC1542066) |
 | **Early Dec** | M365 admin center → **Agents → Tools → Registry → Work IQ MCP → Policies** | Turn the memory read policy off if agents shouldn't read a person's memory | On by default (MC1539004) |
+| **January 2027** | Agent 365 Business Analytics (was Copilot Analytics) → **Access management** | If you changed the Viva feature access settings for identifiable output, report publishing, dashboard export, report customization or agent metrics export, make matching access policies within 30 days | Access moves into the product. Global, AI and Viva Insights admins manage it. Managers see team cost insights by default (MC1557764) |
 | **Before end of Jan 2027** | M365 admin center → **Copilot → Settings → All settings → Access requests to usage-based billing experiences** | **Specific users and groups** → add **Copilot Access**. **Save**. From mid-December, add a link to your own guidance | From the end of January, Cowork, Code and Autopilot show for every Copilot user. This decides who can ask for them. See step 6 in the Access Governance Guide (MC1546354) |
 
 ### Tell people
@@ -56,6 +60,10 @@ Docs call the blueprint switch **Users can create agent blueprints**. It's the s
 | Mid-Nov to late Dec 2026 | Everyone | The standalone Word, Excel and PowerPoint agents are leaving. Ask Chat instead. Old chats stay readable but can't continue (MC1536062) |
 | Nov 30 to Dec 31, 2026 | People who use scheduled prompts in Copilot Chat | Schedules move to **Tasks → Scheduled** in the Copilot app. Check your schedules there. Make again any that didn't move before Dec 31, when the old Power Platform scheduled prompts stop. Limit: 10 active and 50 total per person (MC1550533) |
 | December 2026 (Frontier) | Workspaces users | Workspaces (was Notebooks) no longer let you pick Researcher, Analyst or Designer. Just ask in the chat. The agents are still in the Copilot app (MC1550540) |
+| Nov 30, 2026 and Feb 15, 2027 | Copilot Studio makers | Some models retire on the Microsoft Copilot harness: Mistral Medium 3.5 on Nov 30; Claude Opus 4.8 and 5, Claude Sonnet 4.6 and 5, and Chat GPT Sol 6 on Feb 15, 2027. Agents move to the newer model by themselves. Test them first. Find them in the Power Platform admin center → **Manage → Copilot Studio** (MC1559394) |
+| Mid-Nov 2026 to Mar 2027 | SharePoint page authors | The new **Agent Chat** web part puts an agent on a SharePoint page. Adding it doesn't give people access to the agent, and the agent doesn't read the page (MC1559633) |
+| Late Nov 2026 | PowerPoint users | Copilot in PowerPoint can use plugins. Only plugins made available to them show up (MC1556104) |
+| Dec 8, 2026 | Copilot Studio makers who use Dataverse | Agents can run as a Dataverse agent user tied to an Entra agent identity, with their own least-privilege security role (MC1560996) |
 | By Dec 31, 2026 | Copilot Studio makers with a custom web chat | People can now connect third-party services inside the chat. Custom web UIs on the Standard harness need a code change (MC1548034) |
 
 ## 1. Who can build agents
@@ -64,7 +72,8 @@ Docs call the blueprint switch **Users can create agent blueprints**. It's the s
 | --- | --- | --- | --- |
 | **Agent Builder** (in the Copilot app) | Everyone with a Microsoft Copilot license | You can't turn off building for some people. Control sharing (step 2) and who can use agents at all (**Agents → Settings → User access**) | Copilot Agent Sharing Access (for sharing) |
 | **Copilot Studio** | Everyone with a Copilot license, a Copilot Studio license or a trial | 1. Assign the Copilot Studio user license to a group. 2. In the Power Platform admin center, go to **Manage → Tenant settings → Copilot Studio authors** and add the group. 3. Turn off self-service trials. 4. Limit each environment to a security group. 5. Use data policies to block channels and connectors | Copilot Studio Access |
-| **Apps in Copilot Studio and Cowork** | On by default in Copilot Studio. Cowork app building needs Frontier | Copilot Studio: run `pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledGroupsManagedAppsMcsPreview --setting-value '<group object ID>'`. Cowork: Frontier access | Copilot App Builder Access; Copilot Frontier Access |
+| **Apps in Copilot Studio and Cowork** | On by default in both. Since Managed Runtime went GA (mid-Nov to mid-Dec 2026), Cowork app building doesn't need Frontier (MC1558033) | Cowork: **Copilot → Settings → View all → Build apps in Copilot** → **Specific users and groups**. Copilot Studio: run `pac admin update-tenant-settings --setting-name powerPlatform.powerapps.enabledGroupsManagedAppsMcsPreview --setting-value '<group object ID>'`. Copilot Code: only people in a Code spending policy can build | Copilot App Builder Access |
+| **Autopilot** (Frontier) | Nobody. Off by default (MC1557730) | **Agents → All agents → Autopilot (Frontier) → Activate**, plus a spending policy with **Autopilot** | Copilot + Autopilot Access |
 | **SharePoint agents** | Anyone who can edit a site and has a Copilot license | Turn off agents on sensitive sites with **Restricted content discovery**. Turn off the **Microsoft Copilot for SharePoint** service plan for people who shouldn't use them | None (site-level setting) |
 | **Agents with actions or MCP servers** (uploaded packages) | Everyone, unless you limit it. The Oct 25, 2026 date has passed | **Copilot → Settings → Advanced package uploads** | Copilot Advanced Package Upload Access |
 | **Teams custom apps** (sideloading) | Depends on your Teams app setup policy | Teams admin center → **Teams apps → Setup policies → Upload custom apps**. Turn it on only in a policy for developers | Your developer group |
@@ -126,6 +135,8 @@ Rules of thumb:
 - **Need a group just for one agent?** Name it `Copilot <Agent name> Agent Access`, like the other groups in this repo. Give it through an access package so it gets reviewed.
 
 **Cowork plugins are assigned elsewhere:** go to **Agents → Tools → [plugin] → Installed for**. Pick the Cowork spend groups (Limited, Unlimited and Temp), because those are the people who can use Cowork. No single tenant setting turns off plugin sharing. New Microsoft plugins are assigned the same way: Planner (MC1540339), Engage (GA Nov 16, off by default, MC1530609) and Workforce Intelligence (Frontier, from Nov 16, MC1552389). Give Workforce Intelligence only to **Copilot Workforce Insights Agent Access**, not to every Cowork user.
+
+**One place for installs.** Microsoft made unified app and agent installation GA on Nov 18, 2026 (MC796790). If your tenant's availability is unified, installs you set in the Microsoft 365 admin center and the Teams admin center stay in sync. Teams app setup policies no longer install apps, and installs made through them aren't carried over. Check your important installs in **Agents → All agents → [agent] → Users → Installed for**.
 
 **Plugins replace the Agents button.** From late October to late November 2026, users see a **Plugins** button instead of **Agents**, **Agents & Skills** or **Customize** (MC1484008). You still manage agents in the same admin pages.
 
@@ -209,6 +220,8 @@ From mid-November 2026, **Create an agent** in SharePoint and OneDrive opens Age
 | **Sharing** | Who can share Agent Builder agents with the whole organization | Do these first: no deadline |
 | **User access** | Which users or groups can use agents and plugins at all | Set this before you limit one agent to a group |
 | **Agent feedback sharing** | Whether agent owners see user ratings and comments. Default **No agents** | Do these first: no deadline (MC1520901) |
+| **Activity classification** (Frontier) | Sorts agent sessions into use cases for the **Activity** tab and Agent Map. On by default. Not shown to users or makers | Do these first: no deadline (MC1557759) |
+| **AI value** (Frontier) | Turns AI value numbers on or off for Cowork, and sets the inputs | Same as above |
 | **Tags** | Labels for finding and sorting agents. Up to 50. Deleting a tag removes it from every agent | Tag agents by owner team and by data they read |
 
 ## Admin roles for agents
@@ -256,6 +269,11 @@ All of these groups use PIM, so people turn the role on only when they need it. 
 - [Manage transcript API access for Teams meetings](https://learn.microsoft.com/microsoftteams/meeting-transcript-api-access)
 - [Manage Copilot Studio costs in the Microsoft 365 admin center](https://learn.microsoft.com/microsoft-365/copilot/usage-based-billing-manage-copilot-studio-costs)
 - [Access requests to usage-based billing experiences](https://learn.microsoft.com/copilot/implement/request-access-usage-based-billing-experiences)
+- [Configure Autopilot (Frontier) for your organization](https://learn.microsoft.com/copilot/autopilot/admin-configure)
+- [Build apps in Copilot Cowork: enable or disable app building](https://learn.microsoft.com/copilot/cowork/cowork-build-apps#enable-or-disable-app-building)
+- [Copilot Managed Runtime overview for admins: app building options](https://learn.microsoft.com/microsoft-365/admin/manage/apps/#app-building-options)
+- [Understand business use cases for agents (Frontier)](https://learn.microsoft.com/microsoft-agent-365/admin/business-use-case-for-agents)
+- Message Center, new Nov 23, 2026: MC1557730 (Autopilot in Frontier), MC1558033 (Managed Runtime GA), MC1557759 (activity classification and AI value), MC796790 (unified installs GA), MC1557764 (Agent 365 Business Analytics access management), MC1559394 (Copilot Studio model retirements), MC1559633 (Agent Chat web part), MC1556104 (PowerPoint plugins), MC1560996 (Dataverse agent users with Entra agent identity)
 - Message Center, new Nov 16, 2026: MC1546354 (usage-based experiences shown to everyone from end of January), MC1550533 (scheduled prompts move to Tasks), MC1550540 (Workspaces agent picker removed), MC1548034 (Copilot Studio connections in chat), MC1552389 (Workforce Intelligence plugin), MC1479277 (Researcher and Analyst no longer pinned), MC1478975 (connected agents, rollout ends late December)
 - Message Center, new Nov 9, 2026: MC1542062 (Power Platform connectors in Cowork), MC1542066 (Workforce Insights custom data), MC1539004 (Work IQ MCP memory policy), MC1538999 (connectors in Work IQ APIs), MC1536062 (standalone Office agents replaced), MC1540339 (Planner plugin)
 - Message Center, new Nov 2, 2026: MC1302906 (scheduled prompts in Agent Builder), MC1478975 (connected agents), MC1532073 (Evaluation Viewer role), MC1530609 (Engage plugin), MC1530368 (Copilot Studio spending in Cost management)

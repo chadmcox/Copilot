@@ -23,6 +23,24 @@ I checked each step against the admin centers. These are the differences from th
 
 Every Copilot post that changes this guide. The newest ones are at the top. Rows above the line were checked on Oct 26, 2026; the rest come from earlier versions of this guide.
 
+**New on Nov 23, 2026:**
+
+| Change | Post | What it means for you |
+| --- | --- | --- |
+| Autopilot rolls out to Frontier from Nov 17. Off by default. Needs a Copilot license, Frontier, a spending policy with **Autopilot**, and activation in **Agents → All agents → Autopilot (Frontier)** | MC1557730 | See Do these first, step 19. Copilot + Autopilot Access now has a real setting |
+| People who hit a model limit in Chat and Office can keep going with Copilot Credits. New service **Models with usage-based billing in Chat and Office**. Frontier early December, everyone mid-December | MC1557754 | See Do these first, step 20. New group: Copilot Usage-Based Models Access |
+| Copilot Managed Runtime is GA, mid-November to mid-December. Cowork app building no longer needs Frontier. Microsoft says to make an all-users Managed Runtime policy before GA | MC1558033 | See Do these first, step 18. Limit **Build apps in Copilot** to Copilot App Builder Access |
+| Copilot Code: local Sandbox is on and locked from late November unless you set a policy. GitHub Copilot CLI sign-in with a work account (off by default). Mac and mobile | MC1519871 (updated Nov 17) | See Do these first, step 7 |
+| Release preferences become one panel for Standard, Deferred and Frontier by end of November | MC1556082 | See Do these first, step 11. Nothing to redo |
+| In-app browsing in the Copilot desktop app turns on by default in January 2027 | MC1560922 | See Do these first, step 21. Use the `BrowsingEnabled` device policy to keep it off |
+| Microsoft renamed model profiles to **model templates** | Microsoft docs | See Model templates (Cowork) |
+| Plugins come to Copilot in PowerPoint, late November | MC1556104 | Check **Available to** on each plugin. See Cowork plugins |
+| GPT-6.2 Sol and GPT-6.2 Astra roll out. Astra needs the OpenAI subprocessor setting | MC1560916 | Copilot OpenAI Models Access decides who gets Astra. No group change |
+| Copilot video creation in Clipchamp Video Hub (Frontier). Needs Anthropic models and a spending policy with **Clipchamp: Copilot video creation** | MC1560920, MC1518034 (updated Nov 20) | Optional. If you want it, add the service to a small policy. The Clipchamp admin control is off by default |
+| Use case classification for agent sessions and Cowork (Frontier), on by default | MC1557759 | See the Agent Delegation Guide: **Agents → Settings → Activity classification** and **AI value** |
+| Teams AI meeting policies: new **Who can manage AI** option replaces **Allow Copilot and Facilitator**. Dates unchanged (Targeted Release early December, everyone January) | MC1532253 (updated Nov 19) | See Do these first, step 13 |
+| Copilot Workspaces reach Standard release in December, Deferred by January | MC1535647 (updated Nov 20), MC1559638 | Update training. No group change |
+
 **New on Nov 16, 2026:**
 
 | Change | Post | What it means for you |
