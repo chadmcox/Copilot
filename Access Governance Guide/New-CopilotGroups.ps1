@@ -99,10 +99,10 @@ $groups = @(
     # ---------- Feature access ----------
     @{ Name = "Copilot Access";                              Desc = "Baseline Microsoft Copilot users (group-based licensing). Assign the Copilot license here unless it comes with Microsoft 365 E7 (E5 does not include it). Keep the Microsoft Copilot with Graph-grounded chat service plan on." }
     @{ Name = "Copilot + Opal Access";                       Desc = "Opal (Frontier). Target of Copilot > Settings > Opal (Frontier). Group owner must also be a member. Also scope of the Opal spending policy (MC1540330)." }
-    @{ Name = "Copilot + Autopilot Access";                  Desc = "Microsoft Autopilot (formerly Scout, Frontier). Pair with Copilot Frontier Access; scope of the Autopilot spending policy once Microsoft publishes it (MC1479277)." }
+    @{ Name = "Copilot + Autopilot Access";                  Desc = "Autopilot (Frontier, from Nov 17, 2026, off by default). Target of Agents > All agents > Autopilot (Frontier) > Activate > Select users, and scope of the Autopilot spending policy. Memory can't be turned off and chats aren't covered by eDiscovery or retention, so keep out people on legal hold (MC1557730)." }
     @{ Name = "Copilot Studio Access";                       Desc = "Copilot Studio makers." }
-    @{ Name = "Copilot App Builder Access";                  Desc = "Who can build apps in Copilot Studio (Managed Runtime preview). Set via pac admin update-tenant-settings enabledGroupsManagedAppsMcsPreview." }
-    @{ Name = "Copilot Frontier Access";                     Desc = "Target of Copilot > Settings > Copilot Frontier. Gives public previews in Copilot, Teams, new Outlook, OneDrive and SharePoint (MC1529472). Required for Opal, Code, Autopilot, SpaceXAI models and Cowork app building. Keep flat (direct members)." }
+    @{ Name = "Copilot App Builder Access";                  Desc = "Who can build apps: Copilot > Settings > Build apps in Copilot (Cowork, default All users) and Copilot Studio app creation (pac admin update-tenant-settings enabledGroupsManagedAppsMcsPreview). Managed Runtime is GA and Cowork app building no longer needs Frontier (MC1558033)." }
+    @{ Name = "Copilot Frontier Access";                     Desc = "Target of Copilot > Settings > Copilot Frontier. Gives public previews in Copilot, Teams, new Outlook, OneDrive and SharePoint (MC1529472). Required for Opal, Code, Autopilot and SpaceXAI models. Keep flat (direct members)." }
     @{ Name = "Copilot Pilot Ring";                          Desc = "Early-validation users; scope of the Copilot New Services Pilot spending policy (auto-applies new credit-billed services, e.g. Copilot Code)." }
 
     # ---------- Spend (spending policies in Copilot > Cost Management) ----------
@@ -114,6 +114,7 @@ $groups = @(
     @{ Name = "Copilot Work IQ API Access";                  Desc = "Scope of the Work IQ API spending policy: users of custom agents and apps that call the Work IQ API. Admin controls for Business Applications in Work IQ reach preview by Nov 17, 2026 (MC1518036)." }
     @{ Name = "Copilot Managed Runtime Access";              Desc = "Scope of the Managed Runtime spending policy for heavy app users (higher per-user limit). Running a shared app needs this or an all-users Managed Runtime policy, or Power Apps Premium. No Copilot license needed." }
     @{ Name = "Copilot Intelligent Call Delegation Access";  Desc = "Scope of the Intelligent Call Delegation spending policy (Teams AI call screening, public preview, MC1537490)." }
+    @{ Name = "Copilot Usage-Based Models Access";           Desc = "Scope of the Chat and Office Models spending policy (service: Models with usage-based billing in Chat and Office, from December 2026, MC1557754). Lets people keep their chosen model after the license limit by spending Copilot Credits. The AI provider groups still decide which providers they get." }
     @{ Name = "Copilot Teams Phone Agent Accounts";          Desc = "Teams Phone Agent resource accounts only (no people). Scope of the Teams Phone Agent spending policy. One group and one policy per budget (MC1482800). Not managed by access packages." }
 
     # ---------- Copilot Code (rolling out to Frontier from late Oct 2026, MC1519871; -IncludeCodeGroups) ----------

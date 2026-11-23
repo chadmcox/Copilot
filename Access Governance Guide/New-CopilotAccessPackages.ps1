@@ -124,12 +124,14 @@ $packages = @(
     # Managed Runtime users don't need a Copilot license, so Copilot Access isn't bundled.
     @{ Name = "Copilot Managed Runtime Access";      Tier = "Standard"; Groups = @("Copilot Managed Runtime Access") }
     @{ Name = "Copilot Intelligent Call Delegation Access"; Tier = "Standard"; Groups = @("Copilot Access", "Copilot Intelligent Call Delegation Access") }
+    # Models with usage-based billing in Chat and Office (MC1557754). Spends credits, so Elevated.
+    @{ Name = "Copilot Usage-Based Models Access";   Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Usage-Based Models Access") }
     # Copilot Code (rolling out to Frontier from late Oct 2026, MC1519871): -IncludeCodePackages
     @{ Name = "Copilot + Code Access (Limited)";     Tier = "Elevated"; Code = $true; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Code Spend Limit"); Incompatible = "Copilot + Code Access (Unlimited)" }
     @{ Name = "Copilot + Code Access (Unlimited)";   Tier = "Elevated"; Code = $true; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Code Spend Unlimited") }
     @{ Name = "Copilot + Code Secure Execution Exemption"; Tier = "Admin"; Code = $true; Groups = @("Copilot + Code Secure Execution Exemption") }
     @{ Name = "Copilot + Opal Access";               Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Opal Access") }
-    # Autopilot (formerly Scout) is Frontier-only for now.
+    # Autopilot (Frontier, MC1557730): activation scope and Autopilot spending policy use this group.
     @{ Name = "Copilot + Autopilot Access";          Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access", "Copilot + Autopilot Access") }
     @{ Name = "Copilot Frontier Access";             Tier = "Elevated"; Groups = @("Copilot Access", "Copilot Frontier Access") }
     @{ Name = "Copilot Pilot Ring";                  Tier = "Elevated"; Groups = @("Copilot Pilot Ring") }

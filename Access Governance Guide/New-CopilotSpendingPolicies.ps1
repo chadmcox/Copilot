@@ -45,7 +45,7 @@ url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-
     What this script CANNOT do, because the API does not expose it (set these by hand in
     Copilot > Cost management > Configuration):
       - "Allow new Agents and services as they become available" (Auto-apply new services).
-      - Model profiles.
+      - Model templates (Microsoft renamed model profiles).
 
     Rules the API enforces (so the script does too):
       - A policy name is 10-64 characters, letters, digits and spaces only. That is why the
@@ -71,7 +71,7 @@ url: Create spendingPolicy (Graph beta) - https://learn.microsoft.com/microsoft-
 
 .PARAMETER ServiceIdMap
     Overrides the service IDs. Keys: Cowork, SharePointAdvanced, OneDriveAdvanced, WorkIqApi,
-    ManagedRuntime, TeamsPhoneAgent, Code.
+    ManagedRuntime, TeamsPhoneAgent, Code, Autopilot, ChatOfficeModels.
 
 .PARAMETER AlertRecipientUpn
     One or more user principal names to email when a policy reaches its threshold. Required if
@@ -146,6 +146,8 @@ $svc = @{
     ManagedRuntime     = "copilotManagedRuntime"
     TeamsPhoneAgent    = "teamsPhoneAgent"
     Code               = "code"
+    Autopilot          = "autopilot"
+    ChatOfficeModels   = "chatAndOfficeModels"
 }
 foreach ($k in $ServiceIdMap.Keys) { $svc[$k] = $ServiceIdMap[$k] }
 
@@ -163,6 +165,10 @@ $policies = @(
     @{ Name = "Work IQ API";                      Group = "Copilot Work IQ API Access";                  Services = @($svc.WorkIqApi); PerUser = "limited" }
     @{ Name = "Managed Runtime";                  Group = "Copilot Managed Runtime Access";              Services = @($svc.ManagedRuntime); PerUser = "limited" }
     @{ Name = "Teams Phone Agent";                Group = "Copilot Teams Phone Agent Accounts";          Services = @($svc.TeamsPhoneAgent); PerUser = "limited" }
+    # Autopilot (Frontier, MC1557730). Also pick this policy in the Autopilot (Frontier) activation wizard.
+    @{ Name = "Autopilot Frontier";               Group = "Copilot + Autopilot Access";                  Services = @($svc.Autopilot); PerUser = "limited" }
+    # Models with usage-based billing in Chat and Office (from December 2026, MC1557754).
+    @{ Name = "Chat and Office Models";           Group = "Copilot Usage-Based Models Access";           Services = @($svc.ChatOfficeModels); PerUser = "limited" }
     @{ Name = "Code Limited";                     Group = "Copilot + Code Spend Limit";                  Services = @($svc.Code); PerUser = "limited"; Code = $true }
     @{ Name = "Code Unlimited";                   Group = "Copilot + Code Spend Unlimited";              Services = @($svc.Code); PerUser = "unlimited"; Code = $true }
 )
@@ -434,5 +440,6 @@ Write-Host ""
 Write-Host "Still to do by hand in Copilot > Cost management > Configuration:"
 Write-Host "  1. Turn OFF 'Allow new Agents and services as they become available' on every policy above."
 Write-Host "  2. Create the Copilot New Services Pilot policy and leave that switch ON for Copilot Pilot Ring only."
-Write-Host "  3. Pick a model profile on each Cowork policy."
+Write-Host "  3. Pick a model template on each Cowork policy."
 Write-Host "  4. Check each policy turned itself on (status enabled)."
+Write-Host "  5. Autopilot: go to Agents > All agents > Autopilot (Frontier) > Activate, pick Copilot + Autopilot Access and the Autopilot Frontier policy."
